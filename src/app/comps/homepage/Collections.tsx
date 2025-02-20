@@ -1,7 +1,6 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const collections = [
   {
@@ -36,37 +35,67 @@ const collections = [
 
 const Collections = () => {
   return (
-    <section className="py-16 bg-[#faf6f2] dark:bg-[#1e1e1e]">
-      <div className="container mx-auto text-center">
-        {/* Heading */}
-        <h3 className="text-4xl font-bold text-gray-900 dark:text-[#f0e6d2] mb-12 tracking-wide">
-          Featured Collections
-        </h3>
+    <section className="py-24 bg-gradient-to-b from-gray-900 to-black">
+      <div className="container mx-auto px-6">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-sm font-light tracking-[0.3em] text-yellow-400 mb-4">
+            DISCOVER OUR
+          </h2>
+          <h3 className="text-4xl md:text-5xl font-serif text-white mb-6">
+            Featured Collections
+          </h3>
+          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600" />
+        </div>
 
-        {/* Collection Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 px-6">
+        {/* Collections Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {collections.map((collection) => (
             <Link
               key={collection.id}
               href={collection.url}
-              className="group relative block overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:scale-105"
+              className="group relative block rounded-lg overflow-hidden"
             >
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-black/20 z-10" />
+              
               {/* Image */}
-              <Image
-                src={collection.img}
-                alt={collection.name}
-                width={500}
-                height={500}
-                className="w-full h-80 object-cover transition-opacity duration-500 group-hover:opacity-80"
-              />
+              <div className="relative aspect-[3/4] overflow-hidden">
+                <Image
+                  src={collection.img}
+                  alt={collection.name}
+                  fill
+                  className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                />
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <h4 className="text-white text-2xl font-bold">{collection.name}</h4>
-                <p className="text-gray-200 text-sm">{collection.description}</p>
-                <button className="mt-4 px-4 py-2 bg-[#d4af37] text-black rounded-md text-sm font-semibold hover:bg-[#c09c2e] transition">
-                  Explore Now
-                </button>
+              {/* Content */}
+              <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                <div className="overflow-hidden">
+                  <h4 className="text-2xl font-serif text-white mb-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-100">
+                    {collection.name}
+                  </h4>
+                </div>
+                
+                <div className="overflow-hidden">
+                  <p className="text-gray-300 text-sm mb-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-200">
+                    {collection.description}
+                  </p>
+                </div>
+                
+                <div className="overflow-hidden">
+                  <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-300">
+                    <span className="inline-flex items-center text-yellow-400 text-sm font-medium">
+                      Explore Collection
+                      <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
               </div>
             </Link>
           ))}

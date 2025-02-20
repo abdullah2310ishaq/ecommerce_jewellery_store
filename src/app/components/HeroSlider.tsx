@@ -84,9 +84,10 @@ const HeroSlider = () => {
                   {slide.title}
                 </h1>
                 <Link href={slide.url}>
-                  <button className="mt-8 px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-lg font-medium tracking-wide transform transition-all hover:scale-105 hover:shadow-xl">
-                    Explore Collection
-                  </button>
+                <button className="mt-8 px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-lg font-medium tracking-wide transition">
+                  Explore Collection
+              </button>
+
                 </Link>
               </div>
             </div>
@@ -112,14 +113,15 @@ const HeroSlider = () => {
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
         {slides.map((_, index) => (
           <button
-            key={index}
-            onClick={() => setCurrent(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              current === index 
-                ? "bg-yellow-500 w-8" 
-                : "bg-white/50 hover:bg-white/80"
-            }`}
-          />
+          key={index}
+          onClick={() => setCurrent(index)}
+          className={`w-4 h-4 rounded-full transition-all duration-300 ${
+            current === index 
+              ? "bg-yellow-500" 
+              : "bg-white/50 hover:bg-white/80"
+          }`}
+        />
+        
         ))}
       </div>
     </div>
