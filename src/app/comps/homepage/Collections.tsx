@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
 
 const collections = [
   {
@@ -16,83 +15,58 @@ const collections = [
     id: 2,
     name: "Gold Necklaces",
     description: "Luxurious 24K gold necklaces for a royal touch.",
-    img: "https://images.pexels.com/photos/1395306/pexels-photo-1395306.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    img: "https://images.pexels.com/photos/177332/pexels-photo-177332.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     url: "/shop?category=gold-necklaces",
   },
   {
     id: 3,
     name: "Platinum Bracelets",
     description: "Finely crafted platinum bracelets with exquisite designs.",
-    img: "https://images.pexels.com/photos/14802904/pexels-photo-14802904.jpeg?auto=compress&cs=tinysrgb&w=800",
+    img: "https://images.pexels.com/photos/1458867/pexels-photo-1458867.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     url: "/shop?category=platinum-bracelets",
   },
   {
     id: 4,
     name: "Luxury Earrings",
     description: "Statement earrings with diamonds and pearls.",
-    img: "https://images.pexels.com/photos/14802904/pexels-photo-14802904.jpeg?auto=compress&cs=tinysrgb&w=800",
+    img: "https://images.pexels.com/photos/15785515/pexels-photo-15785515/free-photo-of-woman-holding-a-gold-earring.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     url: "/shop?category=luxury-earrings",
   },
-  
 ];
 
 const Collections = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-    }
-  };
-
   return (
-    <section className="py-16 bg-[#faf6f2] dark:bg-[#1e1e1e] relative">
+    <section className="py-16 bg-[#faf6f2] dark:bg-[#1e1e1e]">
       <div className="container mx-auto text-center">
-        <h3 className="text-3xl font-semibold text-gray-900 dark:text-[#f0e6d2] mb-10">
+        {/* Heading */}
+        <h3 className="text-4xl font-bold text-gray-900 dark:text-[#f0e6d2] mb-12 tracking-wide">
           Featured Collections
         </h3>
 
-        {/* Scroll Buttons */}
-        <button
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-[#d4af37] text-white rounded-full shadow-md hidden md:block"
-          onClick={scrollLeft}
-        >
-          ◄
-        </button>
-        <button
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-[#d4af37] text-white rounded-full shadow-md hidden md:block"
-          onClick={scrollRight}
-        >
-          ►
-        </button>
-
-        {/* Scrollable Collection List */}
-        <div
-          ref={scrollRef}
-          className="flex space-x-6 overflow-x-auto px-6 py-4 scrollbar-hide"
-        >
+        {/* Collection Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 px-6">
           {collections.map((collection) => (
             <Link
               key={collection.id}
               href={collection.url}
-              className="group relative w-[300px] flex-shrink-0 overflow-hidden rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              className="group relative block overflow-hidden rounded-xl shadow-xl transform transition-all duration-500 hover:scale-105"
             >
+              {/* Image */}
               <Image
                 src={collection.img}
                 alt={collection.name}
-                width={400}
-                height={400}
-                className="w-full h-64 object-cover transition-opacity duration-500 group-hover:opacity-75"
+                width={500}
+                height={500}
+                className="w-full h-80 object-cover transition-opacity duration-500 group-hover:opacity-80"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex flex-col items-center justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <h4 className="text-white text-lg font-bold">{collection.name}</h4>
-                <p className="text-gray-300 text-sm text-center">{collection.description}</p>
+
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <h4 className="text-white text-2xl font-bold">{collection.name}</h4>
+                <p className="text-gray-200 text-sm">{collection.description}</p>
+                <button className="mt-4 px-4 py-2 bg-[#d4af37] text-black rounded-md text-sm font-semibold hover:bg-[#c09c2e] transition">
+                  Explore Now
+                </button>
               </div>
             </Link>
           ))}
