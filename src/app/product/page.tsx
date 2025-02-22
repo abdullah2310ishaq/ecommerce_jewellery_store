@@ -1,3 +1,4 @@
+"use client"
 import Filters from "./product_components/Filters";
 import ProductList from "./product_components/ProductList";
 
