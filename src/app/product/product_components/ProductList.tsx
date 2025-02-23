@@ -15,12 +15,12 @@ const allProducts: Product[] = [
   { id: "6", name: "Silver Ring", price: "$499", img: "https://images.pexels.com/photos/3641033/pexels-photo-3641033.jpeg?auto=compress&cs=tinysrgb&w=800" },
 ];
 
-const itemsPerPage = 3; // Products per page
+const itemsPerPage = 3;
 
 const ProductList = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Calculate total pages
+
   const totalPages = Math.ceil(allProducts.length / itemsPerPage);
 
   // Get products for the current page
