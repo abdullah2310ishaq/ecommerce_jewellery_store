@@ -1,9 +1,26 @@
-import React from 'react';
-import Link from 'next/link';
+"use client";
 
-import { Instagram, Facebook, Phone, Mail, MapPin, ChevronRight } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import {
+  Instagram,
+  Facebook,
+  Phone,
+  Mail,
+  MapPin,
+  ChevronRight,
+  Award,
+  Gem,
+  Star,
+  ArrowUp
+} from "lucide-react";
 
 const Footer = () => {
+  // "Scroll to Top" logic is now valid in a client component.
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer className="relative bg-gradient-to-b from-gray-900 to-black text-gray-100">
       {/* Decorative top border */}
@@ -17,24 +34,28 @@ const Footer = () => {
             <Link href="/" className="block">
               <div className="flex flex-col items-start">
                 <h2 className="text-3xl font-serif text-yellow-400">H&H</h2>
-                <span className="text-sm tracking-widest text-yellow-500">JEWELLERY</span>
+                <span className="text-sm tracking-widest text-yellow-500">
+                  JEWELLERY
+                </span>
               </div>
             </Link>
             <p className="text-gray-400 leading-relaxed">
-              Elevate your elegance with our finest collection of handcrafted jewelry. 
-              Where timeless beauty meets exceptional quality.
+              Elevate your elegance with our finest collection of handcrafted
+              jewelry. Where timeless beauty meets exceptional quality.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="https://www.instagram.com/handh_jewelry?igsh=ejY4YjI3cTllYXlw" 
+              <a
+                href="https://www.instagram.com/handh_jewelry?igsh=ejY4YjI3cTllYXlw"
                 target="_blank"
+                rel="noreferrer"
                 className="p-2 bg-gray-800 rounded-lg hover:bg-yellow-600 transition-colors duration-300"
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a 
-                href="https://www.facebook.com/share/1FAxWUrtwR/?mibextid=wwXIfr" 
+              <a
+                href="https://www.facebook.com/share/1FAxWUrtwR/?mibextid=wwXIfr"
                 target="_blank"
+                rel="noreferrer"
                 className="p-2 bg-gray-800 rounded-lg hover:bg-yellow-600 transition-colors duration-300"
               >
                 <Facebook className="w-5 h-5" />
@@ -44,12 +65,14 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="lg:ml-12">
-            <h3 className="text-lg font-semibold mb-6 text-yellow-400">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-6 text-yellow-400">
+              Quick Links
+            </h3>
             <ul className="space-y-4">
-              {['Home', 'Shop', 'About Us', 'Contact'].map((item) => (
+              {["Home", "Shop", "About Us", "Contact"].map((item) => (
                 <li key={item}>
-                  <Link 
-                    href={`/${item.toLowerCase().replace(' ', '-')}`}
+                  <Link
+                    href={`/${item.toLowerCase().replace(" ", "-")}`}
                     className="flex items-center group text-gray-400 hover:text-yellow-400 transition-colors duration-300"
                   >
                     <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-4 group-hover:translate-x-0 transition-all duration-300" />
@@ -62,10 +85,12 @@ const Footer = () => {
 
           {/* Contact Information */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 text-yellow-400">Contact Us</h3>
+            <h3 className="text-lg font-semibold mb-6 text-yellow-400">
+              Contact Us
+            </h3>
             <ul className="space-y-4">
               <li>
-                <a 
+                <a
                   href="tel:03445751822"
                   className="flex items-center space-x-3 text-gray-400 hover:text-yellow-400 transition-colors duration-300"
                 >
@@ -74,7 +99,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a 
+                <a
                   href="mailto:handhjewelry925@gmail.com"
                   className="flex items-center space-x-3 text-gray-400 hover:text-yellow-400 transition-colors duration-300"
                 >
@@ -91,8 +116,13 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 text-yellow-400">Newsletter</h3>
-            <p className="text-gray-400 mb-4">Subscribe to receive updates about new collections and special offers.</p>
+            <h3 className="text-lg font-semibold mb-6 text-yellow-400">
+              Newsletter
+            </h3>
+            <p className="text-gray-400 mb-4">
+              Subscribe to receive updates about new collections and special
+              offers.
+            </p>
             <form className="space-y-3">
               <input
                 type="email"
@@ -109,16 +139,47 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} H&H Jewellery. All Rights Reserved.
+        {/* Example "Trusted" Section (Optional) */}
+        <div className="mt-16 flex flex-col md:flex-row items-center justify-center gap-8 bg-black/30 py-6 px-4 rounded-lg border border-yellow-700">
+          <div className="text-center">
+            <h4 className="text-yellow-400 text-xl font-semibold mb-2">
+              Trusted by Thousands
+            </h4>
+            <p className="text-sm text-gray-400 max-w-sm">
+              We pride ourselves on exceptional craftsmanship and attentive
+              service. Join our growing family of satisfied customers.
             </p>
-            <div className="flex space-x-6 text-sm text-gray-500">
-              <Link href="/privacy" className="hover:text-yellow-400 transition-colors duration-300">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-yellow-400 transition-colors duration-300">Terms of Service</Link>
-            </div>
+          </div>
+          {/* Icons row */}
+          {/* ... */}
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <p className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} H&H Jewellery. All Rights Reserved.
+          </p>
+          <div className="flex items-center space-x-6 text-sm text-gray-500">
+            <Link
+              href="/privacy"
+              className="hover:text-yellow-400 transition-colors duration-300"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="hover:text-yellow-400 transition-colors duration-300"
+            >
+              Terms of Service
+            </Link>
+            {/* Scroll to Top Button */}
+            <button
+              onClick={scrollToTop}
+              className="flex items-center text-gray-500 hover:text-yellow-400 transition-colors duration-300"
+            >
+              <ArrowUp className="w-5 h-5 mr-1" />
+              Back to Top
+            </button>
           </div>
         </div>
       </div>

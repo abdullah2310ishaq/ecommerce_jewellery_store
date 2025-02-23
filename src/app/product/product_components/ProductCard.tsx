@@ -6,42 +6,50 @@ interface Product {
   name: string;
   price: string;
   img: string;
-  // rating?: number; // Optional if you want dynamic ratings
-  // isOnSale?: boolean; // Optional if you want to conditionally render a badge
+  rating?: number;
+  isOnSale?: boolean;
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
+  // Hard-coded star rating if no dynamic rating is provided
+  const displayRating = product.rating || 5;
+
   return (
-    <div className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-      {/* Optional Sale or New Badge */}
-      {/* You can conditionally render this badge if product.isOnSale is true, etc. */}
-      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow">
-        Sale
-      </span>
+    <div className="group relative bg-black rounded-lg shadow-md overflow-hidden 
+      border border-transparent hover:border-yellow-600 
+      transition-transform transform hover:-translate-y-1 hover:shadow-2xl 
+      hover:shadow-yellow-600/20 p-2">
+      
+      {/* Sale Badge (only render if product.isOnSale is true) */}
+      {product.isOnSale && (
+        <span className="absolute top-3 right-3 bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
+          Sale
+        </span>
+      )}
 
       {/* Product Image */}
-      <div className="overflow-hidden">
+      <div className="overflow-hidden rounded-md bg-black">
         <Image
           src={product.img}
           alt={product.name}
           width={400}
           height={400}
-          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
         />
       </div>
 
       {/* Product Details */}
-      <div className="p-4 text-center">
-        <h3 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">
+      <div className="p-4 text-center space-y-4 bg-gradient-to-b from-black to-gray-900 rounded-md">
+        <h3 className="text-lg md:text-xl font-semibold text-yellow-400">
           {product.name}
         </h3>
-        <p className="text-[#d4af37] font-semibold text-md md:text-lg mt-1">
+        <p className="font-semibold text-md md:text-lg mt-1 text-yellow-300">
           {product.price}
         </p>
 
-        {/* Optional Star Rating (hard-coded for demo; replace with dynamic data if available) */}
+        {/* Star Rating (can replace with dynamic logic) */}
         <div className="flex justify-center items-center mt-2 mb-4 space-x-1">
-          {[...Array(5)].map((_, index) => (
+          {[...Array(displayRating)].map((_, index) => (
             <svg
               key={index}
               className="w-4 h-4 text-yellow-400 fill-current"
@@ -55,11 +63,11 @@ const ProductCard = ({ product }: { product: Product }) => {
         {/* Action Buttons */}
         <div className="flex justify-center space-x-2">
           <Link href={`/product/${product.id}`}>
-            <button className="px-4 py-2 bg-[#d4af37] text-black rounded-md hover:bg-[#c09c2e] transition-colors">
+            <button className="px-4 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-500 transition-colors font-medium">
               View Details
             </button>
           </Link>
-          <button className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors">
+          <button className="px-4 py-2 bg-gray-700 text-yellow-200 rounded-md hover:bg-gray-600 hover:text-yellow-100 transition-colors font-medium">
             Add to Cart
           </button>
         </div>
