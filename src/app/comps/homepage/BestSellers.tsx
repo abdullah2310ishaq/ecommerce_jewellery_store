@@ -1,42 +1,56 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getBestSellers } from "../../firebase/firebase_services/firestore";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { Star, ArrowRight } from "lucide-react";
 
-interface ProductItem {
+// Adjust your import to the correct path
+import { getBestSellers } from "../../firebase/firebase_services/firestore";
+
+// If your FirestoreProduct has an array of images, define it here
+interface FirestoreProduct {
   id: string;
   name: string;
-  price: number; // Changed to number for consistency
-  rating?: number; // Made optional
-  img: string;
-  url?: string; // Made optional
+  price: number;
+  images?: string[]; // array of images
 }
 
-const BestSellers = () => {
-  const [bestSellers, setBestSellers] = useState<ProductItem[]>([]);
+export default function BestSellers() {
+  const [bestSellers, setBestSellers] = useState<FirestoreProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         const data = await getBestSellers();
-        setBestSellers(data as ProductItem[]);
+        setBestSellers(data as FirestoreProduct[]);
       } catch (error) {
         console.error("Error fetching best sellers:", error);
       } finally {
         setLoading(false);
       }
-    };
-
+    }
     fetchData();
   }, []);
 
   if (loading) {
     return (
-      <div className="text-center py-24 text-gray-200">Loading best sellers...</div>
+      <section className="py-24 bg-gradient-to-b from-black to-gray-900">
+        <div className="container mx-auto px-6 text-center text-white">
+          <h2>Loading Best Sellers...</h2>
+        </div>
+      </section>
+    );
+  }
+
+  if (!bestSellers.length) {
+    return (
+      <section className="py-24 bg-gradient-to-b from-black to-gray-900">
+        <div className="container mx-auto px-6 text-center text-white">
+          <h2>No best sellers found.</h2>
+        </div>
+      </section>
     );
   }
 
@@ -59,13 +73,14 @@ const BestSellers = () => {
           {bestSellers.map((product) => (
             <Link
               key={product.id}
-              href={product.url || `/shop?product=${product.id}`}
+              href={`/shop?product=${product.id}`}
               className="group bg-gray-900 rounded-lg overflow-hidden"
             >
               {/* Image Container */}
               <div className="relative aspect-square overflow-hidden">
                 <Image
-                  src={product.img}
+                  // ONLY show first image in array
+                  src={product.images?.[0] || "/placeholder.jpg"}
                   alt={product.name}
                   fill
                   className="object-cover transform transition-transform duration-700 group-hover:scale-110"
@@ -73,16 +88,19 @@ const BestSellers = () => {
 
                 {/* Price Tag */}
                 <div className="absolute top-4 right-4 bg-black/80 px-4 py-2 rounded-full">
-                  <span className="text-yellow-400 font-medium">Rs.{product.price.toLocaleString()}</span>
+                  <span className="text-yellow-400 font-medium">Rs.{product.price}</span>
                 </div>
               </div>
 
               {/* Product Info */}
               <div className="p-6">
-                {/* Rating */}
+                {/* Example rating display (static 5 stars if you wish) */}
                 <div className="flex items-center space-x-1 mb-3">
-                  {[...Array(product.rating || 0)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                    />
                   ))}
                 </div>
 
@@ -117,6 +135,4 @@ const BestSellers = () => {
       </div>
     </section>
   );
-};
-
-export default BestSellers;
+}

@@ -4,7 +4,11 @@ import Link from "next/link";
 import { Product } from "./ProductList";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  // If rating is missing, default to 5 (?)
   const displayRating = product.rating || 5;
+
+  // Show the first image in the array, or fallback
+  const imageToShow = product.images?.[0] || "/placeholder.svg";
 
   return (
     <div className="group relative bg-black rounded-lg shadow-md overflow-hidden border border-transparent hover:border-yellow-600 transition-transform transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-yellow-600/20 p-2">
@@ -18,7 +22,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Product Image */}
       <div className="overflow-hidden rounded-md bg-black">
         <Image
-          src={product.img || "/placeholder.svg"}
+          src={imageToShow}
           alt={product.name}
           width={400}
           height={400}

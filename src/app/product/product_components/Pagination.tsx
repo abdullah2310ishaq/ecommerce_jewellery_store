@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
 
-const Pagination = ({ totalPages, onPageChange }) => {
+const Pagination = ({ totalPages, onPageChange }: { totalPages: number; onPageChange: (newPage: number) => void }) => {
   // State for current page
   const [currentPage, setCurrentPage] = useState(1);
 
   // Handle page change
-  const changePage = (newPage) => {
+  const changePage = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       onPageChange(newPage);

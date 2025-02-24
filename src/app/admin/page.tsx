@@ -23,7 +23,7 @@ interface FirestoreProduct {
   name: string;
   description?: string;
   price: number;
-  image?: string;
+  images: string[];      // MULTIPLE IMAGES
   collectionId?: string;
   isBestSeller?: boolean;
 }
@@ -32,7 +32,7 @@ interface ProductFormData {
   name: string;
   description: string;
   price: number;
-  image: string;
+  images: string[];      // MULTIPLE IMAGES
   collectionId: string;
 }
 
@@ -58,18 +58,23 @@ export default function AdminPage() {
     name: "",
     description: "",
     price: 0,
-    image: "",
+    images: [],
     collectionId: "",
   });
+  // Text area for images (multiline input)
+  const [newProductImagesText, setNewProductImagesText] = useState<string>("");
+
   // Editing product
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingProductData, setEditingProductData] = useState<ProductFormData>({
     name: "",
     description: "",
     price: 0,
-    image: "",
+    images: [],
     collectionId: "",
   });
+  // Text area for the editing product’s images
+  const [editingImagesText, setEditingImagesText] = useState<string>("");
 
   // ============ STATE: COLLECTIONS ============
   const [collections, setCollections] = useState<FirestoreCollection[]>([]);
@@ -113,15 +118,30 @@ export default function AdminPage() {
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  /** Handle the separate text area for multiple images */
+  const handleNewProductImagesTextChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setNewProductImagesText(e.target.value);
+  };
+
   // Create product
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Convert price to number
+      // Convert the multiline text into an array of URLs
+      const imagesArray = newProductImagesText
+        .split("\n")           // split by new lines
+        .map(url => url.trim()) // trim spaces
+        .filter(url => url);    // remove any empty lines
+
+      // Convert price to number, and set images array
       const createdId = await createProduct({
         ...newProduct,
         price: Number(newProduct.price),
+        images: imagesArray,
       });
+
       alert(`Product created with ID: ${createdId}`);
 
       // Re-fetch products
@@ -133,9 +153,10 @@ export default function AdminPage() {
         name: "",
         description: "",
         price: 0,
-        image: "",
+        images: [],
         collectionId: "",
       });
+      setNewProductImagesText(""); // clear image text area
     } catch (error) {
       console.error("Error creating product:", error);
     }
@@ -144,13 +165,17 @@ export default function AdminPage() {
   // Start editing a product
   const startEditingProduct = (product: FirestoreProduct) => {
     setEditingProductId(product.id);
+    // convert images array to multiline string
+    const imagesText = product.images?.join("\n") || "";
+
     setEditingProductData({
       name: product.name,
       description: product.description || "",
       price: product.price || 0,
-      image: product.image || "",
+      images: product.images || [],
       collectionId: product.collectionId || "",
     });
+    setEditingImagesText(imagesText);
   };
 
   // Handle editing form input
@@ -161,14 +186,28 @@ export default function AdminPage() {
     setEditingProductData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle the separate text area for editing multiple images
+  const handleEditProductImagesTextChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setEditingImagesText(e.target.value);
+  };
+
   // Update product
   const handleUpdateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProductId) return;
     try {
+      // Convert multiline text to an array
+      const imagesArray = editingImagesText
+        .split("\n")
+        .map(url => url.trim())
+        .filter(url => url);
+
       await updateProduct(editingProductId, {
         ...editingProductData,
         price: Number(editingProductData.price),
+        images: imagesArray,
       });
       alert(`Product updated: ${editingProductId}`);
 
@@ -178,6 +217,7 @@ export default function AdminPage() {
 
       // Clear editing state
       setEditingProductId(null);
+      setEditingImagesText("");
     } catch (error) {
       console.error("Error updating product:", error);
     }
@@ -361,14 +401,16 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
-              <input
-                type="text"
-                name="image"
-                placeholder="Image URL (optional)"
-                value={newProduct.image}
-                onChange={handleNewProductChange}
-                className="border p-2 rounded"
+
+              {/* MULTILINE input for multiple image URLs */}
+              <label className="text-sm font-medium">Image URLs (one per line)</label>
+              <textarea
+                placeholder="Enter each image URL on its own line"
+                value={newProductImagesText}
+                onChange={handleNewProductImagesTextChange}
+                className="border p-2 rounded h-24"
               />
+
               <select
                 name="collectionId"
                 value={newProduct.collectionId}
@@ -404,7 +446,10 @@ export default function AdminPage() {
                 <div key={product.id} className="border p-2 rounded">
                   {editingProductId === product.id ? (
                     // EDIT FORM
-                    <form onSubmit={handleUpdateProductSubmit} className="flex flex-col gap-2">
+                    <form
+                      onSubmit={handleUpdateProductSubmit}
+                      className="flex flex-col gap-2"
+                    >
                       <input
                         type="text"
                         name="name"
@@ -427,13 +472,16 @@ export default function AdminPage() {
                         className="border p-1 rounded"
                         required
                       />
-                      <input
-                        type="text"
-                        name="image"
-                        value={editingProductData.image}
-                        onChange={handleEditProductChange}
-                        className="border p-1 rounded"
+
+                      <label className="text-sm font-medium">
+                        Image URLs (one per line)
+                      </label>
+                      <textarea
+                        value={editingImagesText}
+                        onChange={handleEditProductImagesTextChange}
+                        className="border p-1 rounded h-24"
                       />
+
                       <select
                         name="collectionId"
                         value={editingProductData.collectionId}
@@ -467,16 +515,24 @@ export default function AdminPage() {
                   ) : (
                     // DISPLAY PRODUCT
                     <>
-                      <div>
-                        <strong>{product.name}</strong> - ${product.price}
+                      <div className="font-semibold">
+                        {product.name} – ${product.price}
                       </div>
-                      {product.image && (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-24 h-24 object-cover my-1"
-                        />
+
+                      {/* Show multiple images */}
+                      {product.images && product.images.length > 0 && (
+                        <div className="flex gap-2 overflow-x-auto py-2">
+                          {product.images.map((imgUrl, idx) => (
+                            <img
+                              key={idx}
+                              src={imgUrl}
+                              alt={product.name}
+                              className="w-24 h-24 object-cover border rounded"
+                            />
+                          ))}
+                        </div>
                       )}
+
                       {product.description && <p>{product.description}</p>}
                       <p className="text-sm text-gray-500">ID: {product.id}</p>
                       <p className="text-sm text-gray-500">
