@@ -1,26 +1,14 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  img: string;
-  rating?: number;
-  isOnSale?: boolean;
-}
+import { Product } from "./ProductList";
 
 const ProductCard = ({ product }: { product: Product }) => {
-  // Hard-coded star rating if no dynamic rating is provided
   const displayRating = product.rating || 5;
 
   return (
-    <div className="group relative bg-black rounded-lg shadow-md overflow-hidden 
-      border border-transparent hover:border-yellow-600 
-      transition-transform transform hover:-translate-y-1 hover:shadow-2xl 
-      hover:shadow-yellow-600/20 p-2">
-      
-      {/* Sale Badge (only render if product.isOnSale is true) */}
+    <div className="group relative bg-black rounded-lg shadow-md overflow-hidden border border-transparent hover:border-yellow-600 transition-transform transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-yellow-600/20 p-2">
+      {/* Sale Badge */}
       {product.isOnSale && (
         <span className="absolute top-3 right-3 bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
           Sale
@@ -30,7 +18,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Product Image */}
       <div className="overflow-hidden rounded-md bg-black">
         <Image
-          src={product.img}
+          src={product.img || "/placeholder.svg"}
           alt={product.name}
           width={400}
           height={400}
@@ -44,10 +32,10 @@ const ProductCard = ({ product }: { product: Product }) => {
           {product.name}
         </h3>
         <p className="font-semibold text-md md:text-lg mt-1 text-yellow-300">
-          {product.price}
+          ${product.price}
         </p>
 
-        {/* Star Rating (can replace with dynamic logic) */}
+        {/* Rating */}
         <div className="flex justify-center items-center mt-2 mb-4 space-x-1">
           {[...Array(displayRating)].map((_, index) => (
             <svg

@@ -1,0 +1,36 @@
+// lib/firebaseClient.ts
+
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAnalytics, Analytics } from 'firebase/analytics';
+
+// We read from environment variables that start with NEXT_PUBLIC_
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
+
+// We need a variable to store our Firebase app instance
+let firebaseApp;
+let analytics: Analytics | undefined;
+
+// Check if Firebase app is already initialized (important in Next.js dev mode)
+if (!getApps().length) {
+  // Initialize the app
+  firebaseApp = initializeApp(firebaseConfig);
+
+  // Check if we are in a browser before calling getAnalytics (it won't work on the server)
+  if (typeof window !== 'undefined') {
+    analytics = getAnalytics(firebaseApp);
+  }
+} else {
+  // If already initialized, use that one
+  firebaseApp = getApp();
+}
+
+// Export the app (and analytics if needed)
+export { firebaseApp, analytics };

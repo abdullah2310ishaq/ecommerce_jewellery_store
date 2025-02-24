@@ -1,44 +1,45 @@
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Star, ArrowRight } from 'lucide-react';
+"use client";
 
-const bestSellers = [
-  {
-    id: 1,
-    name: "Royal Diamond Ring",
-    price: "Rs.50k",
-    rating: 5,
-    img: "https://images.pexels.com/photos/94843/pexels-photo-94843.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop?product=diamond-ring",
-  },
-  {
-    id: 2,
-    name: "Elegant Gold Necklace",
-    price: "Rs.20k",
-    rating: 5,
-    img: "https://images.pexels.com/photos/998521/pexels-photo-998521.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop?product=gold-necklace",
-  },
-  {
-    id: 3,
-    name: "Luxury Pearl Bracelet",
-    price: "Rs.30k",
-    rating: 5,
-    img: "https://images.pexels.com/photos/168927/pexels-photo-168927.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop?product=pearl-bracelet",
-  },
-  {
-    id: 4,
-    name: "Statement Diamond Earrings",
-    price: "Rs.40k",
-    rating: 5,
-    img: "https://images.pexels.com/photos/1302307/pexels-photo-1302307.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop?product=diamond-earrings",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { getBestSellers } from "../../firebase/firebase_services/firestore";
+import Image from "next/image";
+import Link from "next/link";
+import { Star, ArrowRight } from "lucide-react";
+
+interface ProductItem {
+  id: string;
+  name: string;
+  price: number; // Changed to number for consistency
+  rating?: number; // Made optional
+  img: string;
+  url?: string; // Made optional
+}
 
 const BestSellers = () => {
+  const [bestSellers, setBestSellers] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getBestSellers();
+        setBestSellers(data as ProductItem[]);
+      } catch (error) {
+        console.error("Error fetching best sellers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-24 text-gray-200">Loading best sellers...</div>
+    );
+  }
+
   return (
     <section className="py-24 bg-gradient-to-b from-black to-gray-900">
       <div className="container mx-auto px-6">
@@ -58,7 +59,7 @@ const BestSellers = () => {
           {bestSellers.map((product) => (
             <Link
               key={product.id}
-              href={product.url}
+              href={product.url || `/shop?product=${product.id}`}
               className="group bg-gray-900 rounded-lg overflow-hidden"
             >
               {/* Image Container */}
@@ -69,10 +70,10 @@ const BestSellers = () => {
                   fill
                   className="object-cover transform transition-transform duration-700 group-hover:scale-110"
                 />
-                
+
                 {/* Price Tag */}
                 <div className="absolute top-4 right-4 bg-black/80 px-4 py-2 rounded-full">
-                  <span className="text-yellow-400 font-medium">{product.price}</span>
+                  <span className="text-yellow-400 font-medium">Rs.{product.price.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -80,11 +81,8 @@ const BestSellers = () => {
               <div className="p-6">
                 {/* Rating */}
                 <div className="flex items-center space-x-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                    />
+                  {[...Array(product.rating || 0)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
 
@@ -108,7 +106,7 @@ const BestSellers = () => {
 
         {/* View All Button */}
         <div className="text-center mt-16">
-          <Link 
+          <Link
             href="/shop"
             className="inline-flex items-center px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-full font-medium tracking-wide transition-colors group"
           >

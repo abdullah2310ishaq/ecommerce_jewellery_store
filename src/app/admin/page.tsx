@@ -1,0 +1,670 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+  // PRODUCT functions
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  toggleBestSeller,
+
+  // COLLECTION functions
+  getAllCollections,
+  createCollection,
+  updateCollection,
+  deleteCollectionById,
+  toggleFeaturedCollection,
+} from "../firebase/firebase_services/firestore";
+
+// ---------- PRODUCT INTERFACES ----------
+interface FirestoreProduct {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image?: string;
+  collectionId?: string;
+  isBestSeller?: boolean;
+}
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  collectionId: string;
+}
+
+// ---------- COLLECTION INTERFACES ----------
+interface FirestoreCollection {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  isFeatured?: boolean;
+}
+
+interface CollectionFormData {
+  name: string;
+  description: string;
+  image: string;
+}
+
+export default function AdminPage() {
+  // ============ STATE: PRODUCTS ============
+  const [products, setProducts] = useState<FirestoreProduct[]>([]);
+  const [newProduct, setNewProduct] = useState<ProductFormData>({
+    name: "",
+    description: "",
+    price: 0,
+    image: "",
+    collectionId: "",
+  });
+  // Editing product
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingProductData, setEditingProductData] = useState<ProductFormData>({
+    name: "",
+    description: "",
+    price: 0,
+    image: "",
+    collectionId: "",
+  });
+
+  // ============ STATE: COLLECTIONS ============
+  const [collections, setCollections] = useState<FirestoreCollection[]>([]);
+  const [newCollection, setNewCollection] = useState<CollectionFormData>({
+    name: "",
+    description: "",
+    image: "",
+  });
+  // Editing collection
+  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
+  const [editingCollectionData, setEditingCollectionData] = useState<CollectionFormData>({
+    name: "",
+    description: "",
+    image: "",
+  });
+
+  // ============ FETCH DATA ON MOUNT ============
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const prodData = await getAllProducts();
+        setProducts(prodData as FirestoreProduct[]);
+        const collData = await getAllCollections();
+        setCollections(collData as FirestoreCollection[]);
+      } catch (error) {
+        console.error("Error fetching products/collections:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // =========================================
+  // ============ PRODUCT HANDLERS ===========
+  // =========================================
+
+  // Handle form input for new product
+  const handleNewProductChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Create product
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Convert price to number
+      const createdId = await createProduct({
+        ...newProduct,
+        price: Number(newProduct.price),
+      });
+      alert(`Product created with ID: ${createdId}`);
+
+      // Re-fetch products
+      const prodData = await getAllProducts();
+      setProducts(prodData as FirestoreProduct[]);
+
+      // Reset form
+      setNewProduct({
+        name: "",
+        description: "",
+        price: 0,
+        image: "",
+        collectionId: "",
+      });
+    } catch (error) {
+      console.error("Error creating product:", error);
+    }
+  };
+
+  // Start editing a product
+  const startEditingProduct = (product: FirestoreProduct) => {
+    setEditingProductId(product.id);
+    setEditingProductData({
+      name: product.name,
+      description: product.description || "",
+      price: product.price || 0,
+      image: product.image || "",
+      collectionId: product.collectionId || "",
+    });
+  };
+
+  // Handle editing form input
+  const handleEditProductChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditingProductData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Update product
+  const handleUpdateProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProductId) return;
+    try {
+      await updateProduct(editingProductId, {
+        ...editingProductData,
+        price: Number(editingProductData.price),
+      });
+      alert(`Product updated: ${editingProductId}`);
+
+      // Refresh product list
+      const prodData = await getAllProducts();
+      setProducts(prodData as FirestoreProduct[]);
+
+      // Clear editing state
+      setEditingProductId(null);
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
+  };
+
+  // Delete product
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await deleteProduct(productId);
+      alert(`Product deleted: ${productId}`);
+
+      // Refresh product list
+      const prodData = await getAllProducts();
+      setProducts(prodData as FirestoreProduct[]);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
+  // Toggle product best seller
+  const handleToggleBestSeller = async (productId: string, isBestSeller: boolean) => {
+    try {
+      await toggleBestSeller(productId, !isBestSeller);
+      alert(`Product ${productId} updated isBestSeller -> ${!isBestSeller}`);
+
+      // Update local state
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, isBestSeller: !isBestSeller } : p
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling best seller:", error);
+    }
+  };
+
+  // =========================================
+  // ========== COLLECTION HANDLERS ==========
+  // =========================================
+
+  // Handle form input for new collection
+  const handleNewCollectionChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewCollection((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Create collection
+  const handleCreateCollection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const createdId = await createCollection(newCollection);
+      alert(`Collection created with ID: ${createdId}`);
+
+      // Re-fetch collections
+      const collData = await getAllCollections();
+      setCollections(collData as FirestoreCollection[]);
+
+      // Reset form
+      setNewCollection({
+        name: "",
+        description: "",
+        image: "",
+      });
+    } catch (error) {
+      console.error("Error creating collection:", error);
+    }
+  };
+
+  // Start editing a collection
+  const startEditingCollection = (collection: FirestoreCollection) => {
+    setEditingCollectionId(collection.id);
+    setEditingCollectionData({
+      name: collection.name,
+      description: collection.description || "",
+      image: collection.image || "",
+    });
+  };
+
+  // Handle editing form input for collection
+  const handleEditCollectionChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditingCollectionData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Update collection
+  const handleUpdateCollectionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCollectionId) return;
+    try {
+      await updateCollection(editingCollectionId, editingCollectionData);
+      alert(`Collection updated: ${editingCollectionId}`);
+
+      // Refresh collection list
+      const collData = await getAllCollections();
+      setCollections(collData as FirestoreCollection[]);
+
+      // Clear editing state
+      setEditingCollectionId(null);
+    } catch (error) {
+      console.error("Error updating collection:", error);
+    }
+  };
+
+  // Delete collection
+  const handleDeleteCollection = async (collectionId: string) => {
+    if (!confirm("Are you sure you want to delete this collection?")) return;
+    try {
+      await deleteCollectionById(collectionId);
+      alert(`Collection deleted: ${collectionId}`);
+
+      // Refresh collection list
+      const collData = await getAllCollections();
+      setCollections(collData as FirestoreCollection[]);
+    } catch (error) {
+      console.error("Error deleting collection:", error);
+    }
+  };
+
+  // Toggle collection featured
+  const handleToggleFeaturedCollection = async (collectionId: string, isFeatured: boolean) => {
+    try {
+      await toggleFeaturedCollection(collectionId, !isFeatured);
+      alert(`Collection ${collectionId} updated isFeatured -> ${!isFeatured}`);
+
+      setCollections((prev) =>
+        prev.map((c) =>
+          c.id === collectionId ? { ...c, isFeatured: !isFeatured } : c
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling featured collection:", error);
+    }
+  };
+
+  // =========================================
+  // =============== RENDER UI ===============
+  // =========================================
+
+  return (
+    <div className="min-h-screen p-4 bg-gray-100 text-gray-900">
+      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+
+      {/* ================== PRODUCTS ================== */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* CREATE NEW PRODUCT FORM */}
+        <div className="w-full md:w-1/2 p-4 bg-white rounded shadow">
+          <h2 className="font-semibold mb-2">Add New Product</h2>
+          {collections.length === 0 ? (
+            <p className="text-sm text-red-500">
+              No collections found. Create a collection first.
+            </p>
+          ) : (
+            <form onSubmit={handleCreateProduct} className="flex flex-col gap-2">
+              <input
+                type="text"
+                name="name"
+                placeholder="Product name"
+                value={newProduct.name}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+                required
+              />
+              <textarea
+                name="description"
+                placeholder="Description (optional)"
+                value={newProduct.description}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+              />
+              <input
+                type="number"
+                name="price"
+                placeholder="Price"
+                value={newProduct.price}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="image"
+                placeholder="Image URL (optional)"
+                value={newProduct.image}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+              />
+              <select
+                name="collectionId"
+                value={newProduct.collectionId}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+                required
+              >
+                <option value="">-- Select Collection --</option>
+                {collections.map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white p-2 rounded mt-2"
+              >
+                Add Product
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* EXISTING PRODUCTS */}
+        <div className="w-full md:w-1/2 p-4 bg-white rounded shadow">
+          <h2 className="font-semibold mb-2">Existing Products</h2>
+          {products.length === 0 ? (
+            <p>No products found.</p>
+          ) : (
+            <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
+              {products.map((product) => (
+                <div key={product.id} className="border p-2 rounded">
+                  {editingProductId === product.id ? (
+                    // EDIT FORM
+                    <form onSubmit={handleUpdateProductSubmit} className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        name="name"
+                        value={editingProductData.name}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                        required
+                      />
+                      <textarea
+                        name="description"
+                        value={editingProductData.description}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                      />
+                      <input
+                        type="number"
+                        name="price"
+                        value={editingProductData.price}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                        required
+                      />
+                      <input
+                        type="text"
+                        name="image"
+                        value={editingProductData.image}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                      />
+                      <select
+                        name="collectionId"
+                        value={editingProductData.collectionId}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                      >
+                        <option value="">-- Select Collection --</option>
+                        {collections.map((col) => (
+                          <option key={col.id} value={col.id}>
+                            {col.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className="bg-green-600 text-white p-1 rounded"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingProductId(null)}
+                          className="bg-gray-400 p-1 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    // DISPLAY PRODUCT
+                    <>
+                      <div>
+                        <strong>{product.name}</strong> - ${product.price}
+                      </div>
+                      {product.image && (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-24 h-24 object-cover my-1"
+                        />
+                      )}
+                      {product.description && <p>{product.description}</p>}
+                      <p className="text-sm text-gray-500">ID: {product.id}</p>
+                      <p className="text-sm text-gray-500">
+                        Collection ID: {product.collectionId || "None"}
+                      </p>
+
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() =>
+                            handleToggleBestSeller(
+                              product.id,
+                              product.isBestSeller || false
+                            )
+                          }
+                          className="bg-yellow-500 text-white p-1 rounded"
+                        >
+                          {product.isBestSeller
+                            ? "Remove Best Seller"
+                            : "Mark Best Seller"}
+                        </button>
+                        <button
+                          onClick={() => startEditingProduct(product)}
+                          className="bg-blue-500 text-white p-1 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="bg-red-500 text-white p-1 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ================== SEPARATOR ================== */}
+      <hr className="my-6" />
+
+      {/* ================== COLLECTIONS ================== */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* CREATE NEW COLLECTION FORM */}
+        <div className="w-full md:w-1/2 p-4 bg-white rounded shadow">
+          <h2 className="font-semibold mb-2">Add New Collection</h2>
+          <form onSubmit={handleCreateCollection} className="flex flex-col gap-2">
+            <input
+              type="text"
+              name="name"
+              placeholder="Collection name"
+              value={newCollection.name}
+              onChange={handleNewCollectionChange}
+              className="border p-2 rounded"
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Description (optional)"
+              value={newCollection.description}
+              onChange={handleNewCollectionChange}
+              className="border p-2 rounded"
+            />
+            <input
+              type="text"
+              name="image"
+              placeholder="Image URL (optional)"
+              value={newCollection.image}
+              onChange={handleNewCollectionChange}
+              className="border p-2 rounded"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white p-2 rounded mt-2"
+            >
+              Add Collection
+            </button>
+          </form>
+        </div>
+
+        {/* EXISTING COLLECTIONS */}
+        <div className="w-full md:w-1/2 p-4 bg-white rounded shadow">
+          <h2 className="font-semibold mb-2">Existing Collections</h2>
+          {collections.length === 0 ? (
+            <p>No collections found.</p>
+          ) : (
+            <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
+              {collections.map((collection) => (
+                <div key={collection.id} className="border p-2 rounded">
+                  {editingCollectionId === collection.id ? (
+                    // EDIT COLLECTION FORM
+                    <form onSubmit={handleUpdateCollectionSubmit} className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        name="name"
+                        value={editingCollectionData.name}
+                        onChange={handleEditCollectionChange}
+                        className="border p-1 rounded"
+                        required
+                      />
+                      <textarea
+                        name="description"
+                        value={editingCollectionData.description}
+                        onChange={handleEditCollectionChange}
+                        className="border p-1 rounded"
+                      />
+                      <input
+                        type="text"
+                        name="image"
+                        value={editingCollectionData.image}
+                        onChange={handleEditCollectionChange}
+                        className="border p-1 rounded"
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className="bg-green-600 text-white p-1 rounded"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingCollectionId(null)}
+                          className="bg-gray-400 p-1 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    // DISPLAY COLLECTION
+                    <>
+                      <div>
+                        <strong>{collection.name}</strong>
+                      </div>
+                      {collection.image && (
+                        <img
+                          src={collection.image}
+                          alt={collection.name}
+                          className="w-24 h-24 object-cover my-1"
+                        />
+                      )}
+                      {collection.description && <p>{collection.description}</p>}
+                      <p className="text-sm text-gray-500">ID: {collection.id}</p>
+                      {collection.isFeatured ? (
+                        <p className="text-green-600 text-sm">Featured ✔</p>
+                      ) : (
+                        <p className="text-gray-500 text-sm">Not Featured</p>
+                      )}
+
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() =>
+                            handleToggleFeaturedCollection(
+                              collection.id,
+                              collection.isFeatured || false
+                            )
+                          }
+                          className="bg-yellow-500 text-white p-1 rounded"
+                        >
+                          {collection.isFeatured ? "Remove Featured" : "Make Featured"}
+                        </button>
+                        <button
+                          onClick={() => startEditingCollection(collection)}
+                          className="bg-blue-500 text-white p-1 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCollection(collection.id)}
+                          className="bg-red-500 text-white p-1 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

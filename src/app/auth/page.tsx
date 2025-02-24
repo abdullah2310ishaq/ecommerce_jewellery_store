@@ -10,11 +10,11 @@ import {
   AiOutlineLock,
   AiFillGoogleCircle,
 } from "react-icons/ai";
-import { motion } from "framer-motion"; // Optional, for subtle animations
+import { motion } from "framer-motion"; 
 
-// Validation helpers
+
 const validateEmail = (email: string) => {
-  // Must contain "@" and basic structure
+ 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };

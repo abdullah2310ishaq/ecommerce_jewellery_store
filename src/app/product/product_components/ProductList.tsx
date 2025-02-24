@@ -1,37 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import Pagination from "./Pagination";
-import { Product } from "../../types/Product"; // Ensure the path is correct
 
-// Sample Products
-const allProducts: Product[] = [
-  { id: "1", name: "Diamond Necklace", price: "$1,299", img: "https://images.pexels.com/photos/11914487/pexels-photo-11914487.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "2", name: "Gold Ring", price: "$899", img: "https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "3", name: "Platinum Bracelet", price: "$749", img: "https://images.pexels.com/photos/1458867/pexels-photo-1458867.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "4", name: "Luxury Earrings", price: "$1,099", img: "https://images.pexels.com/photos/11914482/pexels-photo-11914482.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "5", name: "Gold Bracelet", price: "$1,299", img: "https://images.pexels.com/photos/14802904/pexels-photo-14802904.jpeg?auto=compress&cs=tinysrgb&w=800" },
-  { id: "6", name: "Silver Ring", price: "$499", img: "https://images.pexels.com/photos/3641033/pexels-photo-3641033.jpeg?auto=compress&cs=tinysrgb&w=800" },
-];
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  img: string;
+  rating?: number;
+  isOnSale?: boolean;
+  // other fields
+}
+
+interface ProductListProps {
+  products: Product[];
+}
 
 const itemsPerPage = 3;
 
-const ProductList = () => {
+export default function ProductList({ products }: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1);
-
-  // We'll use this state to trigger our fade-in effect
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  // Trigger the fade-in once the component mounts
   useEffect(() => {
     setHasLoaded(true);
   }, []);
 
-  const totalPages = Math.ceil(allProducts.length / itemsPerPage);
-
-  // Get products for the current page
-  const displayedProducts = allProducts.slice(
+  // Calculate pagination
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const displayedProducts = products.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -49,7 +48,7 @@ const ProductList = () => {
           {displayedProducts.map((product, index) => (
             <div
               key={product.id}
-              // Inline style to create a fade-in effect with a small stagger per product
+              // fade-in effect with small stagger
               style={{
                 transition: `opacity 0.6s ease-out ${index * 0.1}s`,
                 opacity: hasLoaded ? 1 : 0,
@@ -67,6 +66,4 @@ const ProductList = () => {
       </div>
     </section>
   );
-};
-
-export default ProductList;
+}

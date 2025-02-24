@@ -1,27 +1,41 @@
 "use client";
-import { useState } from "react";
-// React Icons
+
+import React, { useState } from "react";
 import { FaFilter, FaUndoAlt, FaTag } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { Switch } from "@headlessui/react"; // Optional if you want a nicer toggle
+import { Switch } from "@headlessui/react";
 
-const Filters = () => {
-  // State for Filters
-  const [category, setCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState(2000);
-  const [material, setMaterial] = useState("All");
-  const [stone, setStone] = useState("All"); // NEW - Example "Stone" filter
-  const [saleOnly, setSaleOnly] = useState(false); // NEW - Sale Items
+interface FiltersProps {
+  filters: {
+    category: string;
+    priceRange: number;
+    material: string;
+    stone: string;
+    saleOnly: boolean;
+    searchQuery: string;
+  };
+  setFilters: React.Dispatch<React.SetStateAction<{
+    category: string;
+    priceRange: number;
+    material: string;
+    stone: string;
+    saleOnly: boolean;
+    searchQuery: string;
+  }>>;
+}
 
-  // State for collapse functionality
+export default function Filters({ filters, setFilters }: FiltersProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleReset = () => {
-    setCategory("All");
-    setPriceRange(2000);
-    setMaterial("All");
-    setStone("All");
-    setSaleOnly(false);
+    setFilters({
+      category: "All",
+      priceRange: 2000,
+      material: "All",
+      stone: "All",
+      saleOnly: false,
+      searchQuery: "",
+    });
   };
 
   return (
@@ -46,12 +60,12 @@ const Filters = () => {
         <div className="space-y-6 text-yellow-100">
           {/* CATEGORY FILTER */}
           <div>
-            <label className="block text-yellow-400 mb-2">
-              Category
-            </label>
+            <label className="block text-yellow-400 mb-2">Category</label>
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={filters.category}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, category: e.target.value }))
+              }
               className="w-full p-2 border border-yellow-600 rounded-md bg-black text-yellow-100 placeholder:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
             >
               <option>All</option>
@@ -65,15 +79,17 @@ const Filters = () => {
           {/* PRICE FILTER */}
           <div>
             <label className="block text-yellow-400 mb-2">
-              Price Range: <span className="font-semibold">${priceRange}</span>
+              Price Range: <span className="font-semibold">${filters.priceRange}</span>
             </label>
             <input
               type="range"
               min="0"
               max="5000"
               step="100"
-              value={priceRange}
-              onChange={(e) => setPriceRange(Number(e.target.value))}
+              value={filters.priceRange}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, priceRange: Number(e.target.value) }))
+              }
               className="w-full cursor-pointer accent-yellow-500 transition"
             />
             <div className="mt-1 text-sm text-yellow-200">
@@ -85,8 +101,10 @@ const Filters = () => {
           <div>
             <label className="block text-yellow-400 mb-2">Material</label>
             <select
-              value={material}
-              onChange={(e) => setMaterial(e.target.value)}
+              value={filters.material}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, material: e.target.value }))
+              }
               className="w-full p-2 border border-yellow-600 rounded-md bg-black text-yellow-100 placeholder:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
             >
               <option>All</option>
@@ -97,12 +115,14 @@ const Filters = () => {
             </select>
           </div>
 
-          {/* STONE FILTER (NEW) */}
+          {/* STONE FILTER */}
           <div>
             <label className="block text-yellow-400 mb-2">Gemstone</label>
             <select
-              value={stone}
-              onChange={(e) => setStone(e.target.value)}
+              value={filters.stone}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, stone: e.target.value }))
+              }
               className="w-full p-2 border border-yellow-600 rounded-md bg-black text-yellow-100 placeholder:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
             >
               <option>All</option>
@@ -113,26 +133,41 @@ const Filters = () => {
             </select>
           </div>
 
-          {/* SALE ONLY (NEW) */}
+          {/* SALE ONLY */}
           <div className="flex items-center justify-between">
             <label className="flex items-center text-yellow-400 space-x-2">
               <FaTag className="inline-block" />
               <span>Sale Items Only</span>
             </label>
-            {/* Using a Switch from @headlessui/react (optional) */}
             <Switch
-              checked={saleOnly}
-              onChange={setSaleOnly}
+              checked={filters.saleOnly}
+              onChange={(val) =>
+                setFilters((prev) => ({ ...prev, saleOnly: val }))
+              }
               className={`${
-                saleOnly ? "bg-yellow-500" : "bg-gray-600"
+                filters.saleOnly ? "bg-yellow-500" : "bg-gray-600"
               } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
             >
               <span
                 className={`${
-                  saleOnly ? "translate-x-6" : "translate-x-1"
+                  filters.saleOnly ? "translate-x-6" : "translate-x-1"
                 } inline-block h-4 w-4 transform rounded-full bg-black transition-transform`}
               />
             </Switch>
+          </div>
+
+          {/* SEARCH QUERY */}
+          <div>
+            <label className="block text-yellow-400 mb-2">Search</label>
+            <input
+              type="text"
+              value={filters.searchQuery}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))
+              }
+              className="w-full p-2 border border-yellow-600 rounded-md bg-black text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
+              placeholder="Search product name..."
+            />
           </div>
 
           {/* RESET FILTERS BUTTON */}
@@ -147,6 +182,4 @@ const Filters = () => {
       )}
     </div>
   );
-};
-
-export default Filters;
+}
