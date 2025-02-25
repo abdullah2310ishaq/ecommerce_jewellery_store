@@ -10,7 +10,7 @@ import { logoutUser } from "@/app/firebase/firebase_services/firebaseAuth"; // â
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth(); // âœ… Get user from AuthContext
+  const { user } = useAuth(); 
 
   return (
     <>
@@ -84,7 +84,7 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <NavLink href="/login" icon={<User className="w-5 h-5" />}>
+                <NavLink href="/auth" icon={<User className="w-5 h-5" />}>
                   Login
                 </NavLink>
               )}
