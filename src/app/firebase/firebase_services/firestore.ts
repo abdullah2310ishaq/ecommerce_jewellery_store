@@ -12,6 +12,8 @@ import {
   query,
   where,
   serverTimestamp,
+  orderBy,
+  Timestamp,
 
 } from "firebase/firestore";
 import { firestore } from "./firebaseConfig";
@@ -55,6 +57,17 @@ export interface OrderData {
   status?: string;   // e.g. "Pending", "Shipped", "Delivered"
   createdAt?: Date;   // Firestore timestamp
 }
+//reviews
+export interface ReviewData {
+  userId: string;      // ID of the user leaving the review
+  username: string;    // Display name of the user
+  rating: number;      // 1-5 star rating
+  comment: string;     // User's written review
+  createdAt?: Timestamp;     // Timestamp of review
+}
+
+
+
 
 // ===========================================================
 // 3. READ / FETCH (USER-FACING)
@@ -195,7 +208,6 @@ export const getAllOrders = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-/** Optional: Update order status (admin) */
 export const updateOrderStatus = async (orderId: string, newStatus: string) => {
   const orderDocRef = doc(firestore, "orders", orderId);
   await updateDoc(orderDocRef, { status: newStatus });
@@ -211,5 +223,22 @@ export const getBestSellers = async () => {
   const prodRef = collection(firestore, "products");
   const q = query(prodRef, where("isBestSeller", "==", true));
   const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+
+// add reviews
+export const addReviewToProduct = async (productId: string, review: ReviewData) => {
+  const reviewsRef = collection(firestore, `products/${productId}/reviews`);
+  await addDoc(reviewsRef, {
+    ...review,
+    createdAt: serverTimestamp(),
+  });
+};
+
+
+export const getReviewsForProduct = async (productId: string) => {
+  const reviewsRef = collection(firestore, `products/${productId}/reviews`);
+  const snapshot = await getDocs(query(reviewsRef, orderBy("createdAt", "desc")));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };

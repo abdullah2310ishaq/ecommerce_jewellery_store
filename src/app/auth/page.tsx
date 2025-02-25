@@ -12,9 +12,11 @@ import {
 } from "react-icons/ai";
 import { motion } from "framer-motion"; 
 
+// Import your Firebase Auth methods
+import { registerUser, loginUser, googleSignIn } from "@/app/firebase/firebase_services/firebaseAuth";
 
+// ---------- Validation Helpers ----------
 const validateEmail = (email: string) => {
- 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -27,12 +29,12 @@ const validatePassword = (password: string) => {
 
 const validatePhoneNumber = (phone: string) => {
   // Basic worldwide phone number check
-  // E.g. +1 555 555 5555 or 555-555-5555, etc.
+  // e.g. +1 555 555 5555 or 555-555-5555
   const phoneRegex = /^(\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}$/;
   return !phone || phoneRegex.test(phone); // phone optional => pass if empty
 };
 
-const AuthForm = () => {
+export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,23 +49,13 @@ const AuthForm = () => {
     phoneNumber: "",
   });
 
-  // Guest Login Feature (dummy)
-  const handleGuestLogin = () => {
-    alert("Logged in as guest!");
-    // Additional guest logic could be implemented here
-  };
-
-  // Social sign-in example
-  const handleGoogleSignIn = () => {
-    alert("Google Sign In clicked!");
-  };
-
+  // -------------- Form Submit --------------
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Basic required checks
+    // Basic checks
     if (!formData.email || !formData.password) {
       setError("Please fill in all required fields.");
       setLoading(false);
@@ -72,16 +64,19 @@ const AuthForm = () => {
 
     // Additional checks for Sign Up
     if (!isLogin) {
+      // name
       if (!formData.name) {
         setError("Name is required for sign up.");
         setLoading(false);
         return;
       }
+      // phone
       if (!validatePhoneNumber(formData.phoneNumber)) {
         setError("Please provide a valid phone number format.");
         setLoading(false);
         return;
       }
+      // confirm password
       if (formData.password !== formData.confirmPassword) {
         setError("Passwords do not match.");
         setLoading(false);
@@ -105,16 +100,17 @@ const AuthForm = () => {
       return;
     }
 
-    // Simulate a network request
+    // -------------- Actual Firebase Auth Call --------------
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Form submitted:", {
-        ...formData,
-        isLogin,
-        rememberMe,
-      });
-      setLoading(false);
-      alert(isLogin ? "Signed in!" : "Account created!");
+      if (isLogin) {
+        // Login
+        const user = await loginUser(formData.email, formData.password);
+        alert(`Welcome back, ${user?.displayName || user?.email}!`);
+      } else {
+        // Register
+        const user = await registerUser(formData.email, formData.password, formData.name);
+        alert(`Account created! Welcome, ${user?.displayName || user?.email}.`);
+      }
       // Reset form
       setFormData({
         email: "",
@@ -124,12 +120,33 @@ const AuthForm = () => {
         phoneNumber: "",
       });
       setRememberMe(false);
-    } catch {
-      setError("An error occurred. Please try again.");
+    } catch (err: unknown) {
+      console.error("Auth error:", err);
+      if (err instanceof Error) {
+        setError(err.message || "An error occurred. Please try again.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+    } finally {
       setLoading(false);
     }
   };
 
+  // -------------- Google Sign-In --------------
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      const user = await googleSignIn();
+      alert(`Signed in with Google as: ${user.email}`);
+    } catch (err: unknown) {
+      console.error("Google sign-in error:", err);
+      setError(err instanceof Error ? err.message : "Failed to sign in with Google.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // -------------- Input Change --------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -149,7 +166,7 @@ const AuthForm = () => {
         <div className="hidden md:flex md:w-1/2 p-12 items-center justify-center relative bg-black">
           <div className="text-center">
             <img
-              src="/logo.png" 
+              src="/logo.png"
               alt="Brand Logo"
               className="mx-auto mb-8 w-32 h-32 object-contain"
             />
@@ -169,6 +186,7 @@ const AuthForm = () => {
 
         {/* Right side - Form */}
         <div className="flex-1 bg-gray-800 p-8 space-y-6">
+          {/* Header */}
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-100">
               {isLogin ? "Sign In" : "Sign Up"}
@@ -186,19 +204,9 @@ const AuthForm = () => {
             </div>
           </div>
 
-          
-          {isLogin && (
-            <button
-              onClick={handleGuestLogin}
-              className="w-full py-2 rounded-md border border-gray-600 text-sm font-medium hover:bg-yellow-600/10 transition-colors text-gray-100"
-            >
-              Continue as Guest
-            </button>
-          )}
-
-          {/* Form */}
+          {/* Auth Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+            {/* Name for Sign Up */}
             {!isLogin && (
               <div className="space-y-1">
                 <label htmlFor="name" className="text-gray-200">
@@ -218,7 +226,7 @@ const AuthForm = () => {
               </div>
             )}
 
-            
+            {/* Email */}
             <div className="space-y-1">
               <label htmlFor="email" className="text-gray-200">
                 Email <span className="text-red-400">*</span>
@@ -237,7 +245,7 @@ const AuthForm = () => {
               </div>
             </div>
 
-            
+            {/* Phone for Sign Up */}
             {!isLogin && (
               <div className="space-y-1">
                 <label htmlFor="phoneNumber" className="text-gray-200">
@@ -257,7 +265,7 @@ const AuthForm = () => {
               </div>
             )}
 
-           
+            {/* Password */}
             <div className="space-y-1">
               <label htmlFor="password" className="text-gray-200">
                 Password <span className="text-red-400">*</span>
@@ -287,7 +295,7 @@ const AuthForm = () => {
               </div>
             </div>
 
-            
+            {/* Confirm Password for Sign Up */}
             {!isLogin && (
               <div className="space-y-1">
                 <label htmlFor="confirmPassword" className="text-gray-200">
@@ -308,7 +316,7 @@ const AuthForm = () => {
               </div>
             )}
 
-           
+            {/* Remember Me (for sign in) */}
             {isLogin && (
               <div className="flex items-center gap-2 mt-2">
                 <input
@@ -324,14 +332,14 @@ const AuthForm = () => {
               </div>
             )}
 
-          
+            {/* Show any Error */}
             {error && (
               <div className="bg-red-800 border border-red-700 text-white p-3 rounded-md mt-2">
                 {error}
               </div>
             )}
 
-           
+            {/* Submit Button */}
             <button
               type="submit"
               className="w-full bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-md font-medium transition-colors mt-4"
@@ -354,10 +362,11 @@ const AuthForm = () => {
               )}
             </button>
 
-           
+            {/* Google Sign In */}
             <button
               type="button"
               onClick={handleGoogleSignIn}
+              disabled={loading}
               className="flex items-center justify-center w-full border border-gray-600 text-sm py-3 mt-2 rounded-md hover:bg-yellow-600/10 transition-colors text-gray-200"
             >
               <AiFillGoogleCircle className="mr-2 h-5 w-5" />
@@ -380,6 +389,4 @@ const AuthForm = () => {
       </div>
     </motion.div>
   );
-};
-
-export default AuthForm;
+}

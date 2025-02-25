@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingBag, User, Menu } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, LogOut } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/app/context/AuthContext"; // ✅ Import Auth
+import { logoutUser } from "@/app/firebase/firebase_services/firebaseAuth"; // ✅ Import logout function
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth(); // ✅ Get user from AuthContext
 
   return (
     <>
-      {/* Announcement Bar (optional) */}
+      {/* Announcement Bar */}
       <div className="bg-black text-yellow-300 text-sm py-2 px-4 text-center">
         <span className="font-medium tracking-wide">
           Enjoy 10% off your first purchase! Use code: WELCOME10
@@ -21,6 +24,7 @@ const Navbar = () => {
       <nav className="bg-gradient-to-r from-black to-gray-900 shadow-lg border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            
             {/* LEFT - LOGO */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-2">
@@ -42,7 +46,7 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* CENTER - SEARCH BAR (hidden on mobile) */}
+            {/* CENTER - SEARCH BAR */}
             <div className="hidden sm:block flex-1 max-w-lg mx-4">
               <div className="relative">
                 <input
@@ -56,7 +60,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* RIGHT - NAV LINKS (hidden on mobile) */}
+            {/* RIGHT - NAV LINKS */}
             <div className="hidden md:flex items-center space-x-6">
               <NavLink href="/shop" icon={<ShoppingBag className="w-5 h-5" />}>
                 Shop
@@ -64,9 +68,26 @@ const Navbar = () => {
               <NavLink href="/cart" icon={<ShoppingBag className="w-5 h-5" />}>
                 Cart
               </NavLink>
-              <NavLink href="/login" icon={<User className="w-5 h-5" />}>
-                Login
-              </NavLink>
+
+              {/* Show Login if no user, Logout if logged in */}
+              {user ? (
+                <>
+                  <span className="text-yellow-100 text-sm">
+                    Hi, {user.displayName || "User"}
+                  </span>
+                  <button
+                    onClick={logoutUser}
+                    className="text-yellow-100 hover:text-red-400 transition-colors flex items-center space-x-1"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">Logout</span>
+                  </button>
+                </>
+              ) : (
+                <NavLink href="/login" icon={<User className="w-5 h-5" />}>
+                  Login
+                </NavLink>
+              )}
             </div>
 
             {/* MOBILE MENU BUTTON */}
@@ -81,7 +102,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* MOBILE MENU with transition */}
+        {/* MOBILE MENU */}
         <div
           className={`md:hidden bg-gray-900 border-t border-gray-700 overflow-hidden transition-all ease-out duration-300 ${
             isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -90,8 +111,20 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <MobileNavLink href="/shop">Shop</MobileNavLink>
             <MobileNavLink href="/cart">Cart</MobileNavLink>
-            <MobileNavLink href="/login">Login</MobileNavLink>
+            
+            {/* Show Login if no user, Logout if logged in */}
+            {user ? (
+              <button
+                onClick={logoutUser}
+                className="w-full text-left text-yellow-100 hover:text-red-400 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
+              <MobileNavLink href="/login">Login</MobileNavLink>
+            )}
           </div>
+
           {/* SEARCH BAR FOR MOBILE */}
           <div className="px-2 py-3">
             <input
@@ -108,6 +141,7 @@ const Navbar = () => {
   );
 };
 
+/** Navigation Links */
 const NavLink = ({ href, children, icon }) => (
   <Link
     href={href}
@@ -118,6 +152,7 @@ const NavLink = ({ href, children, icon }) => (
   </Link>
 );
 
+/** Mobile Navigation Links */
 const MobileNavLink = ({ href, children }) => (
   <Link
     href={href}
