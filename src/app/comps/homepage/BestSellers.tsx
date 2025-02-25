@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Star, ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingCart, Eye } from "lucide-react";
 
 // Adjust your import to the correct path
 import { getBestSellers } from "../../firebase/firebase_services/firestore";
@@ -71,54 +71,86 @@ export default function BestSellers() {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {bestSellers.map((product) => (
-            <Link
+            <div
               key={product.id}
-              href={`/shop?product=${product.id}`}
-              className="group bg-gray-900 rounded-lg overflow-hidden"
+              className="relative group bg-gray-900 rounded-lg overflow-hidden"
             >
+              {/* BEST SELLER Badge */}
+              <div className="absolute top-3 left-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full z-10 shadow">
+                BEST SELLER
+              </div>
+
               {/* Image Container */}
               <div className="relative aspect-square overflow-hidden">
                 <Image
-                  // ONLY show first image in array
+                  // Show the first image in array or fallback
                   src={product.images?.[0] || "/placeholder.jpg"}
                   alt={product.name}
                   fill
                   className="object-cover transform transition-transform duration-700 group-hover:scale-110"
                 />
-
                 {/* Price Tag */}
                 <div className="absolute top-4 right-4 bg-black/80 px-4 py-2 rounded-full">
-                  <span className="text-yellow-400 font-medium">Rs.{product.price}</span>
+                  <span className="text-yellow-400 font-medium">
+                    Rs.{product.price}
+                  </span>
+                </div>
+              </div>
+
+              {/* Hover Overlay with Quick Actions */}
+              <div className="absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/80 p-4 w-full text-center flex flex-col space-y-3">
+                  <Link
+                    href={`/shop?product=${product.id}`}
+                    className="flex items-center justify-center space-x-2 text-sm text-yellow-400 font-medium bg-yellow-600 rounded-full px-3 py-2 hover:bg-yellow-500 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>Quick Look</span>
+                  </Link>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Add to cart logic here
+                      alert(`Added ${product.name} to cart!`);
+                    }}
+                    className="flex items-center justify-center space-x-2 text-sm text-yellow-400 font-medium bg-yellow-600 rounded-full px-3 py-2 hover:bg-yellow-500 transition-colors"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Add to Cart</span>
+                  </button>
                 </div>
               </div>
 
               {/* Product Info */}
               <div className="p-6">
-                {/* Example rating display (static 5 stars if you wish) */}
-                <div className="flex items-center space-x-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-
                 {/* Name */}
-                <h4 className="text-xl font-medium text-white mb-2 group-hover:text-yellow-400 transition-colors">
-                  {product.name}
-                </h4>
+                <Link href={`/shop?product=${product.id}`}>
+                  <h4 className="text-xl font-medium text-white mb-2 group-hover:text-yellow-400 transition-colors">
+                    {product.name}
+                  </h4>
+                </Link>
 
-                {/* Action Button */}
+                {/* Subtext or short description (Optional) */}
+                <p className="text-sm text-gray-400">
+                  Discover why this is a top pick among our customers.
+                </p>
+
+                {/* Action Button (View Details) */}
                 <div className="mt-4 flex items-center text-yellow-400 text-sm font-medium group/button">
-                  View Details
-                  <ArrowRight className="w-4 h-4 ml-2 transform group-hover/button:translate-x-2 transition-transform" />
+                  <Link
+                    href={`/shop?product=${product.id}`}
+                    className="inline-flex items-center transition-transform hover:translate-x-1"
+                  >
+                    View Details
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
                 </div>
               </div>
 
               {/* Hover Border Effect */}
               <div className="absolute inset-0 border-2 border-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
-            </Link>
+            </div>
           ))}
         </div>
 

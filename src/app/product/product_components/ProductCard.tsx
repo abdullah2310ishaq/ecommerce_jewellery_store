@@ -1,71 +1,114 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import { Product } from "./ProductList";
+"use client"
+
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { Sparkles, Eye } from "lucide-react"
+
+export interface Product {
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  isOnSale?: boolean
+  description?: string
+}
 
 const ProductCard = ({ product }: { product: Product }) => {
-  // If rating is missing, default to 5 (?)
-  const displayRating = product.rating || 5;
-
-  // Show the first image in the array, or fallback
-  const imageToShow = product.images?.[0] || "/placeholder.svg";
+  const [isHovered, setIsHovered] = useState(false)
+  const imageToShow = product.images?.[0] || "/placeholder.svg"
 
   return (
-    <div className="group relative bg-black rounded-lg shadow-md overflow-hidden border border-transparent hover:border-yellow-600 transition-transform transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-yellow-600/20 p-2">
+    <motion.div
+      className="relative bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-lg overflow-hidden border-2 border-yellow-600/30 hover:border-yellow-600 transition-all duration-300 group"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+    >
+      {/* Animated Glow Effect */}
+      <div className="absolute inset-0 bg-yellow-600/20 filter blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+
       {/* Sale Badge */}
       {product.isOnSale && (
-        <span className="absolute top-3 right-3 bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
-          Sale
-        </span>
+        <motion.div
+          className="absolute top-3 right-3 z-10"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        >
+          <span className="bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Sale
+          </span>
+        </motion.div>
       )}
 
       {/* Product Image */}
-      <div className="overflow-hidden rounded-md bg-black">
+      <div className="relative overflow-hidden aspect-square">
         <Image
-          src={imageToShow}
+          src={imageToShow || "/placeholder.svg"}
           alt={product.name}
-          width={400}
-          height={400}
-          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+          layout="fill"
+          objectFit="cover"
+          className="transition-transform duration-700 ease-in-out group-hover:scale-110"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Product Details */}
-      <div className="p-4 text-center space-y-4 bg-gradient-to-b from-black to-gray-900 rounded-md">
-        <h3 className="text-lg md:text-xl font-semibold text-yellow-400">
-          {product.name}
-        </h3>
-        <p className="font-semibold text-md md:text-lg mt-1 text-yellow-300">
-          ${product.price}
-        </p>
+      <div className="p-4 space-y-4">
+        <h3 className="text-xl font-bold text-yellow-400 truncate">{product.name}</h3>
+        <p className="font-semibold text-2xl mt-1 text-yellow-300">${product.price.toFixed(2)}</p>
 
-        {/* Rating */}
-        <div className="flex justify-center items-center mt-2 mb-4 space-x-1">
-          {[...Array(displayRating)].map((_, index) => (
-            <svg
-              key={index}
-              className="w-4 h-4 text-yellow-400 fill-current"
-              viewBox="0 0 20 20"
+        {/* Description Preview */}
+        <motion.p
+          className="text-gray-300 text-sm line-clamp-2"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? "auto" : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {product.description || "No description available."}
+        </motion.p>
+
+        {/* Action Button */}
+        <motion.div
+          className="pt-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Link href={`/product/${product.id}`} passHref>
+            <motion.button
+              className="w-full px-4 py-2 bg-yellow-600 text-black rounded-md font-medium flex items-center justify-center gap-2 group relative overflow-hidden"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <path d="M10 15l-5.878 3.09 1.123-6.545L0 6.545l6.561-.955L10 0l3.439 5.59L20 6.545l-5.245 4.999 1.123 6.546z" />
-            </svg>
-          ))}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-2">
-          <Link href={`/product/${product.id}`}>
-            <button className="px-4 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-500 transition-colors font-medium">
-              View Details
-            </button>
+              <span className="relative z-10">View Details</span>
+              <Eye className="w-5 h-5 relative z-10" />
+              <motion.div
+                className="absolute inset-0 bg-yellow-400"
+                initial={{ x: "100%" }}
+                whileHover={{ x: 0 }}
+                transition={{ type: "tween" }}
+              />
+            </motion.button>
           </Link>
-          <button className="px-4 py-2 bg-gray-700 text-yellow-200 rounded-md hover:bg-gray-600 hover:text-yellow-100 transition-colors font-medium">
-            Add to Cart
-          </button>
-        </div>
+        </motion.div>
       </div>
-    </div>
-  );
-};
 
-export default ProductCard;
+      {/* Hover Effect Overlay */}
+      <motion.div
+        className="absolute inset-0 bg-yellow-600/10 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      />
+    </motion.div>
+  )
+}
+
+export default ProductCard
+
