@@ -3,17 +3,15 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ShoppingCart, Eye } from "lucide-react";
-
-// Adjust your import to the correct path
+import { motion } from "framer-motion";
+import { Sparkles, ShoppingCart, Eye, ArrowRight } from "lucide-react";
 import { getBestSellers } from "../../firebase/firebase_services/firestore";
 
-// If your FirestoreProduct has an array of images, define it here
 interface FirestoreProduct {
   id: string;
   name: string;
   price: number;
-  images?: string[]; // array of images
+  images?: string[];
 }
 
 export default function BestSellers() {
@@ -71,86 +69,80 @@ export default function BestSellers() {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {bestSellers.map((product) => (
-            <div
+            <motion.div
               key={product.id}
-              className="relative group bg-gray-900 rounded-lg overflow-hidden"
+              className="relative bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-lg overflow-hidden border-2 border-yellow-600/30 hover:border-yellow-600 transition-all duration-300 group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              {/* BEST SELLER Badge */}
-              <div className="absolute top-3 left-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full z-10 shadow">
-                BEST SELLER
-              </div>
+              {/* Animated Glow Effect */}
+              <div className="absolute inset-0 bg-yellow-600/20 filter blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
 
-              {/* Image Container */}
-              <div className="relative aspect-square overflow-hidden">
+              {/* Best Seller Badge */}
+              <motion.div
+                className="absolute top-3 left-3 z-10"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              >
+                <span className="bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  Best Seller
+                </span>
+              </motion.div>
+
+              {/* Product Image */}
+              <div className="relative overflow-hidden aspect-square">
                 <Image
-                  // Show the first image in array or fallback
                   src={product.images?.[0] || "/placeholder.jpg"}
                   alt={product.name}
-                  fill
-                  className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-transform duration-700 ease-in-out group-hover:scale-110"
                 />
-                {/* Price Tag */}
-                <div className="absolute top-4 right-4 bg-black/80 px-4 py-2 rounded-full">
-                  <span className="text-yellow-400 font-medium">
-                    Rs.{product.price}
-                  </span>
-                </div>
-              </div>
-
-              {/* Hover Overlay with Quick Actions */}
-              <div className="absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="bg-black/80 p-4 w-full text-center flex flex-col space-y-3">
-                  <Link
-                    href={`/shop?product=${product.id}`}
-                    className="flex items-center justify-center space-x-2 text-sm text-yellow-400 font-medium bg-yellow-600 rounded-full px-3 py-2 hover:bg-yellow-500 transition-colors"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Quick Look</span>
-                  </Link>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Add to cart logic here
-                      alert(`Added ${product.name} to cart!`);
-                    }}
-                    className="flex items-center justify-center space-x-2 text-sm text-yellow-400 font-medium bg-yellow-600 rounded-full px-3 py-2 hover:bg-yellow-500 transition-colors"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Add to Cart</span>
-                  </button>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
               {/* Product Info */}
-              <div className="p-6">
-                {/* Name */}
-                <Link href={`/shop?product=${product.id}`}>
-                  <h4 className="text-xl font-medium text-white mb-2 group-hover:text-yellow-400 transition-colors">
-                    {product.name}
-                  </h4>
-                </Link>
+              <div className="p-4 space-y-4">
+                <h3 className="text-xl font-bold text-yellow-400 truncate">{product.name}</h3>
+                <p className="font-semibold text-2xl mt-1 text-yellow-300">Rs. {product.price}</p>
 
-                {/* Subtext or short description (Optional) */}
-                <p className="text-sm text-gray-400">
-                  Discover why this is a top pick among our customers.
-                </p>
-
-                {/* Action Button (View Details) */}
-                <div className="mt-4 flex items-center text-yellow-400 text-sm font-medium group/button">
-                  <Link
-                    href={`/shop?product=${product.id}`}
-                    className="inline-flex items-center transition-transform hover:translate-x-1"
-                  >
-                    View Details
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                {/* Action Button */}
+                <motion.div
+                  className="pt-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Link href={`/product/${product.id}`} passHref>
+                    <motion.button
+                      className="w-full px-4 py-2 bg-yellow-600 text-black rounded-md font-medium flex items-center justify-center gap-2 group relative overflow-hidden"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="relative z-10">View Details</span>
+                      <Eye className="w-5 h-5 relative z-10" />
+                      <motion.div
+                        className="absolute inset-0 bg-yellow-400"
+                        initial={{ x: "100%" }}
+                        whileHover={{ x: 0 }}
+                        transition={{ type: "tween" }}
+                      />
+                    </motion.button>
                   </Link>
-                </div>
+                </motion.div>
               </div>
 
-              {/* Hover Border Effect */}
-              <div className="absolute inset-0 border-2 border-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
-            </div>
+              {/* Hover Effect Overlay */}
+              <motion.div
+                className="absolute inset-0 bg-yellow-600/10 pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
           ))}
         </div>
 

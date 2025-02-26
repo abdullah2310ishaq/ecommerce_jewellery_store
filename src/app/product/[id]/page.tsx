@@ -1,97 +1,107 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState, useRef } from "react"
-import { useParams } from "next/navigation"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { addToCart } from "@/app/cart/cart"
-import { useAuth } from "@/app/context/AuthContext"
-import { getProductById, getReviewsForProduct, addReviewToProduct } from "@/app/firebase/firebase_services/firestore"
-import type { Timestamp } from "firebase/firestore"
-import { Star, ShoppingCart, Heart, Share2, User } from "lucide-react"
+import React, { useEffect, useState, useRef } from "react";
+import { useParams } from "next/navigation";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { addToCart } from "@/app/cart/cart";
+import { useAuth } from "@/app/context/AuthContext";
+import { getProductById, getReviewsForProduct, addReviewToProduct } from "@/app/firebase/firebase_services/firestore";
+import type { Timestamp } from "firebase/firestore";
+import { Star, ShoppingCart, Heart, Share2, User } from "lucide-react";
 
 interface FirestoreProduct {
-  id: string
-  name: string
-  price: number
-  images?: string[]
-  description?: string[]
-  features?: string[]
-  category?: string
+  id: string;
+  name: string;
+  price: number;
+  images?: string[];
+  description?: string[];
+  features?: string[];
+  category?: string;
+  stock?: number; // <-- NEW
 }
 
 interface ReviewData {
-  id?: string
-  userId: string
-  username: string
-  rating: number
-  comment: string
-  createdAt?: Timestamp
+  id?: string;
+  userId: string;
+  username: string;
+  rating: number;
+  comment: string;
+  createdAt?: Timestamp;
 }
 
 export default function ProductDetailPage() {
-  const { id } = useParams()
-  const { user, loading: authLoading } = useAuth()
-  const [product, setProduct] = useState<FirestoreProduct | null>(null)
-  const [reviews, setReviews] = useState<ReviewData[]>([])
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" })
-  const [prodLoading, setProdLoading] = useState(true)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
-  const imageRef = useRef<HTMLDivElement>(null)
+  const { id } = useParams();
+  const { user, loading: authLoading } = useAuth();
+  
+  // ---------- STATE ----------
+  const [product, setProduct] = useState<FirestoreProduct | null>(null);
+  const [reviews, setReviews] = useState<ReviewData[]>([]);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [prodLoading, setProdLoading] = useState(true);
+
+  // ---------- QUANTITY STATE ----------
+  const [quantity, setQuantity] = useState(1); // User-chosen quantity
+
+  // For image zoom
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     async function fetchData() {
       try {
-        setProdLoading(true)
-        const resolvedId = Array.isArray(id) ? id[0] : id
-        const prod = await getProductById(resolvedId)
+        setProdLoading(true);
+        const resolvedId = Array.isArray(id) ? id[0] : id;
+        const prod = await getProductById(resolvedId);
         if (prod) {
-          setProduct(prod as FirestoreProduct)
-          const revs = await getReviewsForProduct(prod.id)
-          setReviews(revs as ReviewData[])
+          setProduct(prod as FirestoreProduct);
+          const revs = await getReviewsForProduct(prod.id);
+          setReviews(revs as ReviewData[]);
         }
       } catch (error) {
-        console.error("Error loading product/reviews:", error)
+        console.error("Error loading product/reviews:", error);
       } finally {
-        setProdLoading(false)
+        setProdLoading(false);
       }
     }
-    fetchData()
-  }, [id])
+    fetchData();
+  }, [id]);
 
+  // ---------- Handle Review Submit ----------
   async function handleReviewSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!user || !product) return
+    e.preventDefault();
+    if (!user || !product) return;
 
     const newReview: ReviewData = {
       userId: user.uid,
       username: user.displayName ?? "Anonymous",
       rating: reviewForm.rating,
       comment: reviewForm.comment,
-    }
+    };
 
     try {
-      await addReviewToProduct(product.id, newReview)
-      const updated = await getReviewsForProduct(product.id)
-      setReviews(updated as ReviewData[])
-      setReviewForm({ rating: 5, comment: "" })
+      await addReviewToProduct(product.id, newReview);
+      const updated = await getReviewsForProduct(product.id);
+      setReviews(updated as ReviewData[]);
+      setReviewForm({ rating: 5, comment: "" });
     } catch (err) {
-      console.error("Error adding review:", err)
+      console.error("Error adding review:", err);
     }
   }
 
+  // ---------- Handle Image Zoom ----------
   const handleImageZoom = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageRef.current) return
-    const { left, top, width, height } = imageRef.current.getBoundingClientRect()
-    const x = (e.clientX - left) / width
-    const y = (e.clientY - top) / height
-    setZoomPosition({ x, y })
-  }
+    if (!imageRef.current) return;
+    const { left, top, width, height } = imageRef.current.getBoundingClientRect();
+    const x = (e.clientX - left) / width;
+    const y = (e.clientY - top) / height;
+    setZoomPosition({ x, y });
+  };
 
+  // ---------- Loading States ----------
   if (authLoading || prodLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
@@ -101,7 +111,7 @@ export default function ProductDetailPage() {
           className="w-20 h-20 border-t-4 border-b-4 border-yellow-400 border-solid rounded-full"
         />
       </div>
-    )
+    );
   }
 
   if (!product) {
@@ -109,10 +119,29 @@ export default function ProductDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black text-yellow-100">
         <p className="text-3xl font-semibold">Product not found</p>
       </div>
-    )
+    );
   }
 
-  const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg"
+  // MAIN Image
+  const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg";
+  
+  // ---------- STOCK LOGIC ----------
+  const stock = product.stock ?? 0;  // fallback
+  const isOutOfStock = stock <= 0;
+
+  // ---------- QUANTITY Input Handler ----------
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (val > stock) {
+      // clamp to stock if user tries to exceed
+      setQuantity(stock);
+    } else if (val < 1) {
+      // clamp min to 1
+      setQuantity(1);
+    } else {
+      setQuantity(val);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-yellow-100 p-8">
@@ -133,12 +162,18 @@ export default function ProductDetailPage() {
               onMouseLeave={() => setIsZoomed(false)}
             >
               <Image
-                src={mainImage || "/placeholder.svg"}
+                src={mainImage}
                 alt={product.name}
                 layout="fill"
                 objectFit="cover"
                 className={`transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
-                style={isZoomed ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` } : undefined}
+                style={
+                  isZoomed
+                    ? {
+                        transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%`,
+                      }
+                    : undefined
+                }
               />
             </div>
             {product.images && product.images.length > 1 && (
@@ -184,11 +219,57 @@ export default function ProductDetailPage() {
             >
               ${product.price.toFixed(2)}
             </motion.p>
-            {product.category && (
+
+            {/* ---------- STOCK DISPLAY ---------- */}
+            {isOutOfStock ? (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-red-500 font-semibold text-lg"
+              >
+                Out of Stock
+              </motion.p>
+            ) : (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-green-400 text-lg"
+              >
+                In Stock: {stock}
+              </motion.p>
+            )}
+
+            {/* OPTIONAL: Quantity Input if there's stock */}
+            {!isOutOfStock && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="flex items-center space-x-2"
+              >
+                <label htmlFor="quantity" className="text-yellow-100 text-lg">
+                  Quantity:
+                </label>
+                <input
+                  id="quantity"
+                  type="number"
+                  min={1}
+                  max={stock}
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  className="w-16 p-2 bg-gray-800 border border-gray-600 rounded text-center text-yellow-100"
+                />
+              </motion.div>
+            )}
+
+            {/* Category, Description, Features */}
+            {product.category && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
                 className="text-gray-400 text-lg"
               >
                 Category: {product.category}
@@ -198,7 +279,7 @@ export default function ProductDetailPage() {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
                 className="text-gray-200 text-xl font-serif italic leading-relaxed"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
@@ -209,7 +290,7 @@ export default function ProductDetailPage() {
               <motion.ul
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
                 className="list-none space-y-2 text-gray-300"
               >
                 {product.features.map((feature, index) => (
@@ -220,7 +301,10 @@ export default function ProductDetailPage() {
                 ))}
               </motion.ul>
             )}
+
+            {/* Action Buttons */}
             <div className="flex space-x-4">
+              {/* If stock is 0, disable add to cart */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -230,14 +314,23 @@ export default function ProductDetailPage() {
                     name: product.name,
                     price: product.price,
                     image: mainImage,
-                    quantity: 1,
+                    // Use selected quantity
+                    quantity,
                   })
                 }
-                className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-yellow-500 text-black rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                disabled={isOutOfStock}
+                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300
+                  ${
+                    isOutOfStock
+                      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
+                  }
+                `}
               >
                 <ShoppingCart size={24} />
-                <span className="text-lg">Add to Cart</span>
+                <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
               </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -267,7 +360,9 @@ export default function ProductDetailPage() {
             Customer Reviews
           </h2>
           {reviews.length === 0 ? (
-            <p className="text-gray-400 text-xl italic">No reviews yet. Be the first to review this product!</p>
+            <p className="text-gray-400 text-xl italic">
+              No reviews yet. Be the first to review this product!
+            </p>
           ) : (
             <div className="space-y-8">
               {reviews.map((r, index) => (
@@ -285,7 +380,9 @@ export default function ProductDetailPage() {
                     <div className="flex-grow">
                       <div className="flex justify-between items-center mb-2">
                         <p className="text-yellow-200 font-semibold text-lg">{r.username}</p>
-                        <p className="text-sm text-gray-500">{r.createdAt?.toDate?.().toLocaleDateString()}</p>
+                        <p className="text-sm text-gray-500">
+                          {r.createdAt?.toDate?.().toLocaleDateString()}
+                        </p>
                       </div>
                       <div className="flex items-center mb-3">
                         {[...Array(5)].map((_, i) => (
@@ -368,6 +465,5 @@ export default function ProductDetailPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
-

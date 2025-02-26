@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   orderBy,
   Timestamp,
+  increment,
 
 } from "firebase/firestore";
 import { firestore } from "./firebaseConfig";
@@ -198,6 +199,13 @@ export const placeOrder = async (orderData: OrderData) => {
     status: orderData.status || "Pending",
     createdAt: serverTimestamp(),
   });
+    for (const item of orderData.items) {
+    const productDocRef = doc(firestore, "products", item.productId);
+    await updateDoc(productDocRef, {
+      // Subtract the ordered quantity from stock
+      stock: increment(-item.quantity),
+    });
+  }
 
   return docRef.id; // the newly created order's ID
 };
