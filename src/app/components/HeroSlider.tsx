@@ -56,7 +56,7 @@ const HeroSlider = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className="w-max h-full flex transition-transform duration-1000 ease-out"
+        className="w-max h-full flex transition-transform duration-400 ease-out"
         style={{ transform: `translateX(-${current * 100}vw)` }}
       >
         {slides.map((slide) => (

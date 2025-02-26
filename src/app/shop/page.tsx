@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Search, Filter, X, Gem, Grid3X3, List, Star, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, Filter, X, Gem, Grid3X3, List, Star} from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 // Firestore function to get all collections
@@ -198,12 +198,12 @@ export default function CollectionsPage() {
 
             <div className="flex items-center gap-4">
               <Link
-                href={`/products?category=${encodeURIComponent(collection.name)}`}
+                href={`/product?category=${encodeURIComponent(collection.name)}`}
                 className="inline-block px-6 py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg transition"
               >
                 Explore Collection
               </Link>
-              <button
+              {/* <button
                   type="button"
                   title={isActive ? "Show less information" : "Show more information"}
                   onClick={toggleActive}
@@ -211,7 +211,7 @@ export default function CollectionsPage() {
               >
                 {isActive ? "Less Info" : "More Info"}
                 {isActive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
+              </button> */}
             </div>
 
             <AnimatePresence>

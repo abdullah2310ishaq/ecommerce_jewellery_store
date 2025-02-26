@@ -64,14 +64,14 @@ const ProductCard = ({ product }: { product: Product }) => {
         <p className="font-semibold text-2xl mt-1 text-yellow-300">${product.price.toFixed(2)}</p>
 
         {/* Description Preview */}
-        <motion.p
+        {/* <motion.p
           className="text-gray-300 text-sm line-clamp-2"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? "auto" : 0 }}
           transition={{ duration: 0.3 }}
         >
           {product.description || "No description available."}
-        </motion.p>
+        </motion.p> */}
 
         {/* Action Button */}
         <motion.div
