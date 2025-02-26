@@ -7,13 +7,13 @@ import { googleSignIn } from "@/app/firebase/firebase_services/firebaseAuth";
 import Particles from "react-particles";
 import { loadFull } from "tsparticles";
 import type { Engine } from "tsparticles-engine";
-
+import {useRouter} from "next/navigation";
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [particlesLoaded, setParticlesLoaded] = useState(false);
-
+const router = useRouter();
   const particlesInit = async (engine: Engine) => {
     await loadFull(engine);
   };
@@ -24,7 +24,7 @@ export default function AuthForm() {
       setError("");
       const user = await googleSignIn();
       console.log(`${isLogin ? "Signed in" : "Signed up"} with Google as:`, user.email);
-      // Handle successful auth (e.g., redirect or update UI)
+      router.push("/home");
     } catch (err) {
       console.error("Google auth error:", err);
       setError(`Failed to ${isLogin ? "sign in" : "sign up"} with Google. Please try again.`);
@@ -198,12 +198,22 @@ export default function AuthForm() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-              <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-yellow-400 hover:text-yellow-300 transition duration-300 text-lg"
-              >
-                {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
-              </button>
+          <button
+  onClick={() => setIsLogin(!isLogin)}
+  className="text-yellow-400 hover:text-yellow-300 transition duration-300 text-lg"
+>
+  {isLogin ? (
+    <>
+      Need an account? <span className="text-white">Sign Up</span>
+    </>
+  ) : (
+    <>
+      Already have an account? <span className="text-white">Sign In</span>
+    </>
+  )}
+</button>
+
+
             </motion.div>
           </div>
 
@@ -213,7 +223,7 @@ export default function AuthForm() {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="px-8 pb-8 pt-0 sm:px-12 sm:pb-12 text-center"
           >
-            <p className="text-gray-400 text-sm">
+            {/* <p className="text-gray-400 text-sm">
               By {isLogin ? "signing in" : "signing up"}, you agree to our{" "}
               <a href="#" className="text-yellow-400 hover:text-yellow-300 transition duration-300">
                 Terms of Service
@@ -222,7 +232,7 @@ export default function AuthForm() {
               <a href="#" className="text-yellow-400 hover:text-yellow-300 transition duration-300">
                 Privacy Policy
               </a>
-            </p>
+            </p> */}
           </motion.div>
         </div>
       </motion.div>
