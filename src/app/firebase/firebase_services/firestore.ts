@@ -38,7 +38,7 @@ export interface ProductData {
   // which collection this product belongs to
   collectionId: string;
   isBestSeller?: boolean;
-  // Add more fields if needed (stock, rating, createdAt, etc.)
+  stock:number;
 }
 
 /** Represents a user's order */
@@ -94,14 +94,15 @@ export const getAllProducts = async () => {
 
   return snapshot.docs.map(doc => {
     const data = doc.data();
-    // Make sure data.images is an array or fallback to []
     return {
       id: doc.id,
       name: data.name,
-      price: data.price,
+      description: data.description ?? "",
+      price: data.price ?? 0,
       images: Array.isArray(data.images) ? data.images : [],
-      rating: data.rating,
-      isOnSale: data.isOnSale,
+      collectionId: data.collectionId ?? "",
+      isBestSeller: data.isBestSeller ?? false,
+      stock: data.stock ?? 0,  // <-- retrieve or fallback
     };
   });
 };
@@ -148,14 +149,21 @@ export const deleteCollectionById = async (collectionId: string) => {
 /** Create a new product (admin) */
 export const createProduct = async (data: ProductData) => {
   const prodRef = collection(firestore, "products");
-  const docRef = await addDoc(prodRef, data);
-  return docRef.id; // returns the new doc ID
+  // fallback if not provided
+  const docRef = await addDoc(prodRef, {
+    ...data,
+    stock: data.stock ?? 0, // ensure 'stock' is saved
+  });
+  return docRef.id;
 };
-
 /** Update an existing product (admin) */
 export const updateProduct = async (productId: string, data: Partial<ProductData>) => {
   const prodDocRef = doc(firestore, "products", productId);
-  await updateDoc(prodDocRef, data);
+  // fallback if not provided
+  await updateDoc(prodDocRef, {
+    ...data,
+    stock: data.stock ?? 0,
+  });
 };
 
 /** Delete a product by ID (admin) */

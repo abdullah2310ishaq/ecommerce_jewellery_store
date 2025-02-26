@@ -23,17 +23,19 @@ interface FirestoreProduct {
   name: string;
   description?: string;
   price: number;
-  images: string[];      // MULTIPLE IMAGES
+  images: string[];
   collectionId?: string;
   isBestSeller?: boolean;
+  stock: number;                // <-- NEW FIELD
 }
 
 interface ProductFormData {
   name: string;
   description: string;
   price: number;
-  images: string[];      // MULTIPLE IMAGES
+  images: string[];
   collectionId: string;
+  stock: number;                // <-- NEW FIELD
 }
 
 // ---------- COLLECTION INTERFACES ----------
@@ -60,11 +62,10 @@ export default function AdminPage() {
     price: 0,
     images: [],
     collectionId: "",
+    stock: 0, // default
   });
-  // Text area for images (multiline input)
   const [newProductImagesText, setNewProductImagesText] = useState<string>("");
 
-  // Editing product
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editingProductData, setEditingProductData] = useState<ProductFormData>({
     name: "",
@@ -72,8 +73,8 @@ export default function AdminPage() {
     price: 0,
     images: [],
     collectionId: "",
+    stock: 0,
   });
-  // Text area for the editing product’s images
   const [editingImagesText, setEditingImagesText] = useState<string>("");
 
   // ============ STATE: COLLECTIONS ============
@@ -83,7 +84,6 @@ export default function AdminPage() {
     description: "",
     image: "",
   });
-  // Editing collection
   const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
   const [editingCollectionData, setEditingCollectionData] = useState<CollectionFormData>({
     name: "",
@@ -110,7 +110,7 @@ export default function AdminPage() {
   // ============ PRODUCT HANDLERS ===========
   // =========================================
 
-  // Handle form input for new product
+  /** Handle form input for new product */
   const handleNewProductChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -125,23 +125,22 @@ export default function AdminPage() {
     setNewProductImagesText(e.target.value);
   };
 
-  // Create product
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Convert the multiline text into an array of URLs
+      // Convert multiline text into array
       const imagesArray = newProductImagesText
-        .split("\n")           // split by new lines
-        .map(url => url.trim()) // trim spaces
-        .filter(url => url);    // remove any empty lines
+        .split("\n")
+        .map(url => url.trim())
+        .filter(url => url);
 
-      // Convert price to number, and set images array
+      // Create product with stock
       const createdId = await createProduct({
         ...newProduct,
         price: Number(newProduct.price),
+        stock: Number(newProduct.stock), // ensure numeric
         images: imagesArray,
       });
-
       alert(`Product created with ID: ${createdId}`);
 
       // Re-fetch products
@@ -155,30 +154,29 @@ export default function AdminPage() {
         price: 0,
         images: [],
         collectionId: "",
+        stock: 0,
       });
-      setNewProductImagesText(""); // clear image text area
+      setNewProductImagesText("");
     } catch (error) {
       console.error("Error creating product:", error);
     }
   };
 
-  // Start editing a product
   const startEditingProduct = (product: FirestoreProduct) => {
     setEditingProductId(product.id);
-    // convert images array to multiline string
-    const imagesText = product.images?.join("\n") || "";
+    const imagesText = product.images.join("\n");
 
     setEditingProductData({
       name: product.name,
       description: product.description || "",
-      price: product.price || 0,
-      images: product.images || [],
+      price: product.price,
+      images: product.images,
       collectionId: product.collectionId || "",
+      stock: product.stock,
     });
     setEditingImagesText(imagesText);
   };
 
-  // Handle editing form input
   const handleEditProductChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -186,19 +184,16 @@ export default function AdminPage() {
     setEditingProductData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle the separate text area for editing multiple images
   const handleEditProductImagesTextChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     setEditingImagesText(e.target.value);
   };
 
-  // Update product
   const handleUpdateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProductId) return;
     try {
-      // Convert multiline text to an array
       const imagesArray = editingImagesText
         .split("\n")
         .map(url => url.trim())
@@ -207,15 +202,16 @@ export default function AdminPage() {
       await updateProduct(editingProductId, {
         ...editingProductData,
         price: Number(editingProductData.price),
+        stock: Number(editingProductData.stock),
         images: imagesArray,
       });
       alert(`Product updated: ${editingProductId}`);
 
-      // Refresh product list
+      // Refresh
       const prodData = await getAllProducts();
       setProducts(prodData as FirestoreProduct[]);
 
-      // Clear editing state
+      // Clear editing
       setEditingProductId(null);
       setEditingImagesText("");
     } catch (error) {
@@ -223,14 +219,11 @@ export default function AdminPage() {
     }
   };
 
-  // Delete product
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       await deleteProduct(productId);
       alert(`Product deleted: ${productId}`);
-
-      // Refresh product list
       const prodData = await getAllProducts();
       setProducts(prodData as FirestoreProduct[]);
     } catch (error) {
@@ -238,13 +231,10 @@ export default function AdminPage() {
     }
   };
 
-  // Toggle product best seller
   const handleToggleBestSeller = async (productId: string, isBestSeller: boolean) => {
     try {
       await toggleBestSeller(productId, !isBestSeller);
-      alert(`Product ${productId} updated isBestSeller -> ${!isBestSeller}`);
-
-      // Update local state
+      alert(`Product ${productId} updated: isBestSeller -> ${!isBestSeller}`);
       setProducts((prev) =>
         prev.map((p) =>
           p.id === productId ? { ...p, isBestSeller: !isBestSeller } : p
@@ -259,7 +249,6 @@ export default function AdminPage() {
   // ========== COLLECTION HANDLERS ==========
   // =========================================
 
-  // Handle form input for new collection
   const handleNewCollectionChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -267,29 +256,19 @@ export default function AdminPage() {
     setNewCollection((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Create collection
   const handleCreateCollection = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const createdId = await createCollection(newCollection);
       alert(`Collection created with ID: ${createdId}`);
-
-      // Re-fetch collections
       const collData = await getAllCollections();
       setCollections(collData as FirestoreCollection[]);
-
-      // Reset form
-      setNewCollection({
-        name: "",
-        description: "",
-        image: "",
-      });
+      setNewCollection({ name: "", description: "", image: "" });
     } catch (error) {
       console.error("Error creating collection:", error);
     }
   };
 
-  // Start editing a collection
   const startEditingCollection = (collection: FirestoreCollection) => {
     setEditingCollectionId(collection.id);
     setEditingCollectionData({
@@ -299,7 +278,6 @@ export default function AdminPage() {
     });
   };
 
-  // Handle editing form input for collection
   const handleEditCollectionChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -307,33 +285,25 @@ export default function AdminPage() {
     setEditingCollectionData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Update collection
   const handleUpdateCollectionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCollectionId) return;
     try {
       await updateCollection(editingCollectionId, editingCollectionData);
       alert(`Collection updated: ${editingCollectionId}`);
-
-      // Refresh collection list
       const collData = await getAllCollections();
       setCollections(collData as FirestoreCollection[]);
-
-      // Clear editing state
       setEditingCollectionId(null);
     } catch (error) {
       console.error("Error updating collection:", error);
     }
   };
 
-  // Delete collection
   const handleDeleteCollection = async (collectionId: string) => {
     if (!confirm("Are you sure you want to delete this collection?")) return;
     try {
       await deleteCollectionById(collectionId);
       alert(`Collection deleted: ${collectionId}`);
-
-      // Refresh collection list
       const collData = await getAllCollections();
       setCollections(collData as FirestoreCollection[]);
     } catch (error) {
@@ -341,12 +311,10 @@ export default function AdminPage() {
     }
   };
 
-  // Toggle collection featured
   const handleToggleFeaturedCollection = async (collectionId: string, isFeatured: boolean) => {
     try {
       await toggleFeaturedCollection(collectionId, !isFeatured);
       alert(`Collection ${collectionId} updated isFeatured -> ${!isFeatured}`);
-
       setCollections((prev) =>
         prev.map((c) =>
           c.id === collectionId ? { ...c, isFeatured: !isFeatured } : c
@@ -376,6 +344,7 @@ export default function AdminPage() {
             </p>
           ) : (
             <form onSubmit={handleCreateProduct} className="flex flex-col gap-2">
+              {/* Name */}
               <input
                 type="text"
                 name="name"
@@ -385,6 +354,7 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
+              {/* Description */}
               <textarea
                 name="description"
                 placeholder="Description (optional)"
@@ -392,6 +362,7 @@ export default function AdminPage() {
                 onChange={handleNewProductChange}
                 className="border p-2 rounded"
               />
+              {/* Price */}
               <input
                 type="number"
                 name="price"
@@ -401,8 +372,18 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
+              {/* Stock */}
+              <input
+                type="number"
+                name="stock"
+                placeholder="Stock Quantity"
+                value={newProduct.stock}
+                onChange={handleNewProductChange}
+                className="border p-2 rounded"
+                required
+              />
 
-              {/* MULTILINE input for multiple image URLs */}
+              {/* MULTILINE input for images */}
               <label className="text-sm font-medium">Image URLs (one per line)</label>
               <textarea
                 placeholder="Enter each image URL on its own line"
@@ -411,6 +392,7 @@ export default function AdminPage() {
                 className="border p-2 rounded h-24"
               />
 
+              {/* Collection Select */}
               <select
                 name="collectionId"
                 value={newProduct.collectionId}
@@ -446,10 +428,7 @@ export default function AdminPage() {
                 <div key={product.id} className="border p-2 rounded">
                   {editingProductId === product.id ? (
                     // EDIT FORM
-                    <form
-                      onSubmit={handleUpdateProductSubmit}
-                      className="flex flex-col gap-2"
-                    >
+                    <form onSubmit={handleUpdateProductSubmit} className="flex flex-col gap-2">
                       <input
                         type="text"
                         name="name"
@@ -468,6 +447,15 @@ export default function AdminPage() {
                         type="number"
                         name="price"
                         value={editingProductData.price}
+                        onChange={handleEditProductChange}
+                        className="border p-1 rounded"
+                        required
+                      />
+                      {/* Stock */}
+                      <input
+                        type="number"
+                        name="stock"
+                        value={editingProductData.stock}
                         onChange={handleEditProductChange}
                         className="border p-1 rounded"
                         required
@@ -518,6 +506,9 @@ export default function AdminPage() {
                       <div className="font-semibold">
                         {product.name} – ${product.price}
                       </div>
+                      <p className="text-sm text-gray-500">
+                        Stock: {product.stock}
+                      </p>
 
                       {/* Show multiple images */}
                       {product.images && product.images.length > 0 && (
@@ -542,16 +533,11 @@ export default function AdminPage() {
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() =>
-                            handleToggleBestSeller(
-                              product.id,
-                              product.isBestSeller || false
-                            )
+                            handleToggleBestSeller(product.id, product.isBestSeller || false)
                           }
                           className="bg-yellow-500 text-white p-1 rounded"
                         >
-                          {product.isBestSeller
-                            ? "Remove Best Seller"
-                            : "Mark Best Seller"}
+                          {product.isBestSeller ? "Remove Best Seller" : "Mark Best Seller"}
                         </button>
                         <button
                           onClick={() => startEditingProduct(product)}
@@ -628,7 +614,10 @@ export default function AdminPage() {
                 <div key={collection.id} className="border p-2 rounded">
                   {editingCollectionId === collection.id ? (
                     // EDIT COLLECTION FORM
-                    <form onSubmit={handleUpdateCollectionSubmit} className="flex flex-col gap-2">
+                    <form
+                      onSubmit={handleUpdateCollectionSubmit}
+                      className="flex flex-col gap-2"
+                    >
                       <input
                         type="text"
                         name="name"
@@ -650,7 +639,6 @@ export default function AdminPage() {
                         onChange={handleEditCollectionChange}
                         className="border p-1 rounded"
                       />
-
                       <div className="flex gap-2">
                         <button
                           type="submit"
@@ -687,7 +675,6 @@ export default function AdminPage() {
                       ) : (
                         <p className="text-gray-500 text-sm">Not Featured</p>
                       )}
-
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() =>
