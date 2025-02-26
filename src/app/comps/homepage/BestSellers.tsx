@@ -149,7 +149,7 @@ export default function BestSellers() {
         {/* View All Button */}
         <div className="text-center mt-16">
           <Link
-            href="/shop"
+            href="/product"
             className="inline-flex items-center px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-full font-medium tracking-wide transition-colors group"
           >
             View All Products

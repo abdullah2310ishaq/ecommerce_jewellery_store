@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+"use client";
 
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Slide Data
 const slides = [
   {
     id: 1,
@@ -50,78 +54,98 @@ const HeroSlider = () => {
   };
 
   return (
-    <div 
+    <div
       className="relative h-[calc(100vh-80px)] overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className="w-max h-full flex transition-transform duration-400 ease-out"
-        style={{ transform: `translateX(-${current * 100}vw)` }}
-      >
-        {slides.map((slide) => (
-          <div className="relative w-screen h-full" key={slide.id}>
-            {/* Full-screen image */}
-            <div className="absolute inset-0">
-              <Image
-                src={slide.img}
-                alt={slide.title}
-                fill
-                priority
-                className="object-cover brightness-75"
-              />
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-            </div>
+      <AnimatePresence mode="wait">
+        {slides.map(
+          (slide, index) =>
+            index === current && (
+              <motion.div
+                key={slide.id}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+                className="absolute inset-0 w-full h-full"
+              >
+                {/* Background Image */}
+                <div className="absolute inset-0">
+                  <Image
+                    src={slide.img}
+                    alt={slide.title}
+                    fill
+                    priority
+                    className="object-cover brightness-75"
+                  />
+                  {/* Dark Overlay for Text Contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+                </div>
 
-            {/* Content overlay */}
-            <div className="relative h-full flex flex-col items-center justify-center text-center px-6 md:px-12">
-              <div className="max-w-4xl space-y-6 transform translate-y-12">
-                <h2 className="text-xl md:text-2xl text-yellow-300 font-light tracking-wider">
-                  {slide.description}
-                </h2>
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
-                  {slide.title}
-                </h1>
-                <Link href={slide.url}>
-                <button className="mt-8 px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-lg font-medium tracking-wide transition">
-                  Explore Collection
-              </button>
+                {/* Slide Content */}
+                <div className="relative h-full flex flex-col items-center justify-center text-center px-6 md:px-12">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                    className="max-w-4xl space-y-6 transform translate-y-12"
+                  >
+                    <h2 className="text-xl md:text-2xl text-yellow-300 font-light tracking-wider">
+                      {slide.description}
+                    </h2>
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
+                      {slide.title}
+                    </h1>
+                    <Link href={slide.url}>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="mt-8 px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-lg font-medium tracking-wide transition"
+                      >
+                        Explore Collection
+                      </motion.button>
+                    </Link>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )
+        )}
+      </AnimatePresence>
 
-                </Link>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Navigation arrows */}
-      <button
+      {/* Navigation Arrows */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={handlePrevious}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all transform hover:scale-110"
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all"
       >
         <ChevronLeft className="w-8 h-8" />
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all transform hover:scale-110"
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all"
       >
         <ChevronRight className="w-8 h-8" />
-      </button>
+      </motion.button>
 
-      {/* Dot indicators */}
+      {/* Dot Indicators */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
         {slides.map((_, index) => (
-          <button
-          key={index}
-          onClick={() => setCurrent(index)}
-          className={`w-4 h-4 rounded-full transition-all duration-300 ${
-            current === index 
-              ? "bg-yellow-500" 
-              : "bg-white/50 hover:bg-white/80"
-          }`}
-        />
-        
+          <motion.button
+            key={index}
+            onClick={() => setCurrent(index)}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            className={`w-4 h-4 rounded-full transition-all duration-300 ${
+              current === index
+                ? "bg-yellow-500 scale-125 shadow-lg"
+                : "bg-white/50 hover:bg-white/80"
+            }`}
+          />
         ))}
       </div>
     </div>
