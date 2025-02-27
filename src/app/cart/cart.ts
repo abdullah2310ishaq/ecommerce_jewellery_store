@@ -1,5 +1,7 @@
 // cart/cart.ts
 
+import Swal from "sweetalert2";
+
 export interface CartItem {
     id: string;
     name: string;
@@ -42,9 +44,13 @@ export interface CartItem {
     localStorage.setItem("myCart", JSON.stringify(existingCart));
   
     // ✅ Call the toast function if provided
-    if (toastHandler) {
-      toastHandler(`${item.name} x${item.quantity} added to cart!`);
-    }
+    Swal.fire({
+      title: "Added to Cart!",
+      text: `${item.name} x${item.quantity} added to cart!`,
+      icon: "success",
+      confirmButtonText: "OK",
+    });
+    
   }
   
   /** Update cart item quantity */
@@ -63,18 +69,25 @@ export interface CartItem {
     localStorage.setItem("myCart", JSON.stringify(existingCart));
   
     // ✅ Call the toast function if provided
-    if (toastHandler) {
-      toastHandler("Cart updated successfully!");
-    }
+    Swal.fire({
+      title: "Cart Updated!",
+      text: "Cart updated successfully!",
+      icon: "success",
+      confirmButtonText: "OK",
+    });
+    
   }
   
   /** Clear the entire cart */
   export function clearCart(toastHandler?: (message: string) => void) {
     localStorage.removeItem("myCart");
   
-    // ✅ Call the toast function if provided
-    if (toastHandler) {
-      toastHandler("Cart has been cleared.");
-    }
+    Swal.fire({
+      title: "Cart Cleared!",
+      text: "Your cart has been cleared.",
+      icon: "info",
+      confirmButtonText: "OK",
+    });
+    
   }
   

@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Swal from "sweetalert2";
+
 
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -94,10 +96,22 @@ export default function ProductDetailPage() {
       setReviews(updated as ReviewData[]);
       setReviewForm({ rating: 5, comment: "" });
 
-      toast.success("Review submitted successfully!");
+      Swal.fire({
+        title: "Success!",
+        text: "Review submitted successfully!",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+      
     } catch (err) {
       console.error("Error adding review:", err);
-      toast.error("Failed to submit review. Try again!");
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to submit review. Try again!",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      
     }
   }
 
@@ -319,7 +333,7 @@ export default function ProductDetailPage() {
         image: mainImage,
         quantity,
       },
-      (message) => toast.success(message) // ✅ Pass toast handler
+      (message) => Swal.fire(message) // ✅ Pass toast handler
     );
   }}
   disabled={isOutOfStock}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { placeOrder } from "../firebase/firebase_services/firestore";
 import { CartItem, getCart, updateCartItem, clearCart } from "./cart";
 import {useToast} from "vyrn";
+import Swal from "sweetalert2";
 export default function CartPage() {
   const router = useRouter();
 
@@ -41,7 +42,13 @@ const toast = useToast();
 
   async function handlePlaceOrder() {
     if (!name || !email || !phone || !address) {
-      toast.warning("Please fill in all fields");
+      Swal.fire({
+        title: "Warning!",
+        text: "Please fill in all fields.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      
       return;
     }
 
@@ -60,14 +67,24 @@ const toast = useToast();
         totalAmount,
       };
       const orderId = await placeOrder(orderData);
-      toast.success(`Order placed successfully! Order ID: ${orderId}`);
-      clearCart();
+      Swal.fire({
+        title: "Order Placed!",
+        text: `Order placed successfully! Order ID: ${orderId}`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+       clearCart();
       setCartItems([]);
       // router.push("/thank-you?orderId=" + orderId); // Optional navigation
     } catch (error) {
       console.error("Error placing order:", error);
-      toast.error("Failed to place order. Please try again.");
-    }
+    Swal.fire({
+  title: "Error!",
+  text: "Failed to place order. Please try again.",
+  icon: "error",
+  confirmButtonText: "OK",
+});
+}
   }
 
   // If cart is empty, show a friendly empty state
