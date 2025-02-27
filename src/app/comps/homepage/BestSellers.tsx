@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sparkles, ShoppingCart, Eye, ArrowRight } from "lucide-react";
+import { Sparkles, Eye, ArrowRight } from "lucide-react";
 import { getBestSellers } from "../../firebase/firebase_services/firestore";
 
 interface FirestoreProduct {

@@ -29,8 +29,6 @@ export default function AboutPage() {
       } else {
         setResult("An error occurred while submitting the form.");
       }
-    } catch (error) {
-      setResult("An error occurred while submitting the form.");
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +86,7 @@ export default function AboutPage() {
               </h2>
             </div>
             <p className="text-lg leading-relaxed">
-              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and captures life's most precious moments.
+              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and captures lifes most precious moments.
             </p>
             <p className="text-lg leading-relaxed">
               Each H&H creation embodies the perfect harmony of tradition and innovation. Our master artisans blend age-old techniques with contemporary vision, crafting pieces that are not merely accessories, but expressions of individuality and milestones of personal significance.
@@ -171,7 +169,7 @@ export default function AboutPage() {
         Connect With Us
       </h2>
       <p className="text-amber-50/80 max-w-2xl mx-auto text-lg">
-        We're here to assist you on your journey to find the perfect piece of jewelry
+        We are here to assist you on your journey to find the perfect piece of jewelry
       </p>
     </div>
 

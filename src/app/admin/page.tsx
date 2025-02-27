@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -108,7 +109,7 @@ useEffect(() => {
   } else {
     router.push("/admin/loggin");
   }
-}, []);
+}, [router]);
 
 // 2️⃣ Hook to fetch data (ALWAYS declared, but conditionally does work)
 useEffect(() => {

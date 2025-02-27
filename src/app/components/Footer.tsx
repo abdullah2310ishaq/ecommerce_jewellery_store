@@ -9,9 +9,7 @@ import {
   Mail,
   MapPin,
   ChevronRight,
-  Award,
-  Gem,
-  Star,
+ 
   ArrowUp
 } from "lucide-react";
 

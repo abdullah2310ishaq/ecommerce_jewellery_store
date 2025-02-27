@@ -24,7 +24,7 @@ const itemsPerPage = 6
 
 export default function ProductList({ products }: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  const [hasLoaded, setHasLoaded] = useState(false)
+  const [ setHasLoaded] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")

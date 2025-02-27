@@ -30,7 +30,7 @@ export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [activeCollection, setActiveCollection] = useState<string | null>(null)
+  const [activeCollection] = useState<string | null>(null)
 
   // New state for animation
   const [isLoading, setIsLoading] = useState(true)
@@ -101,9 +101,7 @@ export default function CollectionsPage() {
   }) => {
     const isActive = activeCollection === collection.id
 
-    const toggleActive = () => {
-      setActiveCollection(isActive ? null : collection.id)
-    }
+ 
 
     if (mode === "grid") {
       return (
