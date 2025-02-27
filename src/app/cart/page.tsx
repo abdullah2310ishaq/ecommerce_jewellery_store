@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../firebase/firebase_services/firestore";
 import { CartItem, getCart, updateCartItem, clearCart } from "./cart";
-import {useToast} from "vyrn";
+
 import Swal from "sweetalert2";
 export default function CartPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-const toast = useToast();
+
   // Load cart items on mount
   useEffect(() => {
     setCartItems(getCart());

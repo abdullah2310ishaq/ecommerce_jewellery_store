@@ -17,7 +17,7 @@ import type { Timestamp } from "firebase/firestore";
 import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
 
 
-import { useToast } from "vyrn";
+
 import { addToCart } from "@/app/cart/cart";
 
 interface FirestoreProduct {
@@ -44,8 +44,7 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
 
-  // 2️⃣ Initialize the toast
-  const toast  = useToast();
+
 
   const [product, setProduct] = useState<FirestoreProduct | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
