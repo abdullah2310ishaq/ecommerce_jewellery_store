@@ -48,10 +48,18 @@ export default function NavbarSearchDropdown() {
           where("name", "<=", searchQuery + "\uf8ff")
         );
         const snapshot = await getDocs(qSearch);
-        const productList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Product),
-        }));
+
+        // Omit `id` from doc.data() (if it exists) to avoid duplication 
+        // and use doc.id from Firestore as the primary ID.
+        const productList = snapshot.docs.map((doc) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id: _unused, ...productData } = doc.data() as Product;
+          return {
+            id: doc.id,
+            ...productData,
+          };
+        });
+
         setResults(productList);
       } catch (error) {
         console.error("Error fetching search results:", error);
@@ -60,6 +68,7 @@ export default function NavbarSearchDropdown() {
         setLoading(false);
       }
     }
+
     fetchData();
   }, [searchQuery]);
 
@@ -89,7 +98,10 @@ export default function NavbarSearchDropdown() {
   // Outside click detection
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         closeDropdown();
       }
     }
@@ -121,7 +133,10 @@ export default function NavbarSearchDropdown() {
           >
             {/* Top bar with close button */}
             <div className="flex justify-end p-2 border-b border-gray-700">
-              <button onClick={closeDropdown} className="text-gray-400 hover:text-yellow-400">
+              <button
+                onClick={closeDropdown}
+                className="text-gray-400 hover:text-yellow-400"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
