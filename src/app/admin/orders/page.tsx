@@ -17,7 +17,7 @@ interface OrderDoc {
   }[];
   totalAmount: number;
   status: string;
-  createdAt?: date; // if we stored serverTimestamp
+  createdAt?: Date; // if we stored serverTimestamp
 }
 
 export default function AdminOrdersPage() {
