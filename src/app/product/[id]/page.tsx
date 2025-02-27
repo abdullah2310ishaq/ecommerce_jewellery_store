@@ -4,8 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Swal from "sweetalert2";
-
+import Swal, { SweetAlertOptions } from "sweetalert2";
 
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -15,8 +14,6 @@ import {
 } from "@/app/firebase/firebase_services/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
-
-
 
 import { addToCart } from "@/app/cart/cart";
 
@@ -44,8 +41,6 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
 
-
-
   const [product, setProduct] = useState<FirestoreProduct | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
@@ -62,7 +57,8 @@ export default function ProductDetailPage() {
     async function fetchData() {
       try {
         setProdLoading(true);
-        const resolvedId = Array.isArray(id) ? id[0] : id;
+        // Resolve id (if it's an array, take the first element) and assert it is a string.
+        const resolvedId = Array.isArray(id) ? id[0] : id!;
         const prod = await getProductById(resolvedId);
         if (prod) {
           setProduct(prod as FirestoreProduct);
@@ -101,7 +97,6 @@ export default function ProductDetailPage() {
         icon: "success",
         confirmButtonText: "OK",
       });
-      
     } catch (err) {
       console.error("Error adding review:", err);
       Swal.fire({
@@ -110,7 +105,6 @@ export default function ProductDetailPage() {
         icon: "error",
         confirmButtonText: "OK",
       });
-      
     }
   }
 
@@ -320,32 +314,31 @@ export default function ProductDetailPage() {
 
             {/* Add to Cart Button */}
             <div className="flex space-x-4">
-            <motion.button
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  onClick={() => {
-    addToCart(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: mainImage,
-        quantity,
-      },
-      (message) => Swal.fire(message) // ✅ Pass toast handler
-    );
-  }}
-  disabled={isOutOfStock}
-  className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
-    isOutOfStock
-      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-      : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
-  }`}
->
-  <ShoppingCart size={24} />
-  <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
-</motion.button>
-
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  addToCart(
+                    {
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: mainImage,
+                      quantity,
+                    },
+                    (message: SweetAlertOptions) => Swal.fire(message)
+                  );
+                }}
+                disabled={isOutOfStock}
+                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  isOutOfStock
+                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
+                }`}
+              >
+                <ShoppingCart size={24} />
+                <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
+              </motion.button>
             </div>
           </div>
         </motion.div>
@@ -447,9 +440,7 @@ export default function ProductDetailPage() {
                 <textarea
                   id="comment"
                   value={reviewForm.comment}
-                  onChange={(e) =>
-                    setReviewForm({ ...reviewForm, comment: e.target.value })
-                  }
+                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                   className="w-full p-3 bg-gray-700 rounded-lg text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-600 text-lg"
                   placeholder="Share your thoughts about this product..."
                   rows={4}
