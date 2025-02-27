@@ -1,58 +1,53 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import ProductCard from "./ProductCard"
-import Pagination from "./Pagination"
-import { ChevronDown, ChevronUp, Filter, Grid, List } from "lucide-react"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ProductCard from "./ProductCard";
+import Pagination from "./Pagination";
+import { ChevronDown, ChevronUp, Filter, Grid, List } from "lucide-react";
 
 export interface Product {
-  id: string
-  name: string
-  price: number
-  images?: string[]
-  rating?: number
-  isOnSale?: boolean
-  category?: string
+  id: string;
+  name: string;
+  price: number;
+  images?: string[];
+  rating?: number;
+  isOnSale?: boolean;
+  category?: string;
 }
 
 interface ProductListProps {
-  products: Product[]
+  products: Product[];
 }
 
-const itemsPerPage = 6
+const itemsPerPage = 6;
 
 export default function ProductList({ products }: ProductListProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [ setHasLoaded] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
-  const [filterCategory, setFilterCategory] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
-  useEffect(() => {
-    setHasLoaded(true)
-  }, [])
-
-  const categories = Array.from(new Set(products.map((p) => p.category)))
+  const categories = Array.from(new Set(products.map((p) => p.category)));
 
   const sortedAndFilteredProducts = products
     .filter((p) => !filterCategory || p.category === filterCategory)
     .sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name)
-      if (sortBy === "price") return a.price - b.price
-      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0)
-      return 0
-    })
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "price") return a.price - b.price;
+      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+      return 0;
+    });
 
-  if (sortOrder === "desc") sortedAndFilteredProducts.reverse()
+  if (sortOrder === "desc") sortedAndFilteredProducts.reverse();
 
   // Calculate pagination
-  const totalPages = Math.ceil(sortedAndFilteredProducts.length / itemsPerPage)
+  const totalPages = Math.ceil(sortedAndFilteredProducts.length / itemsPerPage);
   const displayedProducts = sortedAndFilteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  )
+    currentPage * itemsPerPage
+  );
 
   return (
     <section className="bg-gradient-to-b from-gray-900 to-black text-yellow-100 py-12 px-4 min-h-screen">
@@ -160,13 +155,14 @@ export default function ProductList({ products }: ProductListProps) {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
+                    {/* Pass viewMode as a prop to ProductCard */}
                     <ProductCard product={product} viewMode={viewMode} />
                   </motion.div>
                 ))}
               </AnimatePresence>
             </motion.div>
 
-            {/* Pagination Controls (only if there's at least one product) */}
+            {/* Pagination Controls */}
             {displayedProducts.length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -181,6 +177,5 @@ export default function ProductList({ products }: ProductListProps) {
         )}
       </motion.div>
     </section>
-  )
+  );
 }
-

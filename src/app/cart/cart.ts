@@ -1,4 +1,4 @@
-import Swal, { SweetAlertResult } from "sweetalert2";
+import Swal, { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
 
 export interface CartItem {
   id: string;
@@ -15,14 +15,14 @@ export function getCart(): CartItem[] {
 }
 
 /** Add item to the cart in localStorage */
-export function addToCart(item: CartItem, p0: (message: any) => Promise<SweetAlertResult<any>>) {
+export function addToCart(item: CartItem, p0: (message: SweetAlertOptions) => Promise<SweetAlertResult<any>>) {
   let existingCart: CartItem[] = [];
   const storedCart = localStorage.getItem("myCart");
   if (storedCart) {
     existingCart = JSON.parse(storedCart);
   }
 
-  // Check if item already in cart
+  // Check if item is already in cart
   const existingItem = existingCart.find((i) => i.id === item.id);
   if (existingItem) {
     existingItem.quantity += item.quantity;
@@ -44,7 +44,6 @@ export function addToCart(item: CartItem, p0: (message: any) => Promise<SweetAle
 /** Update cart item quantity */
 export function updateCartItem(itemId: string, newQuantity: number) {
   const existingCart = getCart();
-
   const index = existingCart.findIndex((i) => i.id === itemId);
   if (index !== -1) {
     if (newQuantity <= 0) {

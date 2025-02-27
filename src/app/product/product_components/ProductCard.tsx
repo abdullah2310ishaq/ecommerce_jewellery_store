@@ -1,23 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Sparkles, Eye } from "lucide-react"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Sparkles, Eye } from "lucide-react";
 
 export interface Product {
-  id: string
-  name: string
-  price: number
-  images?: string[]
-  isOnSale?: boolean
-  description?: string
+  id: string;
+  name: string;
+  price: number;
+  images?: string[];
+  isOnSale?: boolean;
+  description?: string;
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const imageToShow = product.images?.[0] || "/placeholder.svg"
+interface ProductCardProps {
+  product: Product;
+  viewMode: "grid" | "list";
+}
+
+const ProductCard = ({ product }: ProductCardProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const imageToShow = product.images?.[0] || "/placeholder.svg";
 
   return (
     <motion.div
@@ -49,7 +54,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Product Image */}
       <div className="relative overflow-hidden aspect-square">
         <Image
-          src={imageToShow || "/placeholder.svg"}
+          src={imageToShow}
           alt={product.name}
           layout="fill"
           objectFit="cover"
@@ -61,17 +66,9 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Product Details */}
       <div className="p-4 space-y-4">
         <h3 className="text-xl font-bold text-yellow-400 truncate">{product.name}</h3>
-        <p className="font-semibold text-2xl mt-1 text-yellow-300">${product.price.toFixed(2)}</p>
-
-        {/* Description Preview */}
-        {/* <motion.p
-          className="text-gray-300 text-sm line-clamp-2"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? "auto" : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {product.description || "No description available."}
-        </motion.p> */}
+        <p className="font-semibold text-2xl mt-1 text-yellow-300">
+          ${product.price.toFixed(2)}
+        </p>
 
         {/* Action Button */}
         <motion.div
@@ -107,8 +104,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         transition={{ duration: 0.3 }}
       />
     </motion.div>
-  )
-}
+  );
+};
 
-export default ProductCard
-
+export default ProductCard;
