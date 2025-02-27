@@ -3,7 +3,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics, Analytics } from 'firebase/analytics';
 
-// We read from environment variables that start with NEXT_PUBLIC_
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

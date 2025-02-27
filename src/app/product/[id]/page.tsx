@@ -8,7 +8,7 @@ import { addToCart } from "@/app/cart/cart";
 import { useAuth } from "@/app/context/AuthContext";
 import { getProductById, getReviewsForProduct, addReviewToProduct } from "@/app/firebase/firebase_services/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { Star, ShoppingCart, Heart, Share2, User } from "lucide-react";
+import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
 
 interface FirestoreProduct {
   id: string;
@@ -18,7 +18,7 @@ interface FirestoreProduct {
   description?: string[];
   features?: string[];
   category?: string;
-  stock?: number; // <-- NEW
+  stock?: number;
 }
 
 interface ReviewData {
@@ -126,21 +126,16 @@ export default function ProductDetailPage() {
   const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg";
   
   // ---------- STOCK LOGIC ----------
-  const stock = product.stock ?? 0;  // fallback
+  const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
 
-  // ---------- QUANTITY Input Handler ----------
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    if (val > stock) {
-      // clamp to stock if user tries to exceed
-      setQuantity(stock);
-    } else if (val < 1) {
-      // clamp min to 1
-      setQuantity(1);
-    } else {
-      setQuantity(val);
-    }
+  // ---------- QUANTITY HANDLERS ----------
+  const handleIncrement = () => {
+    if (quantity < stock) setQuantity(quantity + 1);
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) setQuantity(quantity - 1);
   };
 
   return (
@@ -220,7 +215,7 @@ export default function ProductDetailPage() {
               ${product.price.toFixed(2)}
             </motion.p>
 
-            {/* ---------- STOCK DISPLAY ---------- */}
+            {/* Stock Display */}
             {isOutOfStock ? (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -241,26 +236,32 @@ export default function ProductDetailPage() {
               </motion.p>
             )}
 
-            {/* OPTIONAL: Quantity Input if there's stock */}
+            {/* Redesigned Quantity Selector */}
             {!isOutOfStock && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-4"
               >
-                <label htmlFor="quantity" className="text-yellow-100 text-lg">
-                  Quantity:
-                </label>
-                <input
-                  id="quantity"
-                  type="number"
-                  min={1}
-                  max={stock}
-                  value={quantity}
-                  onChange={handleQuantityChange}
-                  className="w-16 p-2 bg-gray-800 border border-gray-600 rounded text-center text-yellow-100"
-                />
+                <span className="text-lg text-yellow-100">Quantity:</span>
+                <div className="flex items-center bg-gray-800 border border-gray-600 rounded">
+                  <button
+                    onClick={handleDecrement}
+                    disabled={quantity <= 1}
+                    className="px-3 py-2 text-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700"
+                  >
+                    <Minus size={20} />
+                  </button>
+                  <div className="px-4 py-2 text-lg text-yellow-100">{quantity}</div>
+                  <button
+                    onClick={handleIncrement}
+                    disabled={quantity >= stock}
+                    className="px-3 py-2 text-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
               </motion.div>
             )}
 
@@ -302,9 +303,8 @@ export default function ProductDetailPage() {
               </motion.ul>
             )}
 
-            {/* Action Buttons */}
+            {/* Action Button: Only Add to Cart */}
             <div className="flex space-x-4">
-              {/* If stock is 0, disable add to cart */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -314,36 +314,18 @@ export default function ProductDetailPage() {
                     name: product.name,
                     price: product.price,
                     image: mainImage,
-                    // Use selected quantity
                     quantity,
                   })
                 }
                 disabled={isOutOfStock}
-                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300
-                  ${
-                    isOutOfStock
-                      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
-                  }
-                `}
+                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  isOutOfStock
+                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
+                }`}
               >
                 <ShoppingCart size={24} />
                 <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-4 bg-gray-800 hover:bg-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Heart size={24} className="text-red-500" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-4 bg-gray-800 hover:bg-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Share2 size={24} className="text-blue-400" />
               </motion.button>
             </div>
           </div>

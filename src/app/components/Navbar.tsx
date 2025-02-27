@@ -76,7 +76,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center space-x-10">
             <NavLink href="/shop">Collections</NavLink>
             <NavLink href="/product">Products</NavLink>
-            <NavLink href="/about">About</NavLink>
+            {/* Removed About link */}
             <NavLink href="/contact">Contact</NavLink>
           </div>
 
@@ -84,6 +84,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center space-x-6">
             <NavIcon href="/cart">
               <ShoppingBag className="w-5 h-5" />
+              <span className="ml-2 text-sm">Cart</span>
             </NavIcon>
 
             {user ? (
@@ -133,7 +134,7 @@ export default function Navbar() {
             {/* Mobile Navigation Links */}
             <MobileNavLink href="/shop">Collections</MobileNavLink>
             <MobileNavLink href="/product">Products</MobileNavLink>
-            <MobileNavLink href="/about">About</MobileNavLink>
+            {/* Removed About link */}
             <MobileNavLink href="/contact">Contact</MobileNavLink>
             <MobileNavLink href="/cart">Cart</MobileNavLink>
 
