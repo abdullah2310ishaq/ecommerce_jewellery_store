@@ -1,22 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { googleSignIn } from "@/app/firebase/firebase_services/firebaseAuth";
-import Particles from "react-particles";
-import { loadFull } from "tsparticles";
-import type { Engine } from "tsparticles-engine";
+
+//hllo ji
 import {useRouter} from "next/navigation";
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [particlesLoaded, setParticlesLoaded] = useState(false);
 const router = useRouter();
-  const particlesInit = async (engine: Engine) => {
-    await loadFull(engine);
-  };
+
 
   const handleGoogleAuth = async () => {
     try {
@@ -33,90 +29,11 @@ const router = useRouter();
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => setParticlesLoaded(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
+
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-6 overflow-hidden">
-      {particlesLoaded && (
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          options={{
-            fullScreen: { enable: false },
-            background: {
-              color: {
-                value: "transparent",
-              },
-            },
-            fpsLimit: 60,
-            interactivity: {
-              events: {
-                onClick: {
-                  enable: true,
-                  mode: "push",
-                },
-                onHover: {
-                  enable: true,
-                  mode: "repulse",
-                },
-                resize: true,
-              },
-              modes: {
-                push: {
-                  quantity: 4,
-                },
-                repulse: {
-                  distance: 200,
-                  duration: 0.4,
-                },
-              },
-            },
-            particles: {
-              color: {
-                value: "#ffffff",
-              },
-              links: {
-                color: "#ffffff",
-                distance: 150,
-                enable: true,
-                opacity: 0.5,
-                width: 1,
-              },
-              move: {
-                direction: "none",
-                enable: true,
-                outModes: {
-                  default: "bounce",
-                },
-                random: false,
-                speed: 2,
-                straight: false,
-              },
-              number: {
-                density: {
-                  enable: true,
-                  area: 800,
-                },
-                value: 80,
-              },
-              opacity: {
-                value: 0.5,
-              },
-              shape: {
-                type: "circle",
-              },
-              size: {
-                value: { min: 1, max: 5 },
-              },
-            },
-            detectRetina: true,
-          }}
-          className="absolute inset-0 z-0"
-        />
-      )}
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
