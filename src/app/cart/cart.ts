@@ -1,4 +1,4 @@
-import Swal, { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
+import Swal from "sweetalert2";
 
 export interface CartItem {
   id: string;
@@ -15,7 +15,7 @@ export function getCart(): CartItem[] {
 }
 
 /** Add item to the cart in localStorage */
-export function addToCart(item: CartItem, p0: (message: SweetAlertOptions) => Promise<SweetAlertResult<any>>) {
+export function addToCart(item: CartItem) {
   let existingCart: CartItem[] = [];
   const storedCart = localStorage.getItem("myCart");
   if (storedCart) {
