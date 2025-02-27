@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import {
   // PRODUCT functions
@@ -54,6 +54,10 @@ interface CollectionFormData {
 }
 
 export default function AdminPage() {
+
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // ============ STATE: PRODUCTS ============
   const [products, setProducts] = useState<FirestoreProduct[]>([]);
   const [newProduct, setNewProduct] = useState<ProductFormData>({
@@ -92,19 +96,56 @@ export default function AdminPage() {
   });
 
   // ============ FETCH DATA ON MOUNT ============
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const prodData = await getAllProducts();
-        setProducts(prodData as FirestoreProduct[]);
-        const collData = await getAllCollections();
-        setCollections(collData as FirestoreCollection[]);
-      } catch (error) {
-        console.error("Error fetching products/collections:", error);
-      }
-    };
-    fetchData();
-  }, []);
+  // 1️⃣ Hook to check auth cookie
+useEffect(() => {
+  const authCookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("admin-auth="))
+    ?.split("=")[1];
+
+  if (authCookie === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    setIsAuthenticated(true);
+  } else {
+    router.push("/admin/loggin");
+  }
+}, []);
+
+// 2️⃣ Hook to fetch data (ALWAYS declared, but conditionally does work)
+useEffect(() => {
+  if (!isAuthenticated) return; // Do nothing if not authenticated
+
+  const fetchData = async () => {
+    try {
+      const prodData = await getAllProducts();
+      setProducts(prodData as FirestoreProduct[]);
+      const collData = await getAllCollections();
+      setCollections(collData as FirestoreCollection[]);
+    } catch (error) {
+      console.error("Error fetching products/collections:", error);
+    }
+  };
+
+  fetchData();
+}, [isAuthenticated]);
+
+// 3️⃣ Conditionally render null if not authenticated
+if (!isAuthenticated) return null;
+//femoved one
+// useEffect(() => {
+//   const fetchData = async () => {
+//     try {
+//       const prodData = await getAllProducts();
+//       setProducts(prodData as FirestoreProduct[]);
+//       const collData = await getAllCollections();
+//       setCollections(collData as FirestoreCollection[]);
+//     } catch (error) {
+//       console.error("Error fetching products/collections:", error);
+//     }
+//   };
+//   fetchData();
+// }, []);
+
+ 
 
   // =========================================
   // ============ PRODUCT HANDLERS ===========

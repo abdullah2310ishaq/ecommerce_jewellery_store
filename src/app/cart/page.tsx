@@ -76,7 +76,7 @@ const toast = useToast();
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black to-gray-900">
         <h1 className="text-3xl font-bold mb-4 text-yellow-300">Your Cart is Empty</h1>
         <p className="text-lg text-gray-400 mb-8">
-          Looks like you haven't added any items to your cart yet.
+          Looks like you havenot added any items to your cart yet.
         </p>
         <button
           onClick={() => router.push('/')}
