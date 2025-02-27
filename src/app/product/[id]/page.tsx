@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Swal, { SweetAlertOptions } from "sweetalert2";
+import Swal from "sweetalert2";
 
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -318,16 +318,14 @@ export default function ProductDetailPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
-                  addToCart(
-                    {
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      image: mainImage,
-                      quantity,
-                    },
-                    (message: SweetAlertOptions) => Swal.fire(message)
-                  );
+                  // Call addToCart with only one argument
+                  addToCart({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: mainImage,
+                    quantity,
+                  });
                 }}
                 disabled={isOutOfStock}
                 className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
