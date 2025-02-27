@@ -20,7 +20,8 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-particles": "^2.12.2",
-    "tsparticles": "^3.8.1"
+    "tsparticles": "^3.8.1",
+    "vyrn": "^3.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../firebase/firebase_services/firestore";
 import { CartItem, getCart, updateCartItem, clearCart } from "./cart";
-
+import {useToast} from "vyrn";
 export default function CartPage() {
   const router = useRouter();
 
@@ -13,7 +13,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-
+const toast = useToast();
   // Load cart items on mount
   useEffect(() => {
     setCartItems(getCart());
@@ -41,7 +41,7 @@ export default function CartPage() {
 
   async function handlePlaceOrder() {
     if (!name || !email || !phone || !address) {
-      alert("Please fill in all fields");
+      toast.warning("Please fill in all fields");
       return;
     }
 
@@ -60,13 +60,13 @@ export default function CartPage() {
         totalAmount,
       };
       const orderId = await placeOrder(orderData);
-      alert(`Order placed successfully! Order ID: ${orderId}`);
+      toast.success(`Order placed successfully! Order ID: ${orderId}`);
       clearCart();
       setCartItems([]);
       // router.push("/thank-you?orderId=" + orderId); // Optional navigation
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
+      toast.error("Failed to place order. Please try again.");
     }
   }
 

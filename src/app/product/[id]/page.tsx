@@ -4,11 +4,19 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { addToCart } from "@/app/cart/cart";
+
 import { useAuth } from "@/app/context/AuthContext";
-import { getProductById, getReviewsForProduct, addReviewToProduct } from "@/app/firebase/firebase_services/firestore";
+import {
+  getProductById,
+  getReviewsForProduct,
+  addReviewToProduct,
+} from "@/app/firebase/firebase_services/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
+
+
+import { useToast } from "vyrn";
+import { addToCart } from "@/app/cart/cart";
 
 interface FirestoreProduct {
   id: string;
@@ -33,17 +41,16 @@ interface ReviewData {
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
-  
-  // ---------- STATE ----------
+
+  // 2️⃣ Initialize the toast
+  const toast  = useToast();
+
   const [product, setProduct] = useState<FirestoreProduct | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [prodLoading, setProdLoading] = useState(true);
 
-  // ---------- QUANTITY STATE ----------
-  const [quantity, setQuantity] = useState(1); // User-chosen quantity
-
-  // For image zoom
+  const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
@@ -70,7 +77,6 @@ export default function ProductDetailPage() {
     fetchData();
   }, [id]);
 
-  // ---------- Handle Review Submit ----------
   async function handleReviewSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !product) return;
@@ -87,12 +93,14 @@ export default function ProductDetailPage() {
       const updated = await getReviewsForProduct(product.id);
       setReviews(updated as ReviewData[]);
       setReviewForm({ rating: 5, comment: "" });
+
+      toast.success("Review submitted successfully!");
     } catch (err) {
       console.error("Error adding review:", err);
+      toast.error("Failed to submit review. Try again!");
     }
   }
 
-  // ---------- Handle Image Zoom ----------
   const handleImageZoom = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageRef.current) return;
     const { left, top, width, height } = imageRef.current.getBoundingClientRect();
@@ -101,14 +109,13 @@ export default function ProductDetailPage() {
     setZoomPosition({ x, y });
   };
 
-  // ---------- Loading States ----------
   if (authLoading || prodLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          className="w-20 h-20 border-t-4 border-b-4 border-yellow-400 border-solid rounded-full"
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-20 h-20 border-t-4 border-b-4 border-yellow-400 rounded-full"
         />
       </div>
     );
@@ -122,14 +129,10 @@ export default function ProductDetailPage() {
     );
   }
 
-  // MAIN Image
   const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg";
-  
-  // ---------- STOCK LOGIC ----------
   const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
 
-  // ---------- QUANTITY HANDLERS ----------
   const handleIncrement = () => {
     if (quantity < stock) setQuantity(quantity + 1);
   };
@@ -141,6 +144,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-yellow-100 p-8">
       <div className="max-w-7xl mx-auto">
+        {/* Product Images & Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,9 +163,8 @@ export default function ProductDetailPage() {
               <Image
                 src={mainImage}
                 alt={product.name}
-                layout="fill"
-                objectFit="cover"
-                className={`transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
+                fill
+                className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
                 style={
                   isZoomed
                     ? {
@@ -186,9 +189,8 @@ export default function ProductDetailPage() {
                     <Image
                       src={img || "/placeholder.svg"}
                       alt=""
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </motion.div>
                 ))}
@@ -236,7 +238,7 @@ export default function ProductDetailPage() {
               </motion.p>
             )}
 
-            {/* Redesigned Quantity Selector */}
+            {/* Quantity Selector */}
             {!isOutOfStock && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -303,30 +305,34 @@ export default function ProductDetailPage() {
               </motion.ul>
             )}
 
-            {/* Action Button: Only Add to Cart */}
+            {/* Add to Cart Button */}
             <div className="flex space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  addToCart({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: mainImage,
-                    quantity,
-                  })
-                }
-                disabled={isOutOfStock}
-                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  isOutOfStock
-                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
-                }`}
-              >
-                <ShoppingCart size={24} />
-                <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
-              </motion.button>
+            <motion.button
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={() => {
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: mainImage,
+        quantity,
+      },
+      (message) => toast.success(message) // ✅ Pass toast handler
+    );
+  }}
+  disabled={isOutOfStock}
+  className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+    isOutOfStock
+      ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+      : "bg-gradient-to-r from-yellow-600 to-yellow-500 text-black"
+  }`}
+>
+  <ShoppingCart size={24} />
+  <span className="text-lg">{isOutOfStock ? "Unavailable" : "Add to Cart"}</span>
+</motion.button>
+
             </div>
           </div>
         </motion.div>
@@ -411,7 +417,11 @@ export default function ProductDetailPage() {
                     >
                       <Star
                         size={32}
-                        className={num <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"}
+                        className={
+                          num <= reviewForm.rating
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-600"
+                        }
                       />
                     </motion.button>
                   ))}
@@ -424,7 +434,9 @@ export default function ProductDetailPage() {
                 <textarea
                   id="comment"
                   value={reviewForm.comment}
-                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                  onChange={(e) =>
+                    setReviewForm({ ...reviewForm, comment: e.target.value })
+                  }
                   className="w-full p-3 bg-gray-700 rounded-lg text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-600 text-lg"
                   placeholder="Share your thoughts about this product..."
                   rows={4}

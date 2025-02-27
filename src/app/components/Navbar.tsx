@@ -77,7 +77,6 @@ export default function Navbar() {
             <NavLink href="/shop">Collections</NavLink>
             <NavLink href="/product">Products</NavLink>
             <NavLink href="/about">About</NavLink>
-            <NavLink href="/contact">Contact</NavLink>
           </div>
 
           {/* Desktop Icons */}
@@ -135,7 +134,7 @@ export default function Navbar() {
             <MobileNavLink href="/shop">Collections</MobileNavLink>
             <MobileNavLink href="/product">Products</MobileNavLink>
             <MobileNavLink href="/about">About</MobileNavLink>
-            <MobileNavLink href="/contact">Contact</MobileNavLink>
+
             <MobileNavLink href="/cart">Cart</MobileNavLink>
 
             {/* User Authentication */}
