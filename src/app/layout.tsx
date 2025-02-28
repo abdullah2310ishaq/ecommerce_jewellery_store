@@ -31,11 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-        <Navbar />
-    
-        {children}
-   
-        <Footer />
+          <Navbar />
+          {/* Add padding-top to push the content below the fixed navbar */}
+          <div className="pt-20">
+            {children}
+          </div>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
