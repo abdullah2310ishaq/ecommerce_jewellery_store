@@ -221,7 +221,7 @@ export default function ProductDetailPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-3xl text-yellow-300 font-light"
             >
-              ${product.price.toFixed(2)}
+              Rs.{product.price.toFixed(2)}
             </motion.p>
 
             {/* Stock Display */}
