@@ -87,15 +87,20 @@ export default function Navbar() {
             </NavIcon>
 
             {user ? (
-              <>
-                <span className="text-yellow-300 text-sm">Hi, {user.displayName || "User"}</span>
+              <div className="flex items-center space-x-4">
+                <div className="px-3 py-1 bg-gray-700 rounded-full">
+                  <span className="text-yellow-300 text-sm">
+                    Hi, {user.displayName || "User"}
+                  </span>
+                </div>
                 <button
                   onClick={logoutUser}
-                  className="text-gray-400 hover:text-yellow-400 transition"
+                  className="p-2 rounded-full bg-gray-700 hover:bg-yellow-600 transition"
+                  title="Logout"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-5 h-5 text-gray-300" />
                 </button>
-              </>
+              </div>
             ) : (
               <NavIcon href="/auth">
                 <User className="w-5 h-5" />
@@ -136,15 +141,17 @@ export default function Navbar() {
             <MobileNavLink href="/about">About</MobileNavLink>
             <MobileNavLink href="/cart">Cart</MobileNavLink>
 
-            {/* User Authentication */}
+            {/* Mobile User Authentication */}
             {user ? (
               <div className="flex flex-col items-center space-y-2">
-                <span className="text-yellow-400 text-lg font-medium">
-                  Hi, {user.displayName || "User"}
-                </span>
+                <div className="px-3 py-1 bg-gray-700 rounded-full">
+                  <span className="text-yellow-400 text-lg font-medium">
+                    Hi, {user.displayName || "User"}
+                  </span>
+                </div>
                 <button
                   onClick={logoutUser}
-                  className="text-yellow-400 hover:text-yellow-500 transition text-lg font-medium"
+                  className="px-4 py-2 bg-gray-700 text-yellow-400 rounded hover:bg-yellow-600 transition text-lg font-medium"
                 >
                   Logout
                 </button>
