@@ -70,8 +70,8 @@ export function clearCart() {
 
   // Show info alert
   Swal.fire({
-    title: "Cart Cleared!",
-    text: "Your cart has been cleared.",
+    title: "Order Placed",
+    text: "Your order has been placed. You ll be informed shortly",
     icon: "info",
     confirmButtonText: "OK",
   });
