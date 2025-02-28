@@ -367,12 +367,33 @@ if (!isAuthenticated) return null;
     }
   };
 
+  function logout() {
+    document.cookie =
+    "admin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  
+  // Redirect the user to the login page
+  window.location.href = "/admin/loggin";
+  }
+
   // =========================================
   // =============== RENDER UI ===============
   // =========================================
 
   return (
     <div className="min-h-screen p-4 bg-gray-100 text-gray-900">
+      
+      <header className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <button
+          onClick={() => {
+            logout();
+            router.push("/admin/loggin");
+          }}
+          className="bg-red-500 text-white px-3 py-1 rounded"
+        >
+          Logout
+        </button>
+      </header>
       <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
 
       {/* ================== PRODUCTS ================== */}
