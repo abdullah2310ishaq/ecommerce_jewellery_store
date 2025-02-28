@@ -383,7 +383,10 @@ if (!isAuthenticated) return null;
     <div className="min-h-screen p-4 bg-gray-100 text-gray-900">
       
       <header className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Admin Panel</h1>
+      
+      </header>
+      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+      <h1 className="text-2xl font-bold">Admin Panel</h1>
         <button
           onClick={() => {
             logout();
@@ -393,9 +396,6 @@ if (!isAuthenticated) return null;
         >
           Logout
         </button>
-      </header>
-      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-
       {/* ================== PRODUCTS ================== */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* CREATE NEW PRODUCT FORM */}
