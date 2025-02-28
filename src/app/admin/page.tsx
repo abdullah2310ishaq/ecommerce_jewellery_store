@@ -567,7 +567,7 @@ if (!isAuthenticated) return null;
                     // DISPLAY PRODUCT
                     <>
                       <div className="font-semibold">
-                        {product.name} – ${product.price}
+                        {product.name} – Rs{product.price}
                       </div>
                       <p className="text-sm text-gray-500">
                         Stock: {product.stock}
