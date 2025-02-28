@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         <p><strong>Total Amount:</strong> Rs. ${totalAmount}</p>
         <p><strong>Shipping Address:</strong> ${address}</p>
         <p>We will notify you once your order is shipped.</p>
-        <p>For any queries, contact us at support@yourstore.com.</p>
+        <p>For any queries, contact us at handhjewelry925@gmail.com .</p>
         <p>Best regards,</p>
         <p><strong>H&H Jewelers</strong></p>
       `,
