@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { googleSignIn } from "@/app/firebase/firebase_services/firebaseAuth";
 
-//hllo ji
 import {useRouter} from "next/navigation";
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
 const router = useRouter();
 
 
@@ -33,7 +33,7 @@ const router = useRouter();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-6 overflow-hidden">
-      
+    
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
