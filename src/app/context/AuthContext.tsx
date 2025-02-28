@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { firebaseAuth } from "../firebase/firebase_services/firebaseConfig";
 
@@ -10,34 +10,32 @@ interface AuthContextValue {
   loading: boolean;
 }
 
-// Create context
-const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  loading: true,
-});
+// Create context with a default value
+const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
 
 // Hook to access the Auth context
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   return useContext(AuthContext);
 }
 
+// Props for the AuthProvider
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
 // AuthProvider component
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Start observing auth state
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
     });
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  // Provide the auth state to the rest of the app
   return (
     <AuthContext.Provider value={{ user, loading }}>
       {children}

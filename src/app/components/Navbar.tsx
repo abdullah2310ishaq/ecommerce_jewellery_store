@@ -134,17 +134,21 @@ export default function Navbar() {
             <MobileNavLink href="/shop">Collections</MobileNavLink>
             <MobileNavLink href="/product">Products</MobileNavLink>
             <MobileNavLink href="/about">About</MobileNavLink>
-
             <MobileNavLink href="/cart">Cart</MobileNavLink>
 
             {/* User Authentication */}
             {user ? (
-              <button
-                onClick={logoutUser}
-                className="text-yellow-400 hover:text-yellow-500 transition text-lg font-medium"
-              >
-                Logout
-              </button>
+              <div className="flex flex-col items-center space-y-2">
+                <span className="text-yellow-400 text-lg font-medium">
+                  Hi, {user.displayName || "User"}
+                </span>
+                <button
+                  onClick={logoutUser}
+                  className="text-yellow-400 hover:text-yellow-500 transition text-lg font-medium"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <MobileNavLink href="/auth">Login</MobileNavLink>
             )}
