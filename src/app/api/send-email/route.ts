@@ -10,16 +10,31 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Define types for order items and payload
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface OrderPayload {
+  name: string;
+  email: string;
+  orderId: string | number;
+  items: OrderItem[];
+  totalAmount: number;
+  address: string;
+}
+
 // Email sending function
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, orderId, items, totalAmount, address } = await req.json();
+    const { name, email, orderId, items, totalAmount, address } =
+      (await req.json()) as OrderPayload;
 
-    // Create order summary
+    // Create order summary HTML
     const orderSummary = items
-      .map((item: { name: string; quantity: number; price: number }) => {
-        return `<li>${item.name} (x${item.quantity}) - Rs. ${item.price}</li>`;
-      })
+      .map((item: OrderItem) => `<li>${item.name} (x${item.quantity}) - Rs. ${item.price}</li>`)
       .join("");
 
     // Email HTML content

@@ -48,10 +48,9 @@ export default function CartPage() {
         icon: "warning",
         confirmButtonText: "OK",
       });
-      
       return;
     }
-
+  
     try {
       const orderData = {
         name,
@@ -66,33 +65,37 @@ export default function CartPage() {
         })),
         totalAmount,
       };
+  
+      // Place the order in Firestore
       const orderId = await placeOrder(orderData);
-
+  
+      // Send order confirmation email
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...orderData, orderId }),
       });
-      
+  
       Swal.fire({
         title: "Order Placed!",
         text: `Order placed successfully! Order ID: ${orderId}`,
         icon: "success",
         confirmButtonText: "OK",
       });
-       clearCart();
+  
+      clearCart();
       setCartItems([]);
-      // router.push("/thank-you?orderId=" + orderId); // Optional navigation
     } catch (error) {
       console.error("Error placing order:", error);
-    Swal.fire({
-  title: "Error!",
-  text: "Failed to place order. Please try again.",
-  icon: "error",
-  confirmButtonText: "OK",
-});
-}
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to place order. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   }
+  
 
   // If cart is empty, show a friendly empty state
   if (cartItems.length === 0) {
