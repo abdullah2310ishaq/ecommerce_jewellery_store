@@ -22,9 +22,9 @@ const NavIcon = ({ href, children }: { href: string; children: React.ReactNode }
   </Link>
 );
 
-// Mobile link component
-const MobileNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-2xl font-medium hover:text-yellow-500 transition">
+// Mobile link component - Closes menu on click
+const MobileNavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) => (
+  <Link href={href} onClick={onClick} className="text-2xl font-medium hover:text-yellow-500 transition">
     {children}
   </Link>
 );
@@ -118,11 +118,11 @@ export default function Navbar() {
               <X className="w-7 h-7" />
             </button>
 
-            {/* Mobile Navigation Links */}
-            <MobileNavLink href="/shop">Collections</MobileNavLink>
-            <MobileNavLink href="/product">Products</MobileNavLink>
-            <MobileNavLink href="/about">About</MobileNavLink>
-            <MobileNavLink href="/cart">Cart</MobileNavLink>
+            {/* Mobile Navigation Links - Closes Menu on Click */}
+            <MobileNavLink href="/shop" onClick={() => setIsMenuOpen(false)}>Collections</MobileNavLink>
+            <MobileNavLink href="/product" onClick={() => setIsMenuOpen(false)}>Products</MobileNavLink>
+            <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)}>About</MobileNavLink>
+            <MobileNavLink href="/cart" onClick={() => setIsMenuOpen(false)}>Cart</MobileNavLink>
 
             {/* Mobile User Authentication */}
             {user ? (
@@ -131,7 +131,10 @@ export default function Navbar() {
                   <span className="text-yellow-400 text-lg font-medium">Hi, {user.displayName || user.email}</span>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
                   className="px-4 py-2 bg-gray-700 text-yellow-400 rounded hover:bg-yellow-600 transition text-lg font-medium"
                   aria-label="Logout"
                 >
@@ -139,7 +142,7 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <MobileNavLink href="/auth">Login</MobileNavLink>
+              <MobileNavLink href="/auth" onClick={() => setIsMenuOpen(false)}>Login</MobileNavLink>
             )}
           </motion.div>
         )}

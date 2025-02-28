@@ -67,6 +67,13 @@ export default function CartPage() {
         totalAmount,
       };
       const orderId = await placeOrder(orderData);
+
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...orderData, orderId }),
+      });
+      
       Swal.fire({
         title: "Order Placed!",
         text: `Order placed successfully! Order ID: ${orderId}`,
