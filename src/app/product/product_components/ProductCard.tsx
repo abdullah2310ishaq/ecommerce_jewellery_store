@@ -67,7 +67,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <div className="p-4 space-y-4">
         <h3 className="text-xl font-bold text-yellow-400 truncate">{product.name}</h3>
         <p className="font-semibold text-2xl mt-1 text-yellow-300">
-          ${product.price.toFixed(2)}
+          Rs.{product.price.toFixed(2)}
         </p>
 
         {/* Action Button */}
