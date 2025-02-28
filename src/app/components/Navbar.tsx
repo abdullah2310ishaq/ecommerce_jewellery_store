@@ -70,16 +70,14 @@ export default function Navbar() {
 
             {user ? (
               <div className="flex items-center space-x-4">
-                {/* Show user's name */}
                 <div className="px-3 py-1 bg-gray-700 rounded-full">
                   <span className="text-yellow-300 text-sm">Hi, {user.displayName || user.email}</span>
                 </div>
-
-                {/* Logout button */}
                 <button
                   onClick={logout}
                   className="p-2 rounded-full bg-gray-700 hover:bg-yellow-600 transition"
                   title="Logout"
+                  aria-label="Logout"
                 >
                   <LogOut className="w-5 h-5 text-gray-300" />
                 </button>
@@ -92,7 +90,11 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button onClick={() => setIsMenuOpen(true)} className="lg:hidden text-yellow-300 hover:text-yellow-500 transition">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="lg:hidden text-yellow-300 hover:text-yellow-500 transition"
+            aria-label="Open mobile menu"
+          >
             <Menu className="w-7 h-7" />
           </button>
         </div>
@@ -108,7 +110,11 @@ export default function Navbar() {
             className="fixed inset-0 bg-black/90 backdrop-blur-lg z-50 flex flex-col items-center justify-center text-yellow-300 space-y-8"
           >
             {/* Close Button */}
-            <button onClick={() => setIsMenuOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-yellow-400 transition">
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-yellow-400 transition"
+              aria-label="Close mobile menu"
+            >
               <X className="w-7 h-7" />
             </button>
 
@@ -124,7 +130,11 @@ export default function Navbar() {
                 <div className="px-3 py-1 bg-gray-700 rounded-full">
                   <span className="text-yellow-400 text-lg font-medium">Hi, {user.displayName || user.email}</span>
                 </div>
-                <button onClick={logout} className="px-4 py-2 bg-gray-700 text-yellow-400 rounded hover:bg-yellow-600 transition text-lg font-medium">
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 bg-gray-700 text-yellow-400 rounded hover:bg-yellow-600 transition text-lg font-medium"
+                  aria-label="Logout"
+                >
                   Logout
                 </button>
               </div>
