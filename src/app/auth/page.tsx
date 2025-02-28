@@ -3,17 +3,23 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
-import { googleSignIn } from "@/app/firebase/firebase_services/firebaseAuth";
+import {
+  googleSignIn,
+  loginUser,
+  registerUser,
+} from "@/app/firebase/firebase_services/firebaseAuth";
+import { useRouter } from "next/navigation";
 
-import {useRouter} from "next/navigation";
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const router = useRouter();
 
-const router = useRouter();
-
-
+  // Handle Google authentication
   const handleGoogleAuth = async () => {
     try {
       setLoading(true);
@@ -29,11 +35,30 @@ const router = useRouter();
     }
   };
 
-
+  // Handle email/password form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError("");
+      let user;
+      if (isLogin) {
+        user = await loginUser(email, password);
+      } else {
+        user = await registerUser(email, password, displayName);
+      }
+      console.log(`${isLogin ? "Signed in" : "Signed up"} as:`, user.email);
+      router.push("/home");
+    } catch (err) {
+      console.error("Auth error:", err);
+      setError(`Failed to ${isLogin ? "sign in" : "sign up"}. Please try again.`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-6 overflow-hidden">
-    
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -89,67 +114,97 @@ const router = useRouter();
               )}
             </AnimatePresence>
 
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 bg-gray-700 rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 bg-gray-700 rounded-lg"
+                  required
+                />
+              </div>
+              {!isLogin && (
+                <div>
+                  <label htmlFor="displayName" className="block text-gray-300 mb-2">
+                    Display Name
+                  </label>
+                  <input
+                    id="displayName"
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="w-full p-3 bg-gray-700 rounded-lg"
+                    required
+                  />
+                </div>
+              )}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                disabled={loading}
+                className="w-full bg-yellow-600 text-black py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300"
+              >
+                {loading ? "Processing..." : isLogin ? "Sign In" : "Sign Up"}
+              </motion.button>
+            </form>
+
+            <div className="flex items-center justify-center my-4">
+              <span className="text-gray-400">or</span>
+            </div>
+
             <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(255,255,255,0.3)" }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="w-full bg-white text-gray-800 font-semibold py-4 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+              className="w-full bg-white text-gray-800 py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300 flex items-center justify-center gap-2"
             >
               <FcGoogle className="w-6 h-6" />
               <span className="text-lg">
-                {loading ? "Processing..." : `${isLogin ? "Sign in" : "Sign up"} with Google`}
+                {loading ? "Processing..." : isLogin ? "Sign In with Google" : "Sign Up with Google"}
               </span>
-              {loading && (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-5 h-5 border-t-2 border-gray-800 border-solid rounded-full ml-2"
-                />
-              )}
             </motion.button>
 
             <motion.div
-              className="text-center"
+              className="text-center mt-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-          <button
-  onClick={() => setIsLogin(!isLogin)}
-  className="text-yellow-400 hover:text-yellow-300 transition duration-300 text-lg"
->
-  {isLogin ? (
-    <>
-      Need an account? <span className="text-white">Sign Up</span>
-    </>
-  ) : (
-    <>
-      Already have an account? <span className="text-white">Sign In</span>
-    </>
-  )}
-</button>
-
-
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-yellow-400 hover:text-yellow-300 transition duration-300 text-lg"
+              >
+                {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
+              </button>
             </motion.div>
           </div>
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.6 }}
             className="px-8 pb-8 pt-0 sm:px-12 sm:pb-12 text-center"
           >
-            {/* <p className="text-gray-400 text-sm">
-              By {isLogin ? "signing in" : "signing up"}, you agree to our{" "}
-              <a href="#" className="text-yellow-400 hover:text-yellow-300 transition duration-300">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-yellow-400 hover:text-yellow-300 transition duration-300">
-                Privacy Policy
-              </a>
-            </p> */}
+            {/* Optionally add Terms and Privacy text here */}
           </motion.div>
         </div>
       </motion.div>
