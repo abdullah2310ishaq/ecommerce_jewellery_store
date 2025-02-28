@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
+import Swal from "sweetalert2";
 import {
   googleSignIn,
   loginUser,
@@ -22,14 +23,26 @@ export default function AuthForm() {
   // Handle Google authentication
   const handleGoogleAuth = async () => {
     try {
+      console.log("[DEBUG] Initiating Google sign-in process...");
       setLoading(true);
       setError("");
       const user = await googleSignIn();
-      console.log(`${isLogin ? "Signed in" : "Signed up"} with Google as:`, user.email);
+      console.log(`[DEBUG] Google sign-in success: ${user.email}`);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Signed in successfully!",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
       router.push("/home");
     } catch (err) {
-      console.error("Google auth error:", err);
-      setError(`Failed to ${isLogin ? "sign in" : "sign up"} with Google. Please try again.`);
+      console.error("[DEBUG] Google auth failed:", err);
+      setError(
+        `Failed to ${isLogin ? "sign in" : "sign up"} with Google. Please try again.`
+      );
     } finally {
       setLoading(false);
     }
@@ -47,10 +60,19 @@ export default function AuthForm() {
       } else {
         user = await registerUser(email, password, displayName);
       }
-      console.log(`${isLogin ? "Signed in" : "Signed up"} as:`, user.email);
+      console.log(`[DEBUG] ${isLogin ? "Signed in" : "Signed up"} as:`, user.email);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: `${isLogin ? "Signed in" : "Signed up"} successfully!`,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
       router.push("/home");
     } catch (err) {
-      console.error("Auth error:", err);
+      console.error("[DEBUG] Email/Password auth error:", err);
       setError(`Failed to ${isLogin ? "sign in" : "sign up"}. Please try again.`);
     } finally {
       setLoading(false);

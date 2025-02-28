@@ -8,10 +8,15 @@ import { firebaseAuth } from "../firebase/firebase_services/firebaseConfig";
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  logout: () => Promise<void>;
 }
 
 // Create context with a default value
-const AuthContext = createContext<AuthContextValue>({ user: null, loading: true });
+const AuthContext = createContext<AuthContextValue>({
+  user: null,
+  loading: true,
+  logout: async () => {},
+});
 
 // Hook to access the Auth context
 export function useAuth(): AuthContextValue {
@@ -33,11 +38,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(currentUser);
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
+  // Logout function
+  const logout = async () => {
+    await firebaseAuth.signOut();
+    setUser(null); // Update state to remove user from context
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
