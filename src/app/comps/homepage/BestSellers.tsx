@@ -34,8 +34,8 @@ export default function BestSellers() {
 
   if (loading) {
     return (
-      <section className="py-24 bg-gradient-to-b from-black to-gray-900">
-        <div className="container mx-auto px-6 text-center text-white">
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-6 text-center text-gray-900">
           <h2>Loading Best Sellers...</h2>
         </div>
       </section>
@@ -44,8 +44,8 @@ export default function BestSellers() {
 
   if (!bestSellers.length) {
     return (
-      <section className="py-24 bg-gradient-to-b from-black to-gray-900">
-        <div className="container mx-auto px-6 text-center text-white">
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-6 text-center text-gray-900">
           <h2>No best sellers found.</h2>
         </div>
       </section>
@@ -53,17 +53,17 @@ export default function BestSellers() {
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-black to-gray-900">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-sm font-light tracking-[0.3em] text-yellow-400 mb-4">
+          <h2 className="text-sm font-light tracking-[0.3em] text-[#FB6F90] mb-4">
             CUSTOMER FAVORITES
           </h2>
-          <h3 className="text-4xl md:text-5xl font-serif text-white mb-6">
+          <h3 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6">
             Best Sellers
           </h3>
-          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600" />
+          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-[#FB6F90] via-[#FB6F90] to-[#FB6F90]" />
         </div>
 
         {/* Products Grid */}
@@ -71,13 +71,13 @@ export default function BestSellers() {
           {bestSellers.map((product) => (
             <motion.div
               key={product.id}
-              className="relative bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-lg overflow-hidden border-2 border-yellow-600/30 hover:border-yellow-600 transition-all duration-300 group"
+              className="relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl shadow-lg overflow-hidden border-2 border-[#FB6F90]/30 hover:border-[#FB6F90] transition-all duration-300 group"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               {/* Animated Glow Effect */}
-              <div className="absolute inset-0 bg-yellow-600/20 filter blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-[#FB6F90]/20 filter blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
 
               {/* Best Seller Badge */}
               <motion.div
@@ -86,7 +86,7 @@ export default function BestSellers() {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               >
-                <span className="bg-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                <span className="bg-[#FB6F90] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
                   Best Seller
                 </span>
@@ -97,8 +97,7 @@ export default function BestSellers() {
                 <Image
                   src={product.images?.[0] || "/placeholder.jpg"}
                   alt={product.name}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
                   className="transition-transform duration-700 ease-in-out group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -106,8 +105,12 @@ export default function BestSellers() {
 
               {/* Product Info */}
               <div className="p-4 space-y-4">
-                <h3 className="text-xl font-bold text-yellow-400 truncate">{product.name}</h3>
-                <p className="font-semibold text-2xl mt-1 text-yellow-300">Rs. {product.price}</p>
+                <h3 className="text-xl font-bold text-[#FB6F90] truncate">
+                  {product.name}
+                </h3>
+                <p className="font-semibold text-2xl mt-1 text-[#FB6F90]">
+                  Rs. {product.price}
+                </p>
 
                 {/* Action Button */}
                 <motion.div
@@ -118,14 +121,14 @@ export default function BestSellers() {
                 >
                   <Link href={`/product/${product.id}`} passHref>
                     <motion.button
-                      className="w-full px-4 py-2 bg-yellow-600 text-black rounded-md font-medium flex items-center justify-center gap-2 group relative overflow-hidden"
+                      className="w-full px-4 py-2 bg-[#FB6F90] text-white rounded-md font-medium flex items-center justify-center gap-2 group relative overflow-hidden"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <span className="relative z-10">View Details</span>
                       <Eye className="w-5 h-5 relative z-10" />
                       <motion.div
-                        className="absolute inset-0 bg-yellow-400"
+                        className="absolute inset-0 bg-[#FB6F90]/80"
                         initial={{ x: "100%" }}
                         whileHover={{ x: 0 }}
                         transition={{ type: "tween" }}
@@ -137,7 +140,7 @@ export default function BestSellers() {
 
               {/* Hover Effect Overlay */}
               <motion.div
-                className="absolute inset-0 bg-yellow-600/10 pointer-events-none"
+                className="absolute inset-0 bg-[#FB6F90]/10 pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -150,7 +153,7 @@ export default function BestSellers() {
         <div className="text-center mt-16">
           <Link
             href="/product"
-            className="inline-flex items-center px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-full font-medium tracking-wide transition-colors group"
+            className="inline-flex items-center px-8 py-3 bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded-full font-medium tracking-wide transition-colors group"
           >
             View All Products
             <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" />

@@ -1,63 +1,74 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogOut, ShoppingBag, User } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/app/context/AuthContext";
+import { logoutUser } from "@/app/firebase/firebase_services/firebaseAuth";
 import SearchWithModal from "./Search";
 
-// Desktop link component
+// Desktop link
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-gray-300 hover:text-yellow-400 transition font-medium text-sm tracking-wide">
+  <Link
+    href={href}
+    className="text-gray-600 hover:text-[#FB6F90] transition font-medium text-sm tracking-wide"
+  >
     {children}
   </Link>
 );
 
-// Desktop icon link component
+// Desktop icon link
 const NavIcon = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-gray-400 hover:text-yellow-400 transition flex items-center">
+  <Link
+    href={href}
+    className="text-gray-600 hover:text-[#FB6F90] transition flex items-center"
+  >
     {children}
   </Link>
 );
 
-// Mobile link component - Closes menu on click
-const MobileNavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) => (
-  <Link href={href} onClick={onClick} className="text-2xl font-medium hover:text-yellow-500 transition">
+// Mobile link
+const MobileNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+  <Link
+    href={href}
+    className="text-2xl font-medium hover:text-[#FB6F90] transition"
+  >
     {children}
   </Link>
 );
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-
-  // Automatically close mobile menu on route change
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
 
   return (
     <>
       {/* Announcement Bar */}
-      <div className="bg-gradient-to-r from-yellow-500/20 via-yellow-400/10 to-yellow-500/20 text-yellow-300 text-sm py-3 text-center tracking-wide font-medium">
+      <div className="bg-[#FB6F90]/20 text-[#FB6F90] text-sm py-3 text-center tracking-wide font-medium">
         ✨ Exclusive 10% off on your first order! Use code: <span className="font-bold">WELCOME10</span> ✨
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md shadow-md border-b border-gray-800">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <Image src="/logo.png" alt="Logo" width={40} height={40} className="object-contain" />
-            <span className="text-yellow-300 text-2xl font-bold tracking-wide">H&H Jewelers</span>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+            <span className="text-[#FB6F90] text-2xl font-bold tracking-wide">
+              H&H Jewelers
+            </span>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden sm:block flex-1 max-w-lg mx-8">
+          {/* Desktop Search (Centered) */}
+          <div className="hidden sm:flex flex-1 justify-center max-w-lg">
             <SearchWithModal />
           </div>
 
@@ -66,6 +77,7 @@ export default function Navbar() {
             <NavLink href="/shop">Collections</NavLink>
             <NavLink href="/product">Products</NavLink>
             <NavLink href="/about">About</NavLink>
+            <NavLink href="/contact">Contact</NavLink>
           </div>
 
           {/* Desktop Icons */}
@@ -76,19 +88,15 @@ export default function Navbar() {
             </NavIcon>
 
             {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="px-3 py-1 bg-gray-700 rounded-full">
-                  <span className="text-yellow-300 text-sm">Hi, {user.displayName || user.email}</span>
-                </div>
+              <>
+                <span className="text-[#FB6F90] text-sm">Hi, {user.displayName || "User"}</span>
                 <button
-                  onClick={logout}
-                  className="p-2 rounded-full bg-gray-700 hover:bg-yellow-600 transition"
-                  title="Logout"
-                  aria-label="Logout"
+                  onClick={logoutUser}
+                  className="text-gray-600 hover:text-[#FB6F90] transition"
                 >
-                  <LogOut className="w-5 h-5 text-gray-300" />
+                  <LogOut className="w-5 h-5" />
                 </button>
-              </div>
+              </>
             ) : (
               <NavIcon href="/auth">
                 <User className="w-5 h-5" />
@@ -99,8 +107,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden text-yellow-300 hover:text-yellow-500 transition"
-            aria-label="Open mobile menu"
+            className="lg:hidden text-[#FB6F90] hover:text-[#fb4e73] transition"
           >
             <Menu className="w-7 h-7" />
           </button>
@@ -114,42 +121,33 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-lg z-50 flex flex-col items-center justify-center text-yellow-300 space-y-8"
+            className="fixed inset-0 bg-white/95 backdrop-blur-lg z-50 flex flex-col items-center justify-center text-[#FB6F90] space-y-8"
           >
             {/* Close Button */}
             <button
               onClick={() => setIsMenuOpen(false)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-yellow-400 transition"
-              aria-label="Close mobile menu"
+              className="absolute top-6 right-6 text-gray-600 hover:text-[#FB6F90] transition"
             >
               <X className="w-7 h-7" />
             </button>
 
-            {/* Mobile Navigation Links - Closes Menu on Click */}
-            <MobileNavLink href="/shop" onClick={() => setIsMenuOpen(false)}>Collections</MobileNavLink>
-            <MobileNavLink href="/product" onClick={() => setIsMenuOpen(false)}>Products</MobileNavLink>
-            <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)}>About</MobileNavLink>
-            <MobileNavLink href="/cart" onClick={() => setIsMenuOpen(false)}>Cart</MobileNavLink>
+            {/* Mobile Navigation Links */}
+            <MobileNavLink href="/shop">Collections</MobileNavLink>
+            <MobileNavLink href="/product">Products</MobileNavLink>
+            <MobileNavLink href="/about">About</MobileNavLink>
+            <MobileNavLink href="/contact">Contact</MobileNavLink>
+            <MobileNavLink href="/cart">Cart</MobileNavLink>
 
-            {/* Mobile User Authentication */}
+            {/* User Authentication */}
             {user ? (
-              <div className="flex flex-col items-center space-y-2">
-                <div className="px-3 py-1 bg-gray-700 rounded-full">
-                  <span className="text-yellow-400 text-lg font-medium">Hi, {user.displayName || user.email}</span>
-                </div>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="px-4 py-2 bg-gray-700 text-yellow-400 rounded hover:bg-yellow-600 transition text-lg font-medium"
-                  aria-label="Logout"
-                >
-                  Logout
-                </button>
-              </div>
+              <button
+                onClick={logoutUser}
+                className="text-[#FB6F90] hover:text-[#fb4e73] transition text-lg font-medium"
+              >
+                Logout
+              </button>
             ) : (
-              <MobileNavLink href="/auth" onClick={() => setIsMenuOpen(false)}>Login</MobileNavLink>
+              <MobileNavLink href="/auth">Login</MobileNavLink>
             )}
           </motion.div>
         )}

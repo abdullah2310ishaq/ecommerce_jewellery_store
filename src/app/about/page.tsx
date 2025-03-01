@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Mail, Phone, MapPin, Clock, Award, Heart } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Award, Heart } from "lucide-react";
 
 export default function AboutPage() {
   const [result, setResult] = useState("");
@@ -35,10 +35,10 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 text-amber-50">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Hero Section with Parallax Effect */}
       <div className="relative h-[60vh] overflow-hidden">
-        <div className="absolute inset-0 bg-black/70 z-10"></div>
+        <div className="absolute inset-0 bg-white/80 z-10"></div>
         <div className="relative h-full w-full">
           <Image 
             src="/jewelry-banner.jpg" 
@@ -50,15 +50,17 @@ export default function AboutPage() {
         </div>
         <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="text-center px-4">
-            <h1 className="text-6xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-100 drop-shadow-lg">
+            <h1 className="text-6xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] drop-shadow-lg">
               H&H Jewelers
             </h1>
-            <p className="text-xl md:text-2xl text-amber-50 max-w-3xl mx-auto font-light tracking-wide">
-              <span className="border-b-2 border-amber-400 pb-1">Crafting Timeless Elegance Since 1995</span>
+            <p className="text-xl md:text-2xl text-gray-800 max-w-3xl mx-auto font-light tracking-wide">
+              <span className="border-b-2 border-[#FB6F90] pb-1">
+                Crafting Timeless Elegance Since 1995
+              </span>
             </p>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-gray-950 to-transparent z-10"></div>
+        <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent z-10"></div>
       </div>
 
       {/* Main Content */}
@@ -67,7 +69,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
           <div>
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-lg blur-md opacity-25"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] rounded-lg blur-md opacity-25"></div>
               <div className="relative overflow-hidden rounded-lg shadow-xl">
                 <Image 
                   src="/logo.jpg?height=500&width=500" 
@@ -81,17 +83,17 @@ export default function AboutPage() {
           </div>
           <div className="space-y-6">
             <div className="inline-block">
-              <h2 className="text-3xl md:text-4xl font-semibold text-amber-300 relative after:content-[''] after:absolute after:w-1/2 after:h-[3px] after:bg-gradient-to-r after:from-amber-400 after:to-transparent after:bottom-0 after:left-0 pb-2">
+              <h2 className="text-3xl md:text-4xl font-semibold text-[#FB6F90] relative after:content-[''] after:absolute after:w-1/2 after:h-[3px] after:bg-gradient-to-r after:from-[#FB6F90] after:to-transparent after:bottom-0 after:left-0 pb-2">
                 Our Heritage
               </h2>
             </div>
-            <p className="text-lg leading-relaxed">
-              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and captures lifes most precious moments.
+            <p className="text-lg leading-relaxed text-gray-800">
+              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and captures life’s most precious moments.
             </p>
-            <p className="text-lg leading-relaxed">
+            <p className="text-lg leading-relaxed text-gray-800">
               Each H&H creation embodies the perfect harmony of tradition and innovation. Our master artisans blend age-old techniques with contemporary vision, crafting pieces that are not merely accessories, but expressions of individuality and milestones of personal significance.
             </p>
-            <div className="flex items-center space-x-4 text-amber-400 mt-6">
+            <div className="flex items-center space-x-4 text-[#FB6F90] mt-6">
               <Clock className="h-5 w-5" />
               <span className="text-lg font-light">Established 1995</span>
             </div>
@@ -100,21 +102,21 @@ export default function AboutPage() {
 
         {/* Elegant Divider */}
         <div className="flex items-center justify-center my-20">
-          <div className="w-1/3 h-px bg-gradient-to-r from-transparent via-amber-700/50 to-transparent"></div>
+          <div className="w-1/3 h-px bg-gradient-to-r from-transparent via-[#FB6F90]/50 to-transparent"></div>
           <div className="mx-4">
-            <div className="w-3 h-3 rotate-45 bg-amber-400"></div>
+            <div className="w-3 h-3 rotate-45 bg-[#FB6F90]"></div>
           </div>
-          <div className="w-1/3 h-px bg-gradient-to-l from-transparent via-amber-700/50 to-transparent"></div>
+          <div className="w-1/3 h-px bg-gradient-to-l from-transparent via-[#FB6F90]/50 to-transparent"></div>
         </div>
 
         {/* Values Section with Hover Effects */}
         <div className="mb-24">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-semibold text-amber-300 inline-block relative after:content-[''] after:absolute after:w-full after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-amber-400 after:to-transparent after:bottom-0 after:left-0 pb-3">
+            <h2 className="text-4xl font-semibold text-[#FB6F90] inline-block relative after:content-[''] after:absolute after:w-full after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#FB6F90] after:to-transparent after:bottom-0 after:left-0 pb-3">
               Our Values
             </h2>
-            <p className="text-lg text-amber-50/80 max-w-3xl mx-auto mt-6">
-              The principles that guide us in creating pieces worthy of your most cherished moments
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto mt-6">
+              The principles that guide us in creating pieces worthy of your most cherished moments.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -136,15 +138,15 @@ export default function AboutPage() {
               }
             ].map((value, index) => (
               <div key={index} className="group relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-amber-600/5 to-amber-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
-                <div className="relative bg-gray-900/40 backdrop-blur-sm p-8 rounded-xl border border-amber-900/30 shadow-lg transform group-hover:translate-y-[-5px] transition-transform duration-500">
-                  <div className="text-amber-400 mb-4 group-hover:scale-110 transform transition-transform duration-500">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#FB6F90]/5 to-[#FB6F90]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
+                <div className="relative bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-lg transform group-hover:-translate-y-1 transition-transform duration-500">
+                  <div className="text-[#FB6F90] mb-4 group-hover:scale-110 transform transition-transform duration-500">
                     {value.icon}
                   </div>
-                  <h3 className="text-xl font-medium mb-3 text-amber-300">
+                  <h3 className="text-xl font-medium mb-3 text-[#FB6F90]">
                     {value.title}
                   </h3>
-                  <p className="text-amber-50/80 group-hover:text-amber-50 transition-colors duration-300">
+                  <p className="text-gray-700 group-hover:text-gray-900 transition-colors duration-300">
                     {value.description}
                   </p>
                 </div>
@@ -152,136 +154,126 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-
-    
-    
       </div>
 
-  {/* Contact Section with Proper Layout Fix */}
-<section id="contact" className="py-20 px-4 relative">
-  <div className="absolute inset-0 bg-black/80"></div>
-  <div className="absolute inset-0 opacity-20">
-  
-  </div>
-  <div className="max-w-7xl mx-auto relative z-10">
-    <div className="text-center mb-16">
-      <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-100 mb-6">
-        Connect With Us
-      </h2>
-      <p className="text-amber-50/80 max-w-2xl mx-auto text-lg">
-        We are here to assist you on your journey to find the perfect piece of jewelry
-      </p>
-    </div>
-
-    {/* Contact Info + Form + Image Grid */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-      
-      {/* Contact Info */}
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-        <div className="relative flex flex-col space-y-6 bg-gray-900/80 backdrop-blur-md p-8 rounded-xl border border-amber-700/30 shadow-xl">
-          <h3 className="text-2xl font-semibold text-amber-300 mb-4">Visit Our Boutique</h3>
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <MapPin className="text-amber-400 h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-amber-100 font-medium">Our Location</p>
-              <p className="text-amber-100/70">Luxury Mall, Islamabad</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <Phone className="text-amber-400 h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-amber-100 font-medium">Call Us</p>
-              <a href="tel:+92-346-2207429" className="text-amber-100/70 hover:text-amber-300 transition-colors duration-300">
-                +92-344-5751822
-              </a>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <Mail className="text-amber-400 h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-amber-100 font-medium">Email Us</p>
-              <a href="mailto:contact@hjewelers.com" className="text-amber-100/70 hover:text-amber-300 transition-colors duration-300">
-              handhjewelry925@gmail.com
-              </a>
-            </div>
-          </div>
-          <div className="pt-4 border-t border-amber-700/30 mt-4">
-            <p className="text-amber-100/70">
-              Experience our exquisite collection in person at our elegant showroom.
+      {/* Contact Section */}
+      <section id="contact" className="py-20 px-4 relative">
+        <div className="absolute inset-0 bg-white/95"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] mb-6">
+              Connect With Us
+            </h2>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+              We are here to assist you on your journey to find the perfect piece of jewelry.
             </p>
           </div>
+
+          {/* Contact Info + Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+            {/* Contact Info */}
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="relative flex flex-col space-y-6 bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-xl">
+                <h3 className="text-2xl font-semibold text-[#FB6F90] mb-4">Visit Our Boutique</h3>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
+                    <MapPin className="text-[#FB6F90] h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Our Location</p>
+                    <p className="text-gray-600">Luxury Mall, Islamabad</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
+                    <Phone className="text-[#FB6F90] h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Call Us</p>
+                    <a href="tel:+92-346-2207429" className="text-gray-600 hover:text-[#FB6F90] transition-colors duration-300">
+                      +92-344-5751822
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
+                    <Mail className="text-[#FB6F90] h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Email Us</p>
+                    <a href="mailto:contact@hjewelers.com" className="text-gray-600 hover:text-[#FB6F90] transition-colors duration-300">
+                      handhjewelry925@gmail.com
+                    </a>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-gray-300 mt-4">
+                  <p className="text-gray-600">
+                    Experience our exquisite collection in person at our elegant showroom.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="relative bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-xl">
+                <form onSubmit={onSubmit} className="space-y-5">
+                  <h3 className="text-2xl font-semibold text-[#FB6F90] mb-4">Send a Message</h3>
+                  <div>
+                    <label htmlFor="name" className="text-gray-800 text-sm font-medium block mb-2">Your Name</label>
+                    <input
+                      id="name"
+                      type="text"
+                      name="name"
+                      placeholder="Enter your name"
+                      className="w-full p-3 rounded-md bg-gray-100 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FB6F90] transition-all duration-300"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="text-gray-800 text-sm font-medium block mb-2">Your Email</label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      placeholder="Enter your email"
+                      className="w-full p-3 rounded-md bg-gray-100 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FB6F90] transition-all duration-300"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="text-gray-800 text-sm font-medium block mb-2">Your Message</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      placeholder="How can we help you?"
+                      className="w-full p-3 rounded-md bg-gray-100 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FB6F90] transition-all duration-300 min-h-[120px]"
+                      rows={5}
+                      required
+                    ></textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white font-medium py-3 px-6 rounded-md shadow-lg transition-all duration-300 disabled:opacity-70 transform hover:-translate-y-1"
+                  >
+                    {isSubmitting ? "Sending..." : "Send Message"}
+                  </button>
+                  {result && (
+                    <p className={`text-sm ${result.includes("Successfully") ? "text-green-600" : "text-red-600"}`}>
+                      {result}
+                    </p>
+                  )}
+                </form>
+              </div>
+            </div>
+
+            {/* (Optional) Image Grid or Additional Content can go here */}
+          </div>
         </div>
-      </div>
-
-      {/* Contact Form */}
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-        <div className="relative bg-gray-900/80 backdrop-blur-md p-8 rounded-xl border border-amber-700/30 shadow-xl">
-          <form onSubmit={onSubmit} className="space-y-5">
-            <h3 className="text-2xl font-semibold text-amber-300 mb-4">Send a Message</h3>
-            <div>
-              <label htmlFor="name" className="text-amber-200 text-sm font-medium block mb-2">Your Name</label>
-              <input
-                id="name"
-                type="text"
-                name="name"
-                placeholder="Enter your name"
-                className="w-full p-3 rounded-md bg-gray-800/90 border border-amber-700/30 text-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-300"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="text-amber-200 text-sm font-medium block mb-2">Your Email</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                className="w-full p-3 rounded-md bg-gray-800/90 border border-amber-700/30 text-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-300"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="text-amber-200 text-sm font-medium block mb-2">Your Message</label>
-              <textarea
-                id="message"
-                name="message"
-                placeholder="How can we help you?"
-                className="w-full p-3 rounded-md bg-gray-800/90 border border-amber-700/30 text-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-300 min-h-[120px]"
-                rows={5}
-                required
-              ></textarea>
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-white font-medium py-3 px-6 rounded-md shadow-lg transition-all duration-300 disabled:opacity-70 transform hover:-translate-y-1"
-            >
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </button>
-            {result && (
-              <p className={`text-sm ${result.includes("Successfully") ? "text-green-400" : "text-red-400"}`}>
-                {result}
-              </p>
-            )}
-          </form>
-        </div>
-      </div>
-
-
-
-    </div>
-  </div>
-</section>
-
-
+      </section>
     </div>
   );
 }

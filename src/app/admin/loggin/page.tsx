@@ -23,19 +23,19 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <form onSubmit={handleLogin} className="bg-gray-800 p-6 rounded shadow-lg w-96">
+    <div className="flex items-center justify-center min-h-screen bg-white text-gray-900">
+      <form onSubmit={handleLogin} className="bg-gray-100 p-6 rounded shadow-lg w-96">
         <h1 className="text-2xl font-bold mb-4">Admin Login</h1>
         <input
           type="password"
           placeholder="Enter Admin Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 rounded text-black"
+          className="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-[#FB6F90] text-gray-900"
           required
         />
-        {error && <p className="text-red-400 mt-2">{error}</p>}
-        <button type="submit" className="w-full bg-blue-600 mt-4 p-2 rounded">
+        {error && <p className="text-red-600 mt-2">{error}</p>}
+        <button type="submit" className="w-full bg-[#FB6F90] mt-4 p-2 rounded text-white hover:bg-[#FB6F90]/90 transition-colors">
           Login
         </button>
       </form>

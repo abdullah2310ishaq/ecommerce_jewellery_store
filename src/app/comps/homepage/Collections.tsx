@@ -34,9 +34,9 @@ export default function Collections() {
 
   if (loading) {
     return (
-      <section className="py-24 bg-gradient-to-b from-gray-900 to-black">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-center text-white">Loading Collections...</h2>
+          <h2 className="text-center text-gray-900">Loading Collections...</h2>
         </div>
       </section>
     );
@@ -44,8 +44,8 @@ export default function Collections() {
 
   if (!collections.length) {
     return (
-      <section className="py-24 bg-gradient-to-b from-gray-900 to-black">
-        <div className="container mx-auto px-6 text-center text-white">
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-6 text-center text-gray-900">
           <h2>No featured collections found.</h2>
         </div>
       </section>
@@ -53,17 +53,17 @@ export default function Collections() {
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-900 to-black">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-6">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h2 className="text-sm font-light tracking-[0.3em] text-yellow-400 mb-4">
+          <h2 className="text-sm font-light tracking-[0.3em] text-[#FB6F90] mb-4">
             DISCOVER OUR
           </h2>
-          <h3 className="text-4xl md:text-5xl font-serif text-white mb-6">
+          <h3 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6">
             Featured Collections
           </h3>
-          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600" />
+          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-[#FB6F90] via-[#FB6F90] to-[#FB6F90]" />
         </div>
 
         {/* Collections Grid */}
@@ -71,17 +71,14 @@ export default function Collections() {
           {collections.map((collection) => (
             <Link
               key={collection.id}
-              // For the URL, you might do something like /shop?category={collection.id}
-              // or /collection/{collection.id}. Adjust as needed.
               href={`/shop?category=${collection.id}`}
               className="group relative block rounded-lg overflow-hidden"
             >
               {/* Overlay */}
-              <div className="absolute inset-0 bg-black/20 z-10" />
+              <div className="absolute inset-0 bg-[#FB6F90]/10 z-10" />
 
               {/* Image */}
               <div className="relative aspect-[3/4] overflow-hidden">
-                {/* If collection.image is missing, you can use a fallback */}
                 <Image
                   src={collection.image || "/placeholder.jpg"}
                   alt={collection.name}
@@ -89,26 +86,24 @@ export default function Collections() {
                   className="object-cover transform transition-transform duration-700 group-hover:scale-110"
                 />
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
 
               {/* Content */}
               <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
                 <div className="overflow-hidden">
-                  <h4 className="text-2xl font-serif text-white mb-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-100">
+                  <h4 className="text-2xl font-serif text-gray-900 mb-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-100">
                     {collection.name}
                   </h4>
                 </div>
-
                 <div className="overflow-hidden">
-                  <p className="text-gray-300 text-sm mb-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-200">
+                  <p className="text-gray-700 text-sm mb-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-200">
                     {collection.description}
                   </p>
                 </div>
-
                 <div className="overflow-hidden">
                   <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-300">
-                    <span className="inline-flex items-center text-yellow-400 text-sm font-medium">
+                    <span className="inline-flex items-center text-[#FB6F90] text-sm font-medium">
                       Explore Collection
                       <svg
                         className="w-4 h-4 ml-2 transform group-hover:translate-x-2 transition-transform duration-300"
@@ -127,6 +122,9 @@ export default function Collections() {
                   </div>
                 </div>
               </div>
+
+              {/* Hover Effect Overlay */}
+              <div className="absolute inset-0 bg-[#FB6F90]/10 pointer-events-none" />
             </Link>
           ))}
         </div>

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "./ProductCard";
@@ -50,7 +49,7 @@ export default function ProductList({ products }: ProductListProps) {
   );
 
   return (
-    <section className="bg-gradient-to-b from-gray-900 to-black text-yellow-100 py-12 px-4 min-h-screen">
+    <section className="bg-white text-gray-900 py-12 px-4 min-h-screen">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -62,7 +61,7 @@ export default function ProductList({ products }: ProductListProps) {
           initial={{ y: -20 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent mb-8 text-center"
+          className="text-4xl md:text-5xl font-bold mb-8 text-center text-[#FB6F90]"
         >
           Our Exclusive Jewelry Collection
         </motion.h2>
@@ -78,13 +77,21 @@ export default function ProductList({ products }: ProductListProps) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded ${viewMode === "grid" ? "bg-yellow-600 text-black" : "bg-gray-800"}`}
+              className={`p-2 rounded ${
+                viewMode === "grid"
+                  ? "bg-[#FB6F90] text-white"
+                  : "bg-gray-100 text-gray-900"
+              }`}
             >
               <Grid size={20} />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded ${viewMode === "list" ? "bg-yellow-600 text-black" : "bg-gray-800"}`}
+              className={`p-2 rounded ${
+                viewMode === "list"
+                  ? "bg-[#FB6F90] text-white"
+                  : "bg-gray-100 text-gray-900"
+              }`}
             >
               <List size={20} />
             </button>
@@ -92,10 +99,14 @@ export default function ProductList({ products }: ProductListProps) {
 
           {/* Sort Controls */}
           <div className="flex items-center space-x-2">
+            <label htmlFor="sortBy" className="sr-only">Sort By</label>
             <select
+              id="sortBy"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "name" | "price" | "rating")}
-              className="bg-gray-800 rounded p-2"
+              onChange={(e) =>
+                setSortBy(e.target.value as "name" | "price" | "rating")
+              }
+              className="bg-gray-100 rounded p-2 border border-[#FB6F90] text-gray-900"
             >
               <option value="name">Name</option>
               <option value="price">Price</option>
@@ -103,19 +114,25 @@ export default function ProductList({ products }: ProductListProps) {
             </select>
             <button
               onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="p-2 bg-gray-800 rounded"
+              className="p-2 bg-gray-100 rounded border border-[#FB6F90]"
             >
-              {sortOrder === "asc" ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              {sortOrder === "asc" ? (
+                <ChevronUp size={20} className="text-[#FB6F90]" />
+              ) : (
+                <ChevronDown size={20} className="text-[#FB6F90]" />
+              )}
             </button>
           </div>
 
           {/* Category Filter */}
           <div className="flex items-center space-x-2">
-            <Filter size={20} />
+            <Filter size={20} className="text-[#FB6F90]" />
+            <label htmlFor="filterCategory" className="sr-only">Filter by Category</label>
             <select
+              id="filterCategory"
               value={filterCategory || ""}
               onChange={(e) => setFilterCategory(e.target.value || null)}
-              className="bg-gray-800 rounded p-2"
+              className="bg-gray-100 rounded p-2 border border-[#FB6F90] text-gray-900"
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -133,7 +150,7 @@ export default function ProductList({ products }: ProductListProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-center text-gray-300 mt-8"
+            className="text-center text-gray-700 mt-8"
           >
             <p className="text-xl">No products found.</p>
           </motion.div>
@@ -143,7 +160,9 @@ export default function ProductList({ products }: ProductListProps) {
             <motion.div
               layout
               className={`grid gap-8 ${
-                viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+                viewMode === "grid"
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                  : "grid-cols-1"
               }`}
             >
               <AnimatePresence>

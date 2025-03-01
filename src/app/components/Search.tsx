@@ -116,7 +116,7 @@ export default function NavbarSearchDropdown() {
       {/* Search button in the navbar */}
       <button
         onClick={toggleDropdown}
-        className="flex items-center gap-2 px-4 py-2 text-yellow-300 hover:text-yellow-400 bg-gray-800 rounded"
+        className="flex items-center gap-2 px-4 py-2 text-white hover:text-[#FB6F90] bg-gray-800 rounded"
       >
         <Search className="w-5 h-5" />
         <span>Search</span>
@@ -135,17 +135,17 @@ export default function NavbarSearchDropdown() {
             <div className="flex justify-end p-2 border-b border-gray-700">
               <button
                 onClick={closeDropdown}
-                className="text-gray-400 hover:text-yellow-400"
+                className="text-gray-400 hover:text-[#FB6F90]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             {selectedProduct ? (
               // --- PRODUCT DETAIL VIEW ---
-              <div className="p-4 text-gray-200">
+              <div className="p-4 text-white">
                 <button
                   onClick={backToResults}
-                  className="flex items-center gap-2 mb-4 text-yellow-400 hover:text-yellow-300"
+                  className="flex items-center gap-2 mb-4 text-[#FB6F90] hover:text-[#FB6F90]/90"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span>Back to Results</span>
@@ -158,16 +158,16 @@ export default function NavbarSearchDropdown() {
                     className="object-cover"
                   />
                 </div>
-                <h2 className="text-2xl font-bold text-yellow-300">
+                <h2 className="text-2xl font-bold text-white">
                   {selectedProduct.name}
                 </h2>
-                <p className="text-lg text-yellow-400 my-2">
+                <p className="text-lg text-[#FB6F90] my-2">
                   Rs. {selectedProduct.price}
                 </p>
                 <div className="flex gap-4 mt-4">
                   <Link
                     href={`/product/${selectedProduct.id}`}
-                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-black rounded font-medium"
+                    className="px-4 py-2 bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded font-medium"
                   >
                     View Details
                   </Link>
@@ -178,18 +178,18 @@ export default function NavbarSearchDropdown() {
               <>
                 <div className="px-4 pb-4">
                   <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FB6F90] w-5 h-5" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="w-full px-4 py-2 pl-10 text-gray-100 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full px-4 py-2 pl-10 text-white bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FB6F90]"
                     />
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     {loading ? (
-                      <p className="p-4 text-yellow-400">Searching...</p>
+                      <p className="p-4 text-[#FB6F90]">Searching...</p>
                     ) : results.length > 0 ? (
                       results.map((product) => (
                         <div
@@ -206,10 +206,10 @@ export default function NavbarSearchDropdown() {
                             />
                           </div>
                           <div>
-                            <p className="text-yellow-300 font-medium">
+                            <p className="text-white font-medium">
                               {product.name}
                             </p>
-                            <p className="text-sm text-yellow-400">
+                            <p className="text-sm text-[#FB6F90]">
                               Rs. {product.price}
                             </p>
                           </div>

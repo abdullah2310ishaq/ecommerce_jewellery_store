@@ -80,14 +80,14 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-6 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 p-6 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md z-10"
       >
-        <div className="bg-gray-800/80 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
+        <div className="bg-white/90 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden border border-gray-200">
           <div className="p-8 sm:p-12">
             <motion.div
               initial={{ y: -20 }}
@@ -103,7 +103,7 @@ export default function AuthForm() {
                 whileTap={{ scale: 0.95 }}
               />
               <motion.h2
-                className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200 mb-4"
+                className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] mb-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -111,7 +111,7 @@ export default function AuthForm() {
                 {isLogin ? "Welcome Back!" : "Join Our Family"}
               </motion.h2>
               <motion.p
-                className="text-gray-300 text-lg mb-8"
+                className="text-gray-700 text-lg mb-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
@@ -138,7 +138,7 @@ export default function AuthForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-gray-300 mb-2">
+                <label htmlFor="email" className="block text-gray-700 mb-2">
                   Email
                 </label>
                 <input
@@ -146,12 +146,12 @@ export default function AuthForm() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 bg-gray-700 rounded-lg"
+                  className="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-gray-300 mb-2">
+                <label htmlFor="password" className="block text-gray-700 mb-2">
                   Password
                 </label>
                 <input
@@ -159,13 +159,13 @@ export default function AuthForm() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 bg-gray-700 rounded-lg"
+                  className="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg"
                   required
                 />
               </div>
               {!isLogin && (
                 <div>
-                  <label htmlFor="displayName" className="block text-gray-300 mb-2">
+                  <label htmlFor="displayName" className="block text-gray-700 mb-2">
                     Display Name
                   </label>
                   <input
@@ -173,7 +173,7 @@ export default function AuthForm() {
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full p-3 bg-gray-700 rounded-lg"
+                    className="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg"
                     required
                   />
                 </div>
@@ -183,14 +183,14 @@ export default function AuthForm() {
                 whileTap={{ scale: 0.95 }}
                 type="submit"
                 disabled={loading}
-                className="w-full bg-yellow-600 text-black py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300"
+                className="w-full bg-[#FB6F90] text-white py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300"
               >
                 {loading ? "Processing..." : isLogin ? "Sign In" : "Sign Up"}
               </motion.button>
             </form>
 
             <div className="flex items-center justify-center my-4">
-              <span className="text-gray-400">or</span>
+              <span className="text-gray-600">or</span>
             </div>
 
             <motion.button
@@ -198,7 +198,7 @@ export default function AuthForm() {
               whileTap={{ scale: 0.95 }}
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="w-full bg-white text-gray-800 py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300 flex items-center justify-center gap-2"
+              className="w-full bg-white text-gray-800 py-4 rounded-lg font-semibold shadow-md hover:shadow-lg transition duration-300 flex items-center justify-center gap-2 border border-gray-300"
             >
               <FcGoogle className="w-6 h-6" />
               <span className="text-lg">
@@ -214,7 +214,7 @@ export default function AuthForm() {
             >
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-yellow-400 hover:text-yellow-300 transition duration-300 text-lg"
+                className="text-[#FB6F90] hover:text-[#FB6F90]/90 transition duration-300 text-lg"
               >
                 {isLogin ? "Need an account? Sign Up" : "Already have an account? Sign In"}
               </button>

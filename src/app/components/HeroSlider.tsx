@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 // Slide Data
 const slides = [
@@ -17,41 +17,41 @@ const slides = [
   },
   {
     id: 2,
-    title: "Winter Special Offers",
+    title: "Old Money Collection",
     description: "Discover unique elegance",
     img: "https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     url: "/shop",
   },
   {
     id: 3,
-    title: "Spring Glamour Collection",
+    title: "Branded Luxury Collection",
     description: "Shine with perfection",
     img: "https://images.pexels.com/photos/2732096/pexels-photo-2732096.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     url: "/shop",
   },
-];
+]
 
 const HeroSlider = () => {
-  const [current, setCurrent] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+  const [current, setCurrent] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    if (isHovered) return;
-    
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000);
+    if (isHovered) return
 
-    return () => clearInterval(interval);
-  }, [isHovered]);
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [isHovered])
 
   const handlePrevious = () => {
-    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
+    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
+  }
 
   const handleNext = () => {
-    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  };
+    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
+  }
 
   return (
     <div
@@ -92,7 +92,7 @@ const HeroSlider = () => {
                     transition={{ duration: 1, delay: 0.3 }}
                     className="max-w-4xl space-y-6 transform translate-y-12"
                   >
-                    <h2 className="text-xl md:text-2xl text-yellow-300 font-light tracking-wider">
+                    <h2 className="text-xl md:text-2xl text-[#FB6F90] font-light tracking-wider">
                       {slide.description}
                     </h2>
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
@@ -102,7 +102,7 @@ const HeroSlider = () => {
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        className="mt-8 px-8 py-4 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-lg font-medium tracking-wide transition"
+                        className="mt-8 px-8 py-4 bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded-md text-lg font-medium tracking-wide transition"
                       >
                         Explore Collection
                       </motion.button>
@@ -142,14 +142,14 @@ const HeroSlider = () => {
             whileTap={{ scale: 0.9 }}
             className={`w-4 h-4 rounded-full transition-all duration-300 ${
               current === index
-                ? "bg-yellow-500 scale-125 shadow-lg"
+                ? "bg-[#FB6F90] scale-125 shadow-lg"
                 : "bg-white/50 hover:bg-white/80"
             }`}
           />
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default HeroSlider;
+export default HeroSlider

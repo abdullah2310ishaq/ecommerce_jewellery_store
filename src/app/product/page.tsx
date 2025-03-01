@@ -29,7 +29,7 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-yellow-100">
+      <div className="min-h-screen flex items-center justify-center bg-white text-gray-900">
         <p>Loading products...</p>
       </div>
     );
