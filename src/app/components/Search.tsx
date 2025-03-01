@@ -16,7 +16,7 @@ interface Product {
   images?: string[];
 }
 
-export default function NavbarSearchDropdown() {
+export default function SearchWithModal() {
   // Controls dropdown visibility
   const [open, setOpen] = useState(false);
 
@@ -112,27 +112,30 @@ export default function NavbarSearchDropdown() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative">
-      {/* Search button in the navbar */}
-      <button
-        onClick={toggleDropdown}
-        className="flex items-center gap-2 px-4 py-2 text-white hover:text-[#FB6F90] bg-gray-800 rounded"
-      >
-        <Search className="w-5 h-5" />
-        <span>Search</span>
-      </button>
+    <div ref={containerRef} className="relative w-full max-w-md">
+      {/* Search input in the navbar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <input
+          type="text"
+          onClick={toggleDropdown}
+          placeholder="Search jewelry..."
+          className="w-full px-4 py-2 pl-10 text-gray-600 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#FB6F90] focus:border-transparent text-sm"
+        />
+      </div>
 
       {/* Dropdown panel (animated) */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="absolute left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-40"
+            className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-40"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
             {/* Top bar with close button */}
-            <div className="flex justify-end p-2 border-b border-gray-700">
+            <div className="flex justify-between items-center p-3 border-b border-gray-100">
+              <h3 className="text-sm font-medium text-gray-700">Search Results</h3>
               <button
                 onClick={closeDropdown}
                 className="text-gray-400 hover:text-[#FB6F90]"
@@ -140,17 +143,18 @@ export default function NavbarSearchDropdown() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+            
             {selectedProduct ? (
               // --- PRODUCT DETAIL VIEW ---
-              <div className="p-4 text-white">
+              <div className="p-4">
                 <button
                   onClick={backToResults}
                   className="flex items-center gap-2 mb-4 text-[#FB6F90] hover:text-[#FB6F90]/90"
                 >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span>Back to Results</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm">Back to Results</span>
                 </button>
-                <div className="relative w-full h-64 mb-4 rounded overflow-hidden">
+                <div className="relative w-full h-64 mb-4 rounded-lg overflow-hidden">
                   <Image
                     src={selectedProduct.images?.[0] || "/placeholder.jpg"}
                     alt={selectedProduct.name}
@@ -158,7 +162,7 @@ export default function NavbarSearchDropdown() {
                     className="object-cover"
                   />
                 </div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-xl font-bold text-gray-800">
                   {selectedProduct.name}
                 </h2>
                 <p className="text-lg text-[#FB6F90] my-2">
@@ -167,7 +171,7 @@ export default function NavbarSearchDropdown() {
                 <div className="flex gap-4 mt-4">
                   <Link
                     href={`/product/${selectedProduct.id}`}
-                    className="px-4 py-2 bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded font-medium"
+                    className="px-4 py-2 bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded-md font-medium text-sm"
                   >
                     View Details
                   </Link>
@@ -176,51 +180,52 @@ export default function NavbarSearchDropdown() {
             ) : (
               // --- SEARCH INPUT & RESULTS ---
               <>
-                <div className="px-4 pb-4">
+                <div className="px-4 py-3">
                   <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FB6F90] w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FB6F90] w-4 h-4" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="w-full px-4 py-2 pl-10 text-white bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FB6F90]"
+                      className="w-full px-4 py-2 pl-10 text-gray-700 bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FB6F90] text-sm"
+                      autoFocus
                     />
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     {loading ? (
-                      <p className="p-4 text-[#FB6F90]">Searching...</p>
+                      <p className="p-4 text-[#FB6F90] text-center text-sm">Searching...</p>
                     ) : results.length > 0 ? (
                       results.map((product) => (
                         <div
                           key={product.id}
                           onClick={() => setSelectedProduct(product)}
-                          className="flex items-center p-3 border-b border-gray-700 last:border-none cursor-pointer hover:bg-gray-700"
+                          className="flex items-center p-3 border-b border-gray-100 last:border-none cursor-pointer hover:bg-gray-50 transition-colors"
                         >
                           <div className="relative w-12 h-12 mr-3">
                             <Image
                               src={product.images?.[0] || "/placeholder.jpg"}
                               alt={product.name}
                               fill
-                              className="object-cover rounded"
+                              className="object-cover rounded-md"
                             />
                           </div>
                           <div>
-                            <p className="text-white font-medium">
+                            <p className="text-gray-800 font-medium text-sm">
                               {product.name}
                             </p>
-                            <p className="text-sm text-[#FB6F90]">
+                            <p className="text-xs text-[#FB6F90] font-medium">
                               Rs. {product.price}
                             </p>
                           </div>
                         </div>
                       ))
                     ) : searchQuery.trim() ? (
-                      <p className="p-4 text-center text-gray-400">
+                      <p className="p-4 text-center text-gray-500 text-sm">
                         No products found
                       </p>
                     ) : (
-                      <p className="p-4 text-center text-gray-400">
+                      <p className="p-4 text-center text-gray-500 text-sm">
                         Start typing to search...
                       </p>
                     )}
