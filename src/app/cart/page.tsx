@@ -35,7 +35,7 @@ export default function CartPage() {
       setCartItems(getCart());
     }
   }
-
+//hide
   // Remove item from cart
   function handleRemoveItem(itemId: string) {
     updateCartItem(itemId, 0);
