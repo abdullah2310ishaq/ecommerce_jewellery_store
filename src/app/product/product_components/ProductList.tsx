@@ -1,200 +1,262 @@
-"use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import ProductCard from "./ProductCard";
-import Pagination from "./Pagination";
-import { ChevronDown, ChevronUp, Filter, Grid, List } from "lucide-react";
+"use client"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import ProductCard from "./ProductCard"
+import { ChevronDown, ChevronUp, Grid, List, Search, X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images?: string[];
-  rating?: number;
-  isOnSale?: boolean;
-  category?: string;
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  rating?: number
+  isOnSale?: boolean
 }
 
 interface ProductListProps {
-  products: Product[];
+  products: Product[]
 }
 
-const itemsPerPage = 6;
+const ITEMS_PER_PAGE = 3
 
 export default function ProductList({ products }: ProductListProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const categories = Array.from(new Set(products.map((p) => p.category)));
-
-  const sortedAndFilteredProducts = products
-    .filter((p) => !filterCategory || p.category === filterCategory)
+  // Filter and sort products
+  const filteredAndSortedProducts = products
+    .filter((p) => {
+      // Search filter
+      return !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    })
     .sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "price") return a.price - b.price;
-      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
-      return 0;
-    });
+      if (sortBy === "name") return a.name.localeCompare(b.name)
+      if (sortBy === "price") return a.price - b.price
+      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0)
+      return 0
+    })
 
-  if (sortOrder === "desc") sortedAndFilteredProducts.reverse();
+  // Apply sort order
+  if (sortOrder === "desc") filteredAndSortedProducts.reverse()
 
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedAndFilteredProducts.length / itemsPerPage);
-  const displayedProducts = sortedAndFilteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE)
+  const paginatedProducts = filteredAndSortedProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  )
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("")
+    setSortBy("name")
+    setSortOrder("asc")
+    setCurrentPage(1)
+  }
 
   return (
-    <section className="bg-white text-gray-900 py-12 px-4 min-h-screen">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-7xl mx-auto"
-      >
-        {/* Section Heading */}
-        <motion.h2
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-4xl md:text-5xl font-bold mb-8 text-center text-[#FB6F90]"
-        >
-          Our Exclusive Jewelry Collection
-        </motion.h2>
+    <section className="bg-gray-50 py-10 px-4 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header with title and search */}
+        <div className="mb-8">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-2"
+          >
+            Our Exclusive Collection
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-center text-gray-600 mb-6"
+          >
+            Discover our handpicked selection of beautiful jewelry pieces
+          </motion.p>
 
-        {/* Controls */}
+          {/* Search bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="relative max-w-md mx-auto mb-8"
+          >
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#FB6F90] focus:border-transparent"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("")
+                    setCurrentPage(1)
+                  }}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Controls bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-wrap justify-between items-center mb-8 gap-4"
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-lg shadow-sm p-4 mb-8 flex flex-wrap justify-between items-center gap-4"
         >
-          {/* View Mode Toggle */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded ${
-                viewMode === "grid"
-                  ? "bg-[#FB6F90] text-white"
-                  : "bg-gray-100 text-gray-900"
-              }`}
-            >
-              <Grid size={20} />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded ${
-                viewMode === "list"
-                  ? "bg-[#FB6F90] text-white"
-                  : "bg-gray-100 text-gray-900"
-              }`}
-            >
-              <List size={20} />
-            </button>
+          {/* Left side - View toggle and results count */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-1 border rounded-md overflow-hidden">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 ${
+                  viewMode === "grid" ? "bg-[#FB6F90] text-white" : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+                aria-label="Grid view"
+              >
+                <Grid size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 ${
+                  viewMode === "list" ? "bg-[#FB6F90] text-white" : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+                aria-label="List view"
+              >
+                <List size={18} />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-medium">{filteredAndSortedProducts.length}</span> products
+            </p>
           </div>
 
-          {/* Sort Controls */}
-          <div className="flex items-center space-x-2">
-            <label htmlFor="sortBy" className="sr-only">Sort By</label>
-            <select
-              id="sortBy"
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as "name" | "price" | "rating")
-              }
-              className="bg-gray-100 rounded p-2 border border-[#FB6F90] text-gray-900"
-            >
-              <option value="name">Name</option>
-              <option value="price">Price</option>
-              <option value="rating">Rating</option>
-            </select>
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="p-2 bg-gray-100 rounded border border-[#FB6F90]"
-            >
-              {sortOrder === "asc" ? (
-                <ChevronUp size={20} className="text-[#FB6F90]" />
-              ) : (
-                <ChevronDown size={20} className="text-[#FB6F90]" />
-              )}
-            </button>
-          </div>
+          {/* Right side - Sort controls */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <label htmlFor="sortBy" className="text-sm text-gray-600">
+                Sort:
+              </label>
+              <div className="flex">
+                <select
+                  id="sortBy"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "name" | "price" | "rating")}
+                  className="bg-white rounded-l-md border border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-[#FB6F90] focus:border-[#FB6F90]"
+                >
+                  <option value="name">Name</option>
+                  <option value="price">Price</option>
+                  <option value="rating">Rating</option>
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                  className="p-1.5 bg-white rounded-r-md border border-l-0 border-gray-300 hover:bg-gray-50"
+                  aria-label={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                >
+                  {sortOrder === "asc" ? (
+                    <ChevronUp size={18} className="text-gray-700" />
+                  ) : (
+                    <ChevronDown size={18} className="text-gray-700" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-          {/* Category Filter */}
-          <div className="flex items-center space-x-2">
-            <Filter size={20} className="text-[#FB6F90]" />
-            <label htmlFor="filterCategory" className="sr-only">Filter by Category</label>
-            <select
-              id="filterCategory"
-              value={filterCategory || ""}
-              onChange={(e) => setFilterCategory(e.target.value || null)}
-              className="bg-gray-100 rounded p-2 border border-[#FB6F90] text-gray-900"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            {/* Clear filters button */}
+            {(searchQuery || sortBy !== "name" || sortOrder !== "asc") && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-[#FB6F90] hover:text-[#d85476] flex items-center gap-1"
+              >
+                <X size={14} />
+                <span>Clear</span>
+              </button>
+            )}
           </div>
         </motion.div>
 
-        {/* Check if no products at all */}
-        {sortedAndFilteredProducts.length === 0 ? (
+        {/* No products message */}
+        {filteredAndSortedProducts.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-center text-gray-700 mt-8"
+            className="bg-white rounded-lg shadow-sm p-8 text-center"
           >
-            <p className="text-xl">No products found.</p>
+            <p className="text-lg text-gray-600 mb-2">No products found</p>
+            <p className="text-gray-500 mb-4">Try adjusting your search criteria</p>
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-[#FB6F90] text-white rounded-md hover:bg-[#d85476] transition-colors"
+            >
+              Clear Filters
+            </button>
           </motion.div>
         ) : (
           <>
             {/* Product Grid/List */}
-            <motion.div
-              layout
-              className={`grid gap-8 ${
-                viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-1"
+            <div
+              className={`grid gap-6 ${
+                viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
               }`}
             >
-              <AnimatePresence>
-                {displayedProducts.map((product, index) => (
+              <AnimatePresence mode="wait">
+                {paginatedProducts.map((product) => (
                   <motion.div
                     key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    {/* Pass viewMode as a prop to ProductCard */}
                     <ProductCard product={product} viewMode={viewMode} />
                   </motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
 
-            {/* Pagination Controls */}
-            {displayedProducts.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="mt-10 flex justify-center"
-              >
-                <Pagination totalPages={totalPages} onPageChange={setCurrentPage} />
-              </motion.div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <span className="text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             )}
           </>
         )}
-      </motion.div>
+      </div>
     </section>
-  );
+  )
 }
+

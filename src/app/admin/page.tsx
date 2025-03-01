@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import {
   // PRODUCT functions
   getAllProducts,
@@ -27,7 +27,7 @@ interface FirestoreProduct {
   images: string[];
   collectionId?: string;
   isBestSeller?: boolean;
-  stock: number;
+  stock: number;                // <-- NEW FIELD
 }
 
 interface ProductFormData {
@@ -36,7 +36,7 @@ interface ProductFormData {
   price: number;
   images: string[];
   collectionId: string;
-  stock: number;
+  stock: number;                // <-- NEW FIELD
 }
 
 // ---------- COLLECTION INTERFACES ----------
@@ -55,6 +55,7 @@ interface CollectionFormData {
 }
 
 export default function AdminPage() {
+
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -66,7 +67,7 @@ export default function AdminPage() {
     price: 0,
     images: [],
     collectionId: "",
-    stock: 0,
+    stock: 0, // default
   });
   const [newProductImagesText, setNewProductImagesText] = useState<string>("");
 
@@ -89,46 +90,69 @@ export default function AdminPage() {
     image: "",
   });
   const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
+  const [editingCollectionData, setEditingCollectionData] = useState<CollectionFormData>({
+    name: "",
+    description: "",
+    image: "",
+  });
 
   // ============ FETCH DATA ON MOUNT ============
-  // 1️⃣ Check auth cookie
-  useEffect(() => {
-    const authCookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("admin-auth="))
-      ?.split("=")[1];
+  // 1️⃣ Hook to check auth cookie
+useEffect(() => {
+  const authCookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("admin-auth="))
+    ?.split("=")[1];
 
-    if (authCookie === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-    } else {
-      router.push("/admin/loggin");
+  if (authCookie === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    setIsAuthenticated(true);
+  } else {
+    router.push("/admin/loggin");
+  }
+}, [router]);
+
+// 2️⃣ Hook to fetch data (ALWAYS declared, but conditionally does work)
+useEffect(() => {
+  if (!isAuthenticated) return; // Do nothing if not authenticated
+
+  const fetchData = async () => {
+    try {
+      const prodData = await getAllProducts();
+      setProducts(prodData as FirestoreProduct[]);
+      const collData = await getAllCollections();
+      setCollections(collData as FirestoreCollection[]);
+    } catch (error) {
+      console.error("Error fetching products/collections:", error);
     }
-  }, [router]);
+  };
 
-  // 2️⃣ Fetch data when authenticated
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const fetchData = async () => {
-      try {
-        const prodData = await getAllProducts();
-        setProducts(prodData as FirestoreProduct[]);
-        const collData = await getAllCollections();
-        setCollections(collData as FirestoreCollection[]);
-      } catch (error) {
-        console.error("Error fetching products/collections:", error);
-      }
-    };
+  fetchData();
+}, [isAuthenticated]);
 
-    fetchData();
-  }, [isAuthenticated]);
+// 3️⃣ Conditionally render null if not authenticated
+if (!isAuthenticated) return null;
+//femoved one
+// useEffect(() => {
+//   const fetchData = async () => {
+//     try {
+//       const prodData = await getAllProducts();
+//       setProducts(prodData as FirestoreProduct[]);
+//       const collData = await getAllCollections();
+//       setCollections(collData as FirestoreCollection[]);
+//     } catch (error) {
+//       console.error("Error fetching products/collections:", error);
+//     }
+//   };
+//   fetchData();
+// }, []);
 
-  // 3️⃣ Render nothing if not authenticated
-  if (!isAuthenticated) return null;
+ 
 
   // =========================================
   // ============ PRODUCT HANDLERS ===========
   // =========================================
 
+  /** Handle form input for new product */
   const handleNewProductChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -136,6 +160,7 @@ export default function AdminPage() {
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  /** Handle the separate text area for multiple images */
   const handleNewProductImagesTextChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -145,22 +170,26 @@ export default function AdminPage() {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert multiline text into array
       const imagesArray = newProductImagesText
         .split("\n")
-        .map((url) => url.trim())
-        .filter((url) => url);
+        .map(url => url.trim())
+        .filter(url => url);
 
+      // Create product with stock
       const createdId = await createProduct({
         ...newProduct,
         price: Number(newProduct.price),
-        stock: Number(newProduct.stock),
+        stock: Number(newProduct.stock), // ensure numeric
         images: imagesArray,
       });
       alert(`Product created with ID: ${createdId}`);
 
+      // Re-fetch products
       const prodData = await getAllProducts();
       setProducts(prodData as FirestoreProduct[]);
 
+      // Reset form
       setNewProduct({
         name: "",
         description: "",
@@ -178,6 +207,7 @@ export default function AdminPage() {
   const startEditingProduct = (product: FirestoreProduct) => {
     setEditingProductId(product.id);
     const imagesText = product.images.join("\n");
+
     setEditingProductData({
       name: product.name,
       description: product.description || "",
@@ -208,8 +238,8 @@ export default function AdminPage() {
     try {
       const imagesArray = editingImagesText
         .split("\n")
-        .map((url) => url.trim())
-        .filter((url) => url);
+        .map(url => url.trim())
+        .filter(url => url);
 
       await updateProduct(editingProductId, {
         ...editingProductData,
@@ -219,9 +249,11 @@ export default function AdminPage() {
       });
       alert(`Product updated: ${editingProductId}`);
 
+      // Refresh
       const prodData = await getAllProducts();
       setProducts(prodData as FirestoreProduct[]);
 
+      // Clear editing
       setEditingProductId(null);
       setEditingImagesText("");
     } catch (error) {
@@ -288,12 +320,6 @@ export default function AdminPage() {
     });
   };
 
-  const [editingCollectionData, setEditingCollectionData] = useState<CollectionFormData>({
-    name: "",
-    description: "",
-    image: "",
-  });
-
   const handleEditCollectionChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -330,7 +356,7 @@ export default function AdminPage() {
   const handleToggleFeaturedCollection = async (collectionId: string, isFeatured: boolean) => {
     try {
       await toggleFeaturedCollection(collectionId, !isFeatured);
-      alert(`Collection ${collectionId} updated: isFeatured -> ${!isFeatured}`);
+      alert(`Collection ${collectionId} updated isFeatured -> ${!isFeatured}`);
       setCollections((prev) =>
         prev.map((c) =>
           c.id === collectionId ? { ...c, isFeatured: !isFeatured } : c
@@ -343,8 +369,10 @@ export default function AdminPage() {
 
   function logout() {
     document.cookie =
-      "admin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = "/admin/loggin";
+    "admin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  
+  // Redirect the user to the login page
+  window.location.href = "/admin/loggin";
   }
 
   // =========================================
@@ -352,21 +380,22 @@ export default function AdminPage() {
   // =========================================
 
   return (
-    <div className="min-h-screen p-4 bg-white text-gray-900">
-      <header className="flex justify-between items-center mb-4"></header>
+    <div className="min-h-screen p-4 bg-gray-100 text-gray-900">
+      
+      <header className="flex justify-between items-center mb-4">
+      
+      </header>
       <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-      <button
-        onClick={() => {
-          logout();
-          router.push("/admin/loggin");
-        }}
-        className="bg-red-500 text-white px-3 py-1 rounded"
-      >
-        Logout
-      </button>
-      <button type="submit" className="bg-[#FB6F90] text-white p-1 rounded">
-        Save
-      </button>
+      <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <button
+          onClick={() => {
+            logout();
+            router.push("/admin/loggin");
+          }}
+          className="bg-red-500 text-white px-3 py-1 rounded"
+        >
+          Logout
+        </button>
       {/* ================== PRODUCTS ================== */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* CREATE NEW PRODUCT FORM */}
@@ -378,6 +407,7 @@ export default function AdminPage() {
             </p>
           ) : (
             <form onSubmit={handleCreateProduct} className="flex flex-col gap-2">
+              {/* Name */}
               <input
                 type="text"
                 name="name"
@@ -387,6 +417,7 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
+              {/* Description */}
               <textarea
                 name="description"
                 placeholder="Description (optional)"
@@ -394,6 +425,7 @@ export default function AdminPage() {
                 onChange={handleNewProductChange}
                 className="border p-2 rounded"
               />
+              {/* Price */}
               <input
                 type="number"
                 name="price"
@@ -403,6 +435,7 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
+              {/* Stock */}
               <input
                 type="number"
                 name="stock"
@@ -412,20 +445,18 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
-              <label className="text-sm font-medium">
-                Image URLs (one per line)
-              </label>
+
+              {/* MULTILINE input for images */}
+              <label className="text-sm font-medium">Image URLs (one per line)</label>
               <textarea
                 placeholder="Enter each image URL on its own line"
                 value={newProductImagesText}
                 onChange={handleNewProductImagesTextChange}
                 className="border p-2 rounded h-24"
               />
-              <label htmlFor="collectionId" className="text-sm font-medium">
-                Collection
-              </label>
+
+              {/* Collection Select */}
               <select
-                id="collectionId"
                 name="collectionId"
                 value={newProduct.collectionId}
                 onChange={handleNewProductChange}
@@ -441,7 +472,7 @@ export default function AdminPage() {
               </select>
               <button
                 type="submit"
-                className="bg-[#FB6F90] text-white p-2 rounded mt-2"
+                className="bg-blue-600 text-white p-2 rounded mt-2"
               >
                 Add Product
               </button>
@@ -459,15 +490,9 @@ export default function AdminPage() {
               {products.map((product) => (
                 <div key={product.id} className="border p-2 rounded">
                   {editingProductId === product.id ? (
-                    <form
-                      onSubmit={handleUpdateProductSubmit}
-                      className="flex flex-col gap-2"
-                    >
-                      <label className="text-sm font-medium" htmlFor="edit-name">
-                        Name
-                      </label>
+                    // EDIT FORM
+                    <form onSubmit={handleUpdateProductSubmit} className="flex flex-col gap-2">
                       <input
-                        id="edit-name"
                         type="text"
                         name="name"
                         value={editingProductData.name}
@@ -475,21 +500,13 @@ export default function AdminPage() {
                         className="border p-1 rounded"
                         required
                       />
-                      <label className="text-sm font-medium" htmlFor="edit-description">
-                        Description
-                      </label>
                       <textarea
-                        id="edit-description"
                         name="description"
                         value={editingProductData.description}
                         onChange={handleEditProductChange}
                         className="border p-1 rounded"
                       />
-                      <label className="text-sm font-medium" htmlFor="edit-price">
-                        Price
-                      </label>
                       <input
-                        id="edit-price"
                         type="number"
                         name="price"
                         value={editingProductData.price}
@@ -497,11 +514,8 @@ export default function AdminPage() {
                         className="border p-1 rounded"
                         required
                       />
-                      <label className="text-sm font-medium" htmlFor="edit-stock">
-                        Stock
-                      </label>
+                      {/* Stock */}
                       <input
-                        id="edit-stock"
                         type="number"
                         name="stock"
                         value={editingProductData.stock}
@@ -509,20 +523,17 @@ export default function AdminPage() {
                         className="border p-1 rounded"
                         required
                       />
-                      <label className="text-sm font-medium" htmlFor="edit-images">
+
+                      <label className="text-sm font-medium">
                         Image URLs (one per line)
                       </label>
                       <textarea
-                        id="edit-images"
                         value={editingImagesText}
                         onChange={handleEditProductImagesTextChange}
                         className="border p-1 rounded h-24"
                       />
-                      <label className="text-sm font-medium" htmlFor="edit-collection">
-                        Collection
-                      </label>
+
                       <select
-                        id="edit-collection"
                         name="collectionId"
                         value={editingProductData.collectionId}
                         onChange={handleEditProductChange}
@@ -535,10 +546,11 @@ export default function AdminPage() {
                           </option>
                         ))}
                       </select>
+
                       <div className="flex gap-2">
                         <button
                           type="submit"
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-green-600 text-white p-1 rounded"
                         >
                           Save
                         </button>
@@ -552,6 +564,7 @@ export default function AdminPage() {
                       </div>
                     </form>
                   ) : (
+                    // DISPLAY PRODUCT
                     <>
                       <div className="font-semibold">
                         {product.name} – Rs{product.price}
@@ -559,6 +572,8 @@ export default function AdminPage() {
                       <p className="text-sm text-gray-500">
                         Stock: {product.stock}
                       </p>
+
+                      {/* Show multiple images */}
                       {product.images && product.images.length > 0 && (
                         <div className="flex gap-2 overflow-x-auto py-2">
                           {product.images.map((imgUrl, idx) => (
@@ -571,28 +586,25 @@ export default function AdminPage() {
                           ))}
                         </div>
                       )}
+
                       {product.description && <p>{product.description}</p>}
                       <p className="text-sm text-gray-500">ID: {product.id}</p>
                       <p className="text-sm text-gray-500">
                         Collection ID: {product.collectionId || "None"}
                       </p>
+
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() =>
-                            handleToggleBestSeller(
-                              product.id,
-                              product.isBestSeller || false
-                            )
+                            handleToggleBestSeller(product.id, product.isBestSeller || false)
                           }
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-yellow-500 text-white p-1 rounded"
                         >
-                          {product.isBestSeller
-                            ? "Remove Best Seller"
-                            : "Mark Best Seller"}
+                          {product.isBestSeller ? "Remove Best Seller" : "Mark Best Seller"}
                         </button>
                         <button
                           onClick={() => startEditingProduct(product)}
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-blue-500 text-white p-1 rounded"
                         >
                           Edit
                         </button>
@@ -647,7 +659,7 @@ export default function AdminPage() {
             />
             <button
               type="submit"
-              className="bg-[#FB6F90] text-white p-2 rounded mt-2"
+              className="bg-blue-600 text-white p-2 rounded mt-2"
             >
               Add Collection
             </button>
@@ -672,7 +684,6 @@ export default function AdminPage() {
                       <input
                         type="text"
                         name="name"
-                        placeholder="Collection name"
                         value={editingCollectionData.name}
                         onChange={handleEditCollectionChange}
                         className="border p-1 rounded"
@@ -694,7 +705,7 @@ export default function AdminPage() {
                       <div className="flex gap-2">
                         <button
                           type="submit"
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-green-600 text-white p-1 rounded"
                         >
                           Save
                         </button>
@@ -708,6 +719,7 @@ export default function AdminPage() {
                       </div>
                     </form>
                   ) : (
+                    // DISPLAY COLLECTION
                     <>
                       <div>
                         <strong>{collection.name}</strong>
@@ -734,13 +746,13 @@ export default function AdminPage() {
                               collection.isFeatured || false
                             )
                           }
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-yellow-500 text-white p-1 rounded"
                         >
                           {collection.isFeatured ? "Remove Featured" : "Make Featured"}
                         </button>
                         <button
                           onClick={() => startEditingCollection(collection)}
-                          className="bg-[#FB6F90] text-white p-1 rounded"
+                          className="bg-blue-500 text-white p-1 rounded"
                         >
                           Edit
                         </button>

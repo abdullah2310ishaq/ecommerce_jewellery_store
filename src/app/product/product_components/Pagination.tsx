@@ -1,70 +1,121 @@
-"use client";
-import { useState } from "react";
+"use client"
+import { useState, useEffect } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const Pagination = ({ totalPages, onPageChange }: { totalPages: number; onPageChange: (newPage: number) => void }) => {
-  // State for current page
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Handle page change
   const changePage = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-      onPageChange(newPage);
+      setCurrentPage(newPage)
+      onPageChange(newPage)
     }
-  };
+  }
 
-  // Create array of page numbers [1..totalPages]
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // Reset to page 1 if totalPages changes
+  useEffect(() => {
+    setCurrentPage(1)
+    onPageChange(1)
+  }, [totalPages, onPageChange])
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxPagesToShow = 5
+
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if there are fewer than maxPagesToShow
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      // Always include first page
+      pageNumbers.push(1)
+
+      // Calculate start and end of middle pages
+      let startPage = Math.max(2, currentPage - 1)
+      let endPage = Math.min(totalPages - 1, currentPage + 1)
+
+      // Adjust if we're near the beginning
+      if (currentPage <= 3) {
+        endPage = Math.min(4, totalPages - 1)
+      }
+
+      // Adjust if we're near the end
+      if (currentPage >= totalPages - 2) {
+        startPage = Math.max(2, totalPages - 3)
+      }
+
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        pageNumbers.push("...")
+      }
+
+      // Add middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i)
+      }
+
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        pageNumbers.push("...")
+      }
+
+      // Always include last page
+      pageNumbers.push(totalPages)
+    }
+
+    return pageNumbers
+  }
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mt-8 text-gray-900">
+    <div className="flex items-center justify-center space-x-2">
       {/* Previous Button */}
       <button
         onClick={() => changePage(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`px-4 py-2 rounded-md border border-[#FB6F90] 
-          hover:bg-[#FB6F90] hover:text-white transition-colors
-          disabled:opacity-50 disabled:pointer-events-none
-          bg-white text-[#FB6F90]
-        `}
+        className="p-2 rounded-md border border-gray-300 hover:border-[#FB6F90] disabled:opacity-50 disabled:pointer-events-none transition-colors"
+        aria-label="Previous page"
       >
-        Previous
+        <ChevronLeft size={18} className="text-gray-700" />
       </button>
 
-      {/* Page Number Indicator */}
-      <span className="text-lg font-semibold bg-white px-4 py-2 rounded-md border border-[#FB6F90]">
-        Page {currentPage} of {totalPages}
-      </span>
-
-      {/* Optional: Page Jump Dropdown */}
-      {totalPages > 1 && (
-        <select
-          value={currentPage}
-          onChange={(e) => changePage(Number(e.target.value))}
-          className="bg-white border border-[#FB6F90] rounded-md px-3 py-2 text-[#FB6F90] focus:outline-none focus:ring-2 focus:ring-[#FB6F90]"
-        >
-          {pageNumbers.map((num) => (
-            <option key={num} value={num} className="text-gray-900">
-              Page {num}
-            </option>
-          ))}
-        </select>
-      )}
+      {/* Page Numbers */}
+      <div className="flex items-center space-x-1">
+        {getPageNumbers().map((page, index) =>
+          typeof page === "number" ? (
+            <button
+              key={index}
+              onClick={() => changePage(page)}
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === page
+                  ? "bg-[#FB6F90] text-white font-medium"
+                  : "bg-white text-gray-700 border border-gray-300 hover:border-[#FB6F90]"
+              }`}
+            >
+              {page}
+            </button>
+          ) : (
+            <span key={index} className="px-1">
+              {page}
+            </span>
+          ),
+        )}
+      </div>
 
       {/* Next Button */}
       <button
         onClick={() => changePage(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`px-4 py-2 rounded-md border border-[#FB6F90] 
-          hover:bg-[#FB6F90] hover:text-white transition-colors
-          disabled:opacity-50 disabled:pointer-events-none
-          bg-white text-[#FB6F90]
-        `}
+        className="p-2 rounded-md border border-gray-300 hover:border-[#FB6F90] disabled:opacity-50 disabled:pointer-events-none transition-colors"
+        aria-label="Next page"
       >
-        Next
+        <ChevronRight size={18} className="text-gray-700" />
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default Pagination;
+export default Pagination
+

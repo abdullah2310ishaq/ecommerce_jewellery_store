@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Mail, Phone, MapPin, Clock, Award, Heart } from "lucide-react";
+import { Mail,  Clock, Award, Heart } from "lucide-react";
 
 export default function AboutPage() {
   const [result, setResult] = useState("");
@@ -88,7 +88,7 @@ export default function AboutPage() {
               </h2>
             </div>
             <p className="text-lg leading-relaxed text-gray-800">
-              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and captures life’s most precious moments.
+              Welcome to H&H Jewelers, where artistry meets elegance. Our journey began with a passion for timeless design, aiming to create jewelry that transcends generations and capture most precious moments.
             </p>
             <p className="text-lg leading-relaxed text-gray-800">
               Each H&H creation embodies the perfect harmony of tradition and innovation. Our master artisans blend age-old techniques with contemporary vision, crafting pieces that are not merely accessories, but expressions of individuality and milestones of personal significance.
@@ -169,58 +169,13 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Contact Info + Form */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-            {/* Contact Info */}
-            <div className="relative group">
+          {/* Contact Form - Centered and Responsive */}
+          <div className="flex justify-center w-full">
+            <div className="relative group w-full max-w-md sm:max-w-lg md:max-w-xl">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              <div className="relative flex flex-col space-y-6 bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-xl">
-                <h3 className="text-2xl font-semibold text-[#FB6F90] mb-4">Visit Our Boutique</h3>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
-                    <MapPin className="text-[#FB6F90] h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-gray-800 font-medium">Our Location</p>
-                    <p className="text-gray-600">Luxury Mall, Islamabad</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
-                    <Phone className="text-[#FB6F90] h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-gray-800 font-medium">Call Us</p>
-                    <a href="tel:+92-346-2207429" className="text-gray-600 hover:text-[#FB6F90] transition-colors duration-300">
-                      +92-344-5751822
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FB6F90]/10 flex items-center justify-center">
-                    <Mail className="text-[#FB6F90] h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-gray-800 font-medium">Email Us</p>
-                    <a href="mailto:contact@hjewelers.com" className="text-gray-600 hover:text-[#FB6F90] transition-colors duration-300">
-                      handhjewelry925@gmail.com
-                    </a>
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-gray-300 mt-4">
-                  <p className="text-gray-600">
-                    Experience our exquisite collection in person at our elegant showroom.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-              <div className="relative bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-xl">
+              <div className="relative bg-gray-50 p-6 sm:p-8 rounded-xl border border-gray-200 shadow-xl">
                 <form onSubmit={onSubmit} className="space-y-5">
-                  <h3 className="text-2xl font-semibold text-[#FB6F90] mb-4">Send a Message</h3>
+                  <h3 className="text-2xl font-semibold text-[#FB6F90] mb-4 text-center">Send a Message</h3>
                   <div>
                     <label htmlFor="name" className="text-gray-800 text-sm font-medium block mb-2">Your Name</label>
                     <input
@@ -262,15 +217,13 @@ export default function AboutPage() {
                     {isSubmitting ? "Sending..." : "Send Message"}
                   </button>
                   {result && (
-                    <p className={`text-sm ${result.includes("Successfully") ? "text-green-600" : "text-red-600"}`}>
+                    <p className={`text-sm text-center ${result.includes("Successfully") ? "text-green-600" : "text-red-600"}`}>
                       {result}
                     </p>
                   )}
                 </form>
               </div>
             </div>
-
-            {/* (Optional) Image Grid or Additional Content can go here */}
           </div>
         </div>
       </section>

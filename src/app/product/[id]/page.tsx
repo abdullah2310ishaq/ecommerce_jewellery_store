@@ -148,7 +148,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 p-8">
+    <div className="min-h-screen bg-white text-gray-800 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Product Images & Info */}
         <motion.div
@@ -161,7 +161,7 @@ export default function ProductDetailPage() {
           <div className="lg:w-1/2 space-y-4">
             <div
               ref={imageRef}
-              className="relative aspect-square overflow-hidden rounded-2xl cursor-zoom-in shadow-lg"
+              className="relative aspect-square overflow-hidden rounded-2xl cursor-zoom-in shadow-md transition-all duration-300 hover:shadow-lg"
               onMouseMove={handleImageZoom}
               onMouseEnter={() => setIsZoomed(true)}
               onMouseLeave={() => setIsZoomed(false)}
@@ -173,22 +173,20 @@ export default function ProductDetailPage() {
                 className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
                 style={
                   isZoomed
-                    ? {
-                        transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%`,
-                      }
+                    ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` }
                     : undefined
                 }
               />
             </div>
             {product.images && product.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto">
+              <div className="flex gap-3 overflow-x-auto">
                 {product.images.map((img, idx) => (
                   <motion.div
                     key={idx}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`relative w-20 h-20 border-2 rounded-xl cursor-pointer ${
-                      idx === currentImageIndex ? "border-[#FB6F90]" : "border-gray-300"
+                    className={`relative w-24 h-24 border rounded-xl cursor-pointer transition-all duration-300 ${
+                      idx === currentImageIndex ? "border-blue-500" : "border-gray-300"
                     }`}
                     onClick={() => setCurrentImageIndex(idx)}
                   >
@@ -203,14 +201,14 @@ export default function ProductDetailPage() {
               </div>
             )}
           </div>
-
+  
           {/* Product Info */}
           <div className="lg:w-1/2 space-y-6">
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FB6F90] to-[#FB6F90]"
+              className="text-5xl font-bold text-gray-800"
             >
               {product.name}
             </motion.h1>
@@ -218,11 +216,11 @@ export default function ProductDetailPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-3xl text-[#FB6F90] font-light"
+              className="text-3xl text-gray-600 font-light"
             >
               Rs. {product.price.toFixed(2)}
             </motion.p>
-
+  
             {/* Stock Display */}
             {isOutOfStock ? (
               <motion.p
@@ -243,7 +241,7 @@ export default function ProductDetailPage() {
                 In Stock: {stock}
               </motion.p>
             )}
-
+  
             {/* Quantity Selector */}
             {!isOutOfStock && (
               <motion.div
@@ -252,34 +250,34 @@ export default function ProductDetailPage() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="flex items-center space-x-4"
               >
-                <span className="text-lg text-gray-900">Quantity:</span>
-                <div className="flex items-center bg-gray-100 border border-gray-300 rounded">
+                <span className="text-lg">Quantity:</span>
+                <div className="flex items-center bg-gray-100 border border-gray-300 rounded-lg">
                   <button
                     onClick={handleDecrement}
                     disabled={quantity <= 1}
-                    className="px-3 py-2 text-[#FB6F90] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                    className="px-3 py-2 text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
                   >
                     <Minus size={20} />
                   </button>
-                  <div className="px-4 py-2 text-lg text-gray-900">{quantity}</div>
+                  <div className="px-4 py-2 text-lg">{quantity}</div>
                   <button
                     onClick={handleIncrement}
                     disabled={quantity >= stock}
-                    className="px-3 py-2 text-[#FB6F90] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
+                    className="px-3 py-2 text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
                   >
                     <Plus size={20} />
                   </button>
                 </div>
               </motion.div>
             )}
-
+  
             {/* Category, Description, Features */}
             {product.category && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-gray-700 text-lg"
+                className="text-lg text-gray-700"
               >
                 Category: {product.category}
               </motion.p>
@@ -289,7 +287,7 @@ export default function ProductDetailPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-gray-700 text-xl font-serif italic leading-relaxed"
+                className="text-xl text-gray-700 italic leading-relaxed"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 {product.description}
@@ -300,17 +298,17 @@ export default function ProductDetailPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
-                className="list-none space-y-2 text-gray-600"
+                className="list-disc pl-5 space-y-2 text-gray-600"
               >
                 {product.features.map((feature, index) => (
                   <li key={index} className="flex items-center">
-                    <span className="text-[#FB6F90] mr-2">•</span>
+                    <span className="text-blue-500 mr-2">•</span>
                     {feature}
                   </li>
                 ))}
               </motion.ul>
             )}
-
+  
             {/* Add to Cart Button */}
             <div className="flex space-x-4">
               <motion.button
@@ -326,10 +324,10 @@ export default function ProductDetailPage() {
                   });
                 }}
                 disabled={isOutOfStock}
-                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-md hover:shadow-lg transition-all duration-300 ${
                   isOutOfStock
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] text-white"
+                    : "bg-blue-500 text-white"
                 }`}
               >
                 <ShoppingCart size={24} />
@@ -338,128 +336,109 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </motion.div>
-
+  
         {/* Reviews Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          className="mt-20"
-        >
-          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] mb-8">
+        <div className="mt-20 bg-gray-50 p-8 rounded-lg shadow-md">
+          <h2 className="text-3xl font-semibold text-gray-800 mb-8 border-b border-gray-200 pb-3">
             Customer Reviews
           </h2>
           {reviews.length === 0 ? (
-            <p className="text-gray-600 text-xl italic">
+            <p className="text-gray-600 text-lg italic my-8 text-center">
               No reviews yet. Be the first to review this product!
             </p>
           ) : (
-            <div className="space-y-8">
-              {reviews.map((r, index) => (
-                <motion.div
+            <div className="space-y-6">
+              {reviews.map((r) => (
+                <div
                   key={r.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-gray-50 p-6 rounded-2xl shadow-lg"
+                  className="bg-white p-6 border border-gray-100 rounded-md"
                 >
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-[#FB6F90] rounded-full p-3">
-                      <User size={24} className="text-white" />
+                  <div className="flex items-start gap-4">
+                    <div className="bg-blue-500 rounded-full p-2">
+                      <User size={20} className="text-white" />
                     </div>
                     <div className="flex-grow">
                       <div className="flex justify-between items-center mb-2">
-                        <p className="text-[#FB6F90] font-semibold text-lg">{r.username}</p>
+                        <p className="text-blue-500 font-medium">{r.username}</p>
                         <p className="text-sm text-gray-500">
                           {r.createdAt?.toDate?.().toLocaleDateString()}
                         </p>
                       </div>
-                      <div className="flex items-center mb-3">
+                      <div className="flex items-center mb-2">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            size={20}
-                            className={i < r.rating ? "text-[#FB6F90] fill-[#FB6F90]" : "text-gray-400"}
+                            size={16}
+                            className={i < r.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
                           />
                         ))}
                       </div>
-                      <p className="text-gray-700 text-lg italic">{r.comment}</p>
+                      <p className="text-gray-700">{r.comment}</p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
-
+  
           {/* Add Review Form */}
           {user ? (
-            <motion.form
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
+            <form
               onSubmit={handleReviewSubmit}
-              className="mt-12 bg-gray-50 p-8 rounded-2xl shadow-lg space-y-6"
+              className="mt-10 bg-white p-8 border border-gray-200 rounded-lg shadow-sm"
             >
-              <h3 className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FB6F90] to-[#FB6F90]">
-                Write a Review
-              </h3>
-              <div>
-                <label htmlFor="rating" className="block text-gray-900 mb-2 text-lg">
+              <h3 className="text-2xl font-medium text-gray-800 mb-6">Write a Review</h3>
+              <div className="mb-4">
+                <label htmlFor="rating" className="block text-gray-700 mb-1">
                   Your Rating
                 </label>
                 <div className="flex items-center space-x-2">
                   {[1, 2, 3, 4, 5].map((num) => (
-                    <motion.button
+                    <button
                       key={num}
                       type="button"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
                       onClick={() => setReviewForm({ ...reviewForm, rating: num })}
                       className="focus:outline-none"
                     >
                       <Star
-                        size={32}
-                        className={
-                          num <= reviewForm.rating
-                            ? "text-[#FB6F90] fill-[#FB6F90]"
-                            : "text-gray-400"
-                        }
+                        size={24}
+                        className={num <= reviewForm.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
                       />
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               </div>
-              <div>
-                <label htmlFor="comment" className="block text-gray-900 mb-2 text-lg">
+              <div className="mb-4">
+                <label htmlFor="comment" className="block text-gray-700 mb-1">
                   Your Review
                 </label>
                 <textarea
                   id="comment"
                   value={reviewForm.comment}
-                  onChange={(e) =>
-                    setReviewForm({ ...reviewForm, comment: e.target.value })
-                  }
-                  className="w-full p-3 bg-gray-100 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#FB6F90] text-lg"
+                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded text-gray-900"
                   placeholder="Share your thoughts about this product..."
                   rows={4}
                 />
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 type="submit"
-                className="bg-gradient-to-r from-[#FB6F90] to-[#FB6F90] text-white px-8 py-3 rounded-full font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-blue-500 text-white px-5 py-2 rounded font-medium hover:bg-blue-600 transition-colors"
               >
                 Submit Review
-              </motion.button>
-            </motion.form>
+              </button>
+            </form>
           ) : (
-            <p className="mt-12 text-gray-600 italic text-xl text-center">
-              Please log in to write a review and share your experience.
-            </p>
+            <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
+              <p className="text-gray-600">
+                Please log in to write a review and share your experience.
+              </p>
+            </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
+  
+  
 }

@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../firebase/firebase_services/firestore";
-import { CartItem, getCart, updateCartItem, clearCart } from "./cart";
+import { type CartItem, getCart, updateCartItem, clearCart } from "./cart";
 import Swal from "sweetalert2";
+import Link from "next/link";
+import { Info } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import PaymentInfo from "./PaymentInfo";
 
 export default function CartPage() {
   const router = useRouter();
@@ -14,6 +18,7 @@ export default function CartPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
 
   // Load cart items on mount
   useEffect(() => {
@@ -21,10 +26,7 @@ export default function CartPage() {
   }, []);
 
   // Calculate total amount
-  const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Update quantity
   function handleQuantityChange(itemId: string, newQty: number) {
@@ -50,8 +52,7 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
       });
       return;
@@ -90,8 +91,7 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
       });
 
@@ -107,28 +107,26 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
       });
     }
   }
 
-  // If cart is empty, show a friendly empty state
+
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-100">
-        <h1 className="text-3xl font-bold mb-4 text-[#FB6F90]">
-          Your Cart is Empty
-        </h1>
+        <h1 className="text-3xl font-bold mb-4 text-[#FB6F90]">Your Cart is Empty</h1>
         <p className="text-lg text-gray-700 mb-8">
-          Looks like you haven't added any items to your cart yet.
+          Looks like you have not added any items to your cart yet.
         </p>
         <button
-          onClick={() => router.push("/")}
-          className="px-6 py-3 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-full font-medium transition-all duration-300 shadow-xl text-white"
+          onClick={() => router.push("/home")}
+          className="px-6 py-3 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-full font-medium transition-all duration-300 text-white"
         >
           Continue Shopping
+
         </button>
       </div>
     );
@@ -143,40 +141,27 @@ export default function CartPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* CART ITEMS SECTION */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-2xl border border-gray-200">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-8">
             <h2 className="text-2xl font-semibold mb-6 text-[#FB6F90] border-b pb-2">
               Cart Items
             </h2>
             <div className="divide-y divide-gray-200">
               {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col md:flex-row items-center py-6"
-                >
+                <div key={item.id} className="flex flex-col md:flex-row items-center py-6">
                   <div className="flex-1">
-                    <h3 className="text-xl font-medium text-[#FB6F90]">
-                      {item.name}
-                    </h3>
-                    <p className="text-gray-700 mt-1">
-                      ${item.price.toFixed(2)} each
-                    </p>
+                    <h3 className="text-xl font-medium text-[#FB6F90]">{item.name}</h3>
+                    <p className="text-gray-700 mt-1">${item.price.toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center space-x-4 my-4 md:my-0">
                     <button
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity - 1)
-                      }
+                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                       className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
                     >
                       <span className="text-2xl">−</span>
                     </button>
-                    <span className="w-12 text-center text-xl font-semibold">
-                      {item.quantity}
-                    </span>
+                    <span className="w-12 text-center text-xl font-semibold">{item.quantity}</span>
                     <button
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity + 1)
-                      }
+                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                       className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
                     >
                       <span className="text-2xl">+</span>
@@ -201,21 +186,25 @@ export default function CartPage() {
                 Total: ${totalAmount.toFixed(2)}
               </span>
               <p className="mt-2 text-lg text-gray-700">
-                If you want 10% discount, WhatsApp us on 03345751822
+                Get 10% discount!
+                <Link
+                  href="https://wa.me/923345751822"
+                  className="text-[#FB6F90] hover:underline ml-1"
+                >
+                  WhatsApp us on 03345751822
+                </Link>
               </p>
             </div>
           </div>
 
           {/* CHECKOUT FORM */}
-          <div className="bg-white rounded-2xl p-8 shadow-2xl border border-gray-200">
+          <div className="bg-white rounded-2xl p-8">
             <h2 className="text-2xl font-semibold mb-6 text-[#FB6F90] border-b pb-2">
               Checkout Details
             </h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-lg mb-2 text-gray-900">
-                  Name
-                </label>
+                <label className="block text-lg mb-2 text-gray-900">Name</label>
                 <input
                   type="text"
                   placeholder="Enter your full name"
@@ -226,9 +215,7 @@ export default function CartPage() {
               </div>
 
               <div>
-                <label className="block text-lg mb-2 text-gray-900">
-                  Email
-                </label>
+                <label className="block text-lg mb-2 text-gray-900">Email</label>
                 <input
                   type="email"
                   placeholder="your@email.com"
@@ -239,9 +226,7 @@ export default function CartPage() {
               </div>
 
               <div>
-                <label className="block text-lg mb-2 text-gray-900">
-                  Phone
-                </label>
+                <label className="block text-lg mb-2 text-gray-900">Phone</label>
                 <input
                   type="text"
                   placeholder="Your contact number"
@@ -252,9 +237,7 @@ export default function CartPage() {
               </div>
 
               <div>
-                <label className="block text-lg mb-2 text-gray-900">
-                  Shipping Address
-                </label>
+                <label className="block text-lg mb-2 text-gray-900">Shipping Address</label>
                 <textarea
                   placeholder="Enter your complete address"
                   className="w-full p-4 bg-gray-100 border border-gray-300 rounded-lg h-28 focus:ring-2 focus:ring-[#FB6F90] focus:outline-none transition-all"
@@ -263,16 +246,28 @@ export default function CartPage() {
                 />
               </div>
 
-              <button
-                onClick={handlePlaceOrder}
-                className="w-full px-8 py-4 mt-4 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-lg font-medium text-white transition-all duration-300 shadow-xl"
-              >
-                Place Order
-              </button>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={handlePlaceOrder}
+                  className="px-8 py-4 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-lg font-medium text-white transition-all duration-300"
+                >
+                  Place Order
+                </button>
+                <button
+                  onClick={() => setShowPaymentInfo(true)}
+                  className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
+                >
+                  <Info size={24} className="text-[#FB6F90]" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showPaymentInfo && <PaymentInfo onClose={() => setShowPaymentInfo(false)} />}
+      </AnimatePresence>
     </div>
   );
 }

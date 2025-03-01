@@ -28,7 +28,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-8">
           {/* Brand Section */}
           <div className="space-y-6">
-            <Link href="/" className="block">
+            <Link href="/home" className="block">
               <div className="flex flex-col items-start">
                 <h2 className="text-3xl font-serif text-[#FB6F90]">H&H</h2>
                 <span className="text-sm tracking-widest text-[#FB6F90]">
@@ -67,7 +67,7 @@ const Footer = () => {
               Quick Links
             </h3>
             <ul className="space-y-4">
-              {["Home", "Shop", "About Us", "Contact"].map((item) => (
+              {["Home", "About"].map((item) => (
                 <li key={item}>
                   <Link
                     href={`/${item.toLowerCase().replace(" ", "-")}`}
@@ -87,15 +87,18 @@ const Footer = () => {
               Contact Us
             </h3>
             <ul className="space-y-4">
-              <li>
-                <a
-                  href="tel:03445751822"
-                  className="flex items-center space-x-3 text-gray-700 hover:text-[#FB6F90] transition-colors duration-300"
-                >
-                  <Phone className="w-5 h-5" />
-                  <span>0344-5751822</span>
-                </a>
-              </li>
+            <li>
+  <a
+    href="https://wa.me/923445751822"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex items-center space-x-3 text-gray-700 hover:text-[#FB6F90] transition-colors duration-300"
+  >
+    <Phone className="w-5 h-5" />
+    <span>WhatsApp: 0344-5751822</span>
+  </a>
+</li>
+
               <li>
                 <a
                   href="mailto:handhjewelry925@gmail.com"
@@ -113,20 +116,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Example "Trusted" Section (Optional) */}
-        <div className="mt-16 flex flex-col md:flex-row items-center justify-center gap-8 bg-white/70 py-6 px-4 rounded-lg border border-[#FB6F90]">
-          <div className="text-center">
-            <h4 className="text-[#FB6F90] text-xl font-semibold mb-2">
-              Trusted by Thousands
-            </h4>
-            <p className="text-sm text-gray-700 max-w-sm">
-              We pride ourselves on exceptional craftsmanship and attentive
-              service. Join our growing family of satisfied customers.
-            </p>
-          </div>
-          {/* Icons row */}
-          {/* ... */}
-        </div>
 
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-gray-300 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -134,18 +123,7 @@ const Footer = () => {
             © {new Date().getFullYear()} H&H Jewellery. All Rights Reserved.
           </p>
           <div className="flex items-center space-x-6 text-sm text-gray-600">
-            <Link
-              href="/privacy"
-              className="hover:text-[#FB6F90] transition-colors duration-300"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="hover:text-[#FB6F90] transition-colors duration-300"
-            >
-              Terms of Service
-            </Link>
+        
             {/* Scroll to Top Button */}
             <button
               onClick={scrollToTop}
