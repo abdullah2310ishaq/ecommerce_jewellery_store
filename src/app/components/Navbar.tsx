@@ -190,8 +190,7 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <div className="p-2">
-                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md">My Profile</Link>
-                    <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md">My Orders</Link>
+                 <Link href="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md">My Orders</Link>
                     <button
                       onClick={logoutUser}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md"
