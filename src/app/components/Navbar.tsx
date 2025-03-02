@@ -338,7 +338,7 @@ export default function Navbar() {
                 <MobileNavLink href="/product" icon={<ShoppingBag className="w-5 h-5" />} onClick={closeMenu}>Products</MobileNavLink>
                 <MobileNavLink href="/cart" icon={<ShoppingBag className="w-5 h-5" />} onClick={closeMenu}>Shopping Cart</MobileNavLink>
                 <MobileNavLink href="/about" icon={<User className="w-5 h-5" />} onClick={closeMenu}>About Us</MobileNavLink>
-                <MobileNavLink href="/contact" icon={<User className="w-5 h-5" />} onClick={closeMenu}>Contact</MobileNavLink>
+                
               </div>
               
               {/* Footer with subtle styling */}
