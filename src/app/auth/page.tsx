@@ -90,14 +90,12 @@ export default function AuthForm() {
             <div className="mt-8 text-center">
               <div className="flex items-center justify-center gap-2 text-gray-500">
                 <LogIn className="h-4 w-4" />
-                <p className="text-sm">Secure authentication powered by Google</p>
+                <p className="text-sm">Login to cast your review </p>
               </div>
             </div>
           </div>
 
-          <div className="px-8 pb-6 pt-0 text-center">
-            <p className="text-xs text-gray-500">By continuing, you agree to our Terms of Service and Privacy Policy</p>
-          </div>
+      
         </div>
       </motion.div>
     </div>
