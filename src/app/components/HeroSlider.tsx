@@ -13,21 +13,21 @@ const slides = [
     title: "Timeless Luxury Collection",
     description: "Exclusive handcrafted jewelry",
     img: "https://images.pexels.com/photos/3266700/pexels-photo-3266700.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop",
+    url: "/product",
   },
   {
     id: 2,
     title: "Old Money Collection",
     description: "Discover unique elegance",
     img: "https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop",
+    url: "/product",
   },
   {
     id: 3,
     title: "Branded Luxury Collection",
     description: "Shine with perfection",
     img: "https://images.pexels.com/photos/2732096/pexels-photo-2732096.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    url: "/shop",
+    url: "/product",
   },
 ]
 
