@@ -31,7 +31,7 @@ export async function loginUser(email: string, password: string): Promise<User> 
 export async function logoutUser(): Promise<void> {
   await signOut(auth);
 }
-
+//high ji
 export function onAuthStateChange(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
 }
