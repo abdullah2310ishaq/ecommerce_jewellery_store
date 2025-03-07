@@ -17,7 +17,8 @@ import {
   increment,
 
 } from "firebase/firestore";
-import { firestore } from "./firebaseConfig";
+import { firestore,storage } from "./firebaseConfig";
+import {ref,uploadBytes,getDownloadURL, deleteObject} from "firebase/storage";
 
 // 2. Interfaces / Types
 
@@ -40,6 +41,7 @@ export interface ProductData {
   collectionId: string;
   isBestSeller?: boolean;
   stock:number;
+  video?: string;
 }
 
 /** Represents a user's order */
@@ -257,4 +259,30 @@ export const getReviewsForProduct = async (productId: string) => {
   const reviewsRef = collection(firestore, `products/${productId}/reviews`);
   const snapshot = await getDocs(query(reviewsRef, orderBy("createdAt", "desc")));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// upload image
+export const uploadImage = async (file:File) => 
+  {
+if(!file) return null;
+const storageRef = ref(storage, `products/$file.name}`);
+await uploadBytes(storageRef, file);
+const downloadURL = await getDownloadURL(storageRef);
+return downloadURL;
+};
+
+// delete image
+export const deleteImage = async (imageUrl: string) =>
+{
+  if(!imageUrl) return;
+  const storageRef = ref(storage,imageUrl);
+  await deleteObject(storageRef);
+}
+
+export const uploadVideo = async (file: File) => {
+  if (!file) return null;
+  const storageRef = ref(storage, `productVideos/${file.name}`);
+  await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(storageRef);
+  return downloadURL;
 };

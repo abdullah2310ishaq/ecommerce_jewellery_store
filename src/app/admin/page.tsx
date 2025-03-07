@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState, useEffect } from "react"
+
+// Import your Firestore services (adjust the path as needed)
 import {
   // PRODUCT functions
   getAllProducts,
@@ -10,12 +12,17 @@ import {
   updateProduct,
   deleteProduct,
   toggleBestSeller,
+
   // COLLECTION functions
   getAllCollections,
   createCollection,
   updateCollection,
   deleteCollectionById,
   toggleFeaturedCollection,
+
+  // IMAGE/VIDEO UPLOAD
+  uploadImage,
+  uploadVideo
 } from "../firebase/firebase_services/firestore"
 
 // ---------- PRODUCT INTERFACES ----------
@@ -27,7 +34,8 @@ interface FirestoreProduct {
   images: string[]
   collectionId?: string
   isBestSeller?: boolean
-  stock: number // <-- NEW FIELD
+  stock: number
+  video?: string
 }
 
 interface ProductFormData {
@@ -36,7 +44,8 @@ interface ProductFormData {
   price: number
   images: string[]
   collectionId: string
-  stock: number // <-- NEW FIELD
+  stock: number
+  video?: string
 }
 
 // ---------- COLLECTION INTERFACES ----------
@@ -66,9 +75,15 @@ export default function AdminPage() {
     price: 0,
     images: [],
     collectionId: "",
-    stock: 0, // default
+    stock: 0,
+    video: "",
   })
-  const [newProductImagesText, setNewProductImagesText] = useState<string>("")
+  
+  // NEW STATE for holding selected image files (multiple)
+  const [newProductImageFiles, setNewProductImageFiles] = useState<File[]>([])
+  
+  // NEW STATE for holding selected video file (single)
+  const [newProductVideoFile, setNewProductVideoFile] = useState<File | null>(null)
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [editingProductData, setEditingProductData] = useState<ProductFormData>({
@@ -78,8 +93,12 @@ export default function AdminPage() {
     images: [],
     collectionId: "",
     stock: 0,
+    video: "",
   })
-  const [editingImagesText, setEditingImagesText] = useState<string>("")
+  
+  // For editing flow, we also let the user pick new image files or a new video
+  const [editingImageFiles, setEditingImageFiles] = useState<File[]>([])
+  const [editingVideoFile, setEditingVideoFile] = useState<File | null>(null)
 
   // ============ STATE: COLLECTIONS ============
   const [collections, setCollections] = useState<FirestoreCollection[]>([])
@@ -95,8 +114,7 @@ export default function AdminPage() {
     image: "",
   })
 
-  // ============ FETCH DATA ON MOUNT ============
-  // 1️⃣ Hook to check auth cookie
+  // ============ AUTH CHECK ON MOUNT ============
   useEffect(() => {
     const authCookie = document.cookie
       .split("; ")
@@ -110,9 +128,9 @@ export default function AdminPage() {
     }
   }, [router])
 
-  // 2️⃣ Hook to fetch data (ALWAYS declared, but conditionally does work)
+  // ============ FETCH DATA WHEN AUTHENTICATED ============
   useEffect(() => {
-    if (!isAuthenticated) return // Do nothing if not authenticated
+    if (!isAuthenticated) return
 
     const fetchData = async () => {
       try {
@@ -128,39 +146,59 @@ export default function AdminPage() {
     fetchData()
   }, [isAuthenticated])
 
-  // 3️⃣ Conditionally render null if not authenticated
+  // If not authenticated, show nothing
   if (!isAuthenticated) return null
 
   // =========================================
   // ============ PRODUCT HANDLERS ===========
   // =========================================
 
-  /** Handle form input for new product */
+  // Update local state for simple text fields
   const handleNewProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setNewProduct((prev) => ({ ...prev, [name]: value }))
   }
 
-  /** Handle the separate text area for multiple images */
-  const handleNewProductImagesTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewProductImagesText(e.target.value)
+  // When user selects images (multiple), store them in state
+  const handleNewProductImagesFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setNewProductImageFiles(Array.from(e.target.files))
   }
 
+  // When user selects a video (single)
+  const handleNewProductVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setNewProductVideoFile(e.target.files[0]) // single file
+  }
+
+  // CREATE product: Upload each image, plus the video, then create
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      // Convert multiline text into array
-      const imagesArray = newProductImagesText
-        .split("\n")
-        .map((url) => url.trim())
-        .filter((url) => url)
 
-      // Create product with stock
+    try {
+      // 1) Upload images if any
+      const imageURLs: string[] = []
+      for (const file of newProductImageFiles) {
+        const url = await uploadImage(file)
+        if (url) {
+          imageURLs.push(url)
+        }
+      }
+
+      // 2) Upload video if any
+      let videoURL = ""
+      if (newProductVideoFile) {
+        const vidUrl = await uploadVideo(newProductVideoFile)
+        if (vidUrl) videoURL = vidUrl
+      }
+
+      // 3) Create product in Firestore
       const createdId = await createProduct({
         ...newProduct,
         price: Number(newProduct.price),
-        stock: Number(newProduct.stock), // ensure numeric
-        images: imagesArray,
+        stock: Number(newProduct.stock),
+        images: imageURLs,
+        video: videoURL,
       })
       alert(`Product created with ID: ${createdId}`)
 
@@ -176,54 +214,82 @@ export default function AdminPage() {
         images: [],
         collectionId: "",
         stock: 0,
+        video: "",
       })
-      setNewProductImagesText("")
+      setNewProductImageFiles([])
+      setNewProductVideoFile(null)
     } catch (error) {
       console.error("Error creating product:", error)
     }
   }
 
+  // Start editing a product
   const startEditingProduct = (product: FirestoreProduct) => {
     setEditingProductId(product.id)
-    const imagesText = product.images.join("\n")
-
     setEditingProductData({
       name: product.name,
       description: product.description || "",
       price: product.price,
-      images: product.images,
+      images: product.images || [],
       collectionId: product.collectionId || "",
       stock: product.stock,
+      video: product.video || "",
     })
-    setEditingImagesText(imagesText)
+
+    // Clear out any newly selected files from prior editing
+    setEditingImageFiles([])
+    setEditingVideoFile(null)
   }
 
-  const handleEditProductChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
+  // For text fields in EDIT form
+  const handleEditProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setEditingProductData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleEditProductImagesTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditingImagesText(e.target.value)
+  // For new image files in EDIT form
+  const handleEditingProductImagesFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setEditingImageFiles(Array.from(e.target.files))
   }
 
+  // For new video file in EDIT form
+  const handleEditingProductVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setEditingVideoFile(e.target.files[0])
+  }
+
+  // UPDATE product
   const handleUpdateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingProductId) return
-    try {
-      const imagesArray = editingImagesText
-        .split("\n")
-        .map((url) => url.trim())
-        .filter((url) => url)
 
+    try {
+      // 1) If user selected new image files, upload them & add to existing images
+      const updatedImages = [...editingProductData.images]
+      for (const file of editingImageFiles) {
+        const url = await uploadImage(file)
+        if (url) {
+          updatedImages.push(url)
+        }
+      }
+
+      // 2) If user selected a new video, upload it
+      let updatedVideo = editingProductData.video || ""
+      if (editingVideoFile) {
+        const vidUrl = await uploadVideo(editingVideoFile)
+        if (vidUrl) updatedVideo = vidUrl
+      }
+
+      // 3) Save updated fields to Firestore
       await updateProduct(editingProductId, {
         ...editingProductData,
         price: Number(editingProductData.price),
         stock: Number(editingProductData.stock),
-        images: imagesArray,
+        images: updatedImages,
+        video: updatedVideo,
       })
+
       alert(`Product updated: ${editingProductId}`)
 
       // Refresh
@@ -232,7 +298,8 @@ export default function AdminPage() {
 
       // Clear editing
       setEditingProductId(null)
-      setEditingImagesText("")
+      setEditingImageFiles([])
+      setEditingVideoFile(null)
     } catch (error) {
       console.error("Error updating product:", error)
     }
@@ -332,10 +399,11 @@ export default function AdminPage() {
     }
   }
 
+  // =========================================
+  // =============== LOGOUT ==================
+  // =========================================
   function logout() {
     document.cookie = "admin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-
-    // Redirect the user to the login page
     window.location.href = "/admin/loggin"
   }
 
@@ -348,7 +416,6 @@ export default function AdminPage() {
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
         <div className="flex gap-2">
-        
           <button onClick={() => router.push("/admin/analytics")} className="bg-green-500 text-white px-3 py-1 rounded">
             Profit
           </button>
@@ -376,7 +443,6 @@ export default function AdminPage() {
             <p className="text-sm text-red-500">No collections found. Create a collection first.</p>
           ) : (
             <form onSubmit={handleCreateProduct} className="flex flex-col gap-2">
-              {/* Name */}
               <input
                 type="text"
                 name="name"
@@ -386,7 +452,6 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
-              {/* Description */}
               <textarea
                 name="description"
                 placeholder="Description (optional)"
@@ -394,7 +459,6 @@ export default function AdminPage() {
                 onChange={handleNewProductChange}
                 className="border p-2 rounded"
               />
-              {/* Price */}
               <input
                 type="number"
                 name="price"
@@ -404,7 +468,6 @@ export default function AdminPage() {
                 className="border p-2 rounded"
                 required
               />
-              {/* Stock */}
               <input
                 type="number"
                 name="stock"
@@ -415,13 +478,23 @@ export default function AdminPage() {
                 required
               />
 
-              {/* MULTILINE input for images */}
-              <label className="text-sm font-medium">Image URLs (one per line)</label>
-              <textarea
-                placeholder="Enter each image URL on its own line"
-                value={newProductImagesText}
-                onChange={handleNewProductImagesTextChange}
-                className="border p-2 rounded h-24"
+              {/* Multiple image files */}
+              <label className="text-sm font-medium">Select Images (you can choose multiple)</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleNewProductImagesFileChange}
+                className="border p-2"
+              />
+
+              {/* Optional video file */}
+              <label className="text-sm font-medium">Optional Video</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleNewProductVideoFileChange}
+                className="border p-2"
               />
 
               {/* Collection Select */}
@@ -439,6 +512,7 @@ export default function AdminPage() {
                   </option>
                 ))}
               </select>
+
               <button type="submit" className="bg-blue-600 text-white p-2 rounded mt-2">
                 Add Product
               </button>
@@ -480,7 +554,6 @@ export default function AdminPage() {
                         className="border p-1 rounded"
                         required
                       />
-                      {/* Stock */}
                       <input
                         type="number"
                         name="stock"
@@ -490,11 +563,46 @@ export default function AdminPage() {
                         required
                       />
 
-                      <label className="text-sm font-medium">Image URLs (one per line)</label>
-                      <textarea
-                        value={editingImagesText}
-                        onChange={handleEditProductImagesTextChange}
-                        className="border p-1 rounded h-24"
+                      {/* Show existing images, if any */}
+                      {editingProductData.images?.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                          {editingProductData.images.map((imgUrl, idx) => (
+                            <img
+                              key={idx}
+                              src={imgUrl}
+                              alt={`Product Image ${idx}`}
+                              className="w-16 h-16 object-cover border rounded"
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Optionally show existing video, if any */}
+                      {editingProductData.video && (
+                        <video
+                          src={editingProductData.video}
+                          controls
+                          className="w-32 h-auto border rounded"
+                        />
+                      )}
+
+                      {/* Allow user to add more images */}
+                      <label className="text-sm font-medium">Add More Images</label>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleEditingProductImagesFileChange}
+                        className="border p-1"
+                      />
+
+                      {/* Allow user to replace or add a new video */}
+                      <label className="text-sm font-medium">Replace/Add Video</label>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleEditingProductVideoFileChange}
+                        className="border p-1"
                       />
 
                       <select
@@ -544,6 +652,11 @@ export default function AdminPage() {
                             />
                           ))}
                         </div>
+                      )}
+
+                      {/* Show video if exists */}
+                      {product.video && (
+                        <video src={product.video} controls className="w-32 h-auto border rounded my-2" />
                       )}
 
                       {product.description && <p>{product.description}</p>}
@@ -715,4 +828,3 @@ export default function AdminPage() {
     </div>
   )
 }
-

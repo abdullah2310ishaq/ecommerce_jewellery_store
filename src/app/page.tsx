@@ -1,11 +1,17 @@
 "use client"
 
-import VideoHero from "./components/VideoSlider";
+import BestSellers from "./comps/homepage/BestSellers";
+import Collections from "./comps/homepage/Collections";
+import Hero from "./comps/homepage/Hero";
 
 export default function Home() {
   return (
-    <main className="flex flex-col min-h-screen">
-      <VideoHero />
-    </main>
+    <div>
+
+      <Hero />
+      <Collections />
+      <BestSellers />
+
+    </div>
   );
 }
