@@ -20,9 +20,7 @@ import {
 import { firestore,storage } from "./firebaseConfig";
 import {ref,uploadBytes,getDownloadURL, deleteObject} from "firebase/storage";
 
-// 2. Interfaces / Types
 
-/** Represents a jewelry "Collection" (e.g., "Rings", "Necklaces", etc.) */
 export interface CollectionData {
   name: string;
   description?: string;
@@ -31,7 +29,6 @@ export interface CollectionData {
   // Add more fields if needed (like createdAt)
 }
 
-/** Represents an individual product */
 export interface ProductData {
   name: string;
   description?: string;
@@ -44,7 +41,6 @@ export interface ProductData {
   video?: string;
 }
 
-/** Represents a user's order */
 export interface OrderData {
   name: string;      // e.g. "John Doe"
   email: string;     // e.g. "john@example.com"
@@ -60,7 +56,7 @@ export interface OrderData {
   status?: string;   // e.g. "Pending", "Shipped", "Delivered"
   createdAt?: Date;   // Firestore timestamp
 }
-//reviews
+
 export interface ReviewData {
   userId: string;      // ID of the user leaving the review
   username: string;    // Display name of the user
@@ -69,28 +65,18 @@ export interface ReviewData {
   createdAt?: Timestamp;     // Timestamp of review
 }
 
-
-
-
-// ===========================================================
-// 3. READ / FETCH (USER-FACING)
-// ===========================================================
-
-/** Get ALL collections (for user to browse) */
 export const getAllCollections = async () => {
   const collRef = collection(firestore, "collections");
   const snapshot = await getDocs(collRef);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-/** Get specific collection by ID */
 export const getCollectionById = async (collectionId: string) => {
   const docRef = doc(firestore, "collections", collectionId);
   const snapshot = await getDoc(docRef);
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 };
 
-/** Get ALL products (regardless of collection) */
 export const getAllProducts = async () => {
   const prodRef = collection(firestore, "products");
   const snapshot = await getDocs(prodRef);
@@ -110,15 +96,12 @@ export const getAllProducts = async () => {
   });
 };
 
-
-/** Get a single product by ID */
 export const getProductById = async (productId: string) => {
   const prodRef = doc(firestore, "products", productId);
   const snapshot = await getDoc(prodRef);
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 };
 
-/** Get all products belonging to a specific collection */
 export const getProductsByCollection = async (collectionId: string) => {
   const prodRef = collection(firestore, "products");
   const q = query(prodRef, where("collectionId", "==", collectionId));
@@ -126,30 +109,23 @@ export const getProductsByCollection = async (collectionId: string) => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// ===========================================================
-// 4. CREATE / UPDATE / DELETE (ADMIN-ONLY)
-// ===========================================================
-
-/** Create a new collection (admin) */
 export const createCollection = async (data: CollectionData) => {
   const collRef = collection(firestore, "collections");
   const docRef = await addDoc(collRef, data);
   return docRef.id; // returns the new doc ID
 };
 
-/** Update an existing collection (admin) */
 export const updateCollection = async (collectionId: string, data: Partial<CollectionData>) => {
   const collDocRef = doc(firestore, "collections", collectionId);
   await updateDoc(collDocRef, data);
 };
 
-/** Delete a collection by ID (admin) */
+
 export const deleteCollectionById = async (collectionId: string) => {
   const collDocRef = doc(firestore, "collections", collectionId);
   await deleteDoc(collDocRef);
 };
 
-/** Create a new product (admin) */
 export const createProduct = async (data: ProductData) => {
   const prodRef = collection(firestore, "products");
   // fallback if not provided
@@ -159,7 +135,7 @@ export const createProduct = async (data: ProductData) => {
   });
   return docRef.id;
 };
-/** Update an existing product (admin) */
+
 export const updateProduct = async (productId: string, data: Partial<ProductData>) => {
   const prodDocRef = doc(firestore, "products", productId);
   // fallback if not provided
@@ -175,23 +151,17 @@ export const deleteProduct = async (productId: string) => {
   await deleteDoc(prodDocRef);
 };
 
-/** Mark or unmark a collection as 'featured' (admin) */
 export const toggleFeaturedCollection = async (collectionId: string, isFeatured: boolean) => {
   const collDocRef = doc(firestore, "collections", collectionId);
   await updateDoc(collDocRef, { isFeatured });
 };
 
-/** Mark or unmark a product as 'best seller' (admin) */
 export const toggleBestSeller = async (productId: string, isBestSeller: boolean) => {
   const prodDocRef = doc(firestore, "products", productId);
   await updateDoc(prodDocRef, { isBestSeller });
 };
 
-// ===========================================================
-// 5. ORDERS (USER & ADMIN)
-// ===========================================================
 
-/** Place a new order (user) */
 export const placeOrder = async (orderData: OrderData) => {
   const ordersRef = collection(firestore, "orders");
 
@@ -212,14 +182,12 @@ export const placeOrder = async (orderData: OrderData) => {
   return docRef.id; // the newly created order's ID
 };
 
-/** Get a single order by ID (for user or admin) */
 export const getOrderById = async (orderId: string) => {
   const orderDocRef = doc(firestore, "orders", orderId);
   const snapshot = await getDoc(orderDocRef);
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 };
 
-/** Optional: Get all orders (admin) */
 export const getAllOrders = async () => {
   const ordersRef = collection(firestore, "orders");
   const snapshot = await getDocs(ordersRef);
@@ -244,8 +212,6 @@ export const getBestSellers = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-
-// add reviews
 export const addReviewToProduct = async (productId: string, review: ReviewData) => {
   const reviewsRef = collection(firestore, `products/${productId}/reviews`);
   await addDoc(reviewsRef, {
@@ -273,7 +239,6 @@ export const uploadImage = async (file: File, folder: string = "products") => {
   const downloadURL = await getDownloadURL(storageRef)
   return downloadURL
 }
-
 // delete image
 export const deleteImage = async (imageUrl: string) => {
   if (!imageUrl) return
@@ -281,7 +246,6 @@ export const deleteImage = async (imageUrl: string) => {
   await deleteObject(storageRef)
 }
 
-// ... similarly fix your uploadVideo if desired ...
 export const uploadVideo = async (file: File, folder: string = "productVideos") => {
   if (!file) return null
   const uniqueFilename = `${Date.now()}-${file.name}`
