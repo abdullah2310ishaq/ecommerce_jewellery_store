@@ -48,8 +48,8 @@ export default function PaymentInfo({ onClose }: { onClose: () => void }) {
         {/* WhatsApp Contact */}
         <p className="text-gray-700 text-center mb-4">
           📩 Send payment proof with order_id to WhatsApp:  
-          <a href="https://wa.me/923345751822" target="_blank" className="text-[#FB6F90] font-semibold">
-            +92 334 5751822
+          <a href="https://wa.me/+923445751822" target="_blank" className="text-[#FB6F90] font-semibold">
+            +923345751822
           </a>
         </p>
 
