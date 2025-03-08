@@ -262,27 +262,31 @@ export const getReviewsForProduct = async (productId: string) => {
 };
 
 // upload image
-export const uploadImage = async (file:File) => 
-  {
-if(!file) return null;
-const storageRef = ref(storage, `products/$file.name}`);
-await uploadBytes(storageRef, file);
-const downloadURL = await getDownloadURL(storageRef);
-return downloadURL;
-};
+export const uploadImage = async (file: File, folder: string = "products") => {
+  if (!file) return null
+  // Create a unique filename using a timestamp + the original name
+  const uniqueFilename = `${Date.now()}-${file.name}`
+  // e.g. "products/1688830123456-myPhoto.jpg"
+  const storageRef = ref(storage, `${folder}/${uniqueFilename}`)
+  await uploadBytes(storageRef, file)
 
-// delete image
-export const deleteImage = async (imageUrl: string) =>
-{
-  if(!imageUrl) return;
-  const storageRef = ref(storage,imageUrl);
-  await deleteObject(storageRef);
+  const downloadURL = await getDownloadURL(storageRef)
+  return downloadURL
 }
 
-export const uploadVideo = async (file: File) => {
-  if (!file) return null;
-  const storageRef = ref(storage, `productVideos/${file.name}`);
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
-  return downloadURL;
-};
+// delete image
+export const deleteImage = async (imageUrl: string) => {
+  if (!imageUrl) return
+  const storageRef = ref(storage, imageUrl)
+  await deleteObject(storageRef)
+}
+
+// ... similarly fix your uploadVideo if desired ...
+export const uploadVideo = async (file: File, folder: string = "productVideos") => {
+  if (!file) return null
+  const uniqueFilename = `${Date.now()}-${file.name}`
+  const storageRef = ref(storage, `${folder}/${uniqueFilename}`)
+  await uploadBytes(storageRef, file)
+  const downloadURL = await getDownloadURL(storageRef)
+  return downloadURL
+}
