@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../firebase/firebase_services/firestore";
 import { type CartItem, getCart, updateCartItem, clearCart } from "./cart";
@@ -24,11 +24,22 @@ export default function CartPage() {
     setCartItems(getCart());
   }, []);
 
-  // Calculate total amount
-  const totalAmount = cartItems.reduce(
+  // Calculate the subtotal amount
+  const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // Calculate additional fee if subtotal is between Rs.1200 and Rs.3000
+  let additionalFee = 0;
+  if (subtotal < 1200) {
+    additionalFee = 0; // We'll block orders under 1200, so fee is irrelevant
+  } else if (subtotal < 3000) {
+    additionalFee = 200;
+  } // else additionalFee remains 0 for free delivery (subtotal >=3000)
+
+  // Final total
+  const finalTotal = subtotal < 1200 ? 0 : subtotal + additionalFee;
 
   // Update quantity
   function handleQuantityChange(itemId: string, newQty: number) {
@@ -45,6 +56,17 @@ export default function CartPage() {
   }
 
   async function handlePlaceOrder() {
+    // Block order if subtotal is below minimum order amount
+    if (subtotal < 1200) {
+      Swal.fire({
+        title: "Minimum Order Required",
+        text: "The minimum order amount is Rs.1200. Please add more items.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     if (!name || !email || !phone || !address) {
       Swal.fire({
         title: "Warning!",
@@ -73,7 +95,9 @@ export default function CartPage() {
           price: i.price,
           quantity: i.quantity,
         })),
-        totalAmount,
+        // Place order with final total (including additional fee)
+        totalAmount: finalTotal,
+        // You could include additional info about delivery fee if needed
       };
 
       // Place the order in Firestore
@@ -88,7 +112,7 @@ export default function CartPage() {
 
       Swal.fire({
         title: "Order Placed!",
-        text: `Order placed successfully! Order ID: Rs.${orderId}`,
+        text: `Order placed successfully! Order ID: ${orderId}`,
         icon: "success",
         confirmButtonText: "OK",
         customClass: {
@@ -99,7 +123,7 @@ export default function CartPage() {
         },
       });
 
-      // Save order info in sessionStorage for the confirmation page
+      // Save order info in sessionStorage for confirmation page (optional)
       sessionStorage.setItem("orderId", orderId);
       sessionStorage.setItem("orderData", JSON.stringify(orderData));
 
@@ -125,6 +149,7 @@ export default function CartPage() {
     }
   }
 
+  // If cart is empty
   if (cartItems.length === 0) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-100">
@@ -132,10 +157,10 @@ export default function CartPage() {
           Your Cart is Empty
         </h1>
         <p className="text-lg text-gray-700 mb-8">
-          Looks like you have not added any items to your cart yet.
+          Looks like you havenot added any items to your cart yet.
         </p>
-        <button
-          onClick={() => router.push("/home")}
+        <button 
+          onClick={() => router.push('/')} 
           className="px-6 py-3 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-full font-medium transition-all duration-300 text-white"
         >
           Continue Shopping
@@ -153,7 +178,7 @@ export default function CartPage() {
       </header>
 
       <section className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Cart Items Section */}
+        {/* CART ITEMS SECTION */}
         <article className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-lg">
           <header className="mb-6 border-b pb-2">
             <h2 className="text-2xl font-semibold text-[#FB6F90]">
@@ -167,15 +192,11 @@ export default function CartPage() {
                 className="flex flex-col md:flex-row items-center py-6"
               >
                 <div className="flex-1">
-                  <h3 className="text-xl font-medium text-[#FB6F90]">
-                    {item.name}
-                  </h3>
-                  <p className="text-gray-700 mt-1">
-                    Rs.{item.price.toFixed(2)} each
-                  </p>
+                  <h3 className="text-xl font-medium text-[#FB6F90]">{item.name}</h3>
+                  <p className="text-gray-700 mt-1">Rs. {item.price.toFixed(2)} each</p>
                 </div>
                 <div className="flex items-center space-x-4 my-4 md:my-0">
-                  <button
+                  <button 
                     onClick={() =>
                       handleQuantityChange(item.id, item.quantity - 1)
                     }
@@ -186,7 +207,7 @@ export default function CartPage() {
                   <span className="w-12 text-center text-xl font-semibold">
                     {item.quantity}
                   </span>
-                  <button
+                  <button 
                     onClick={() =>
                       handleQuantityChange(item.id, item.quantity + 1)
                     }
@@ -197,9 +218,9 @@ export default function CartPage() {
                 </div>
                 <aside className="flex flex-col items-end">
                   <p className="font-semibold text-xl">
-                    Rs.{(item.price * item.quantity).toFixed(2)}
+                    Rs. {(item.price * item.quantity).toFixed(2)}
                   </p>
-                  <button
+                  <button 
                     onClick={() => handleRemoveItem(item.id)}
                     className="mt-2 text-red-400 text-sm hover:text-red-300"
                   >
@@ -210,29 +231,36 @@ export default function CartPage() {
             ))}
           </ul>
           <footer className="mt-8 text-right">
-            <p className="text-2xl font-bold text-[#FB6F90]">
-              Total: Rs.{totalAmount.toFixed(2)}
-            </p>
-            <p className="mt-2 text-lg text-gray-700">
-              Get <span className="font-bold">10% discount!</span>{" "}
-              <button
-                onClick={() => setShowPaymentInfo(true)}
-                className="text-[#FB6F90] hover:underline"
-              >
-                More Info
-              </button>
-            </p>
+            <div className="text-2xl font-bold text-[#FB6F90]">
+              Subtotal: Rs. {subtotal.toFixed(2)}
+            </div>
+            {subtotal < 1200 ? (
+              <p className="mt-2 text-lg text-red-500 font-bold">
+                Minimum order is Rs.1200
+              </p>
+            ) : subtotal < 3000 ? (
+              <p className="mt-2 text-lg text-gray-700">
+                Additional delivery fee: Rs.200
+              </p>
+            ) : (
+              <p className="mt-2 text-lg text-green-600 font-bold">
+                Free Delivery!
+              </p>
+            )}
+            <div className="text-2xl font-bold text-[#FB6F90] mt-4">
+              Final Total: Rs. {finalTotal.toFixed(2)}
+            </div>
           </footer>
         </article>
 
-        {/* Checkout Form */}
-        <aside className="bg-white rounded-2xl p-8 shadow-lg">
+        {/* CHECKOUT FORM */}
+        <aside className="bg-white rounded-2xl p-8 shadow-lg h-fit">
           <header className="mb-6 border-b pb-2">
             <h2 className="text-2xl font-semibold text-[#FB6F90]">
               Checkout Details
             </h2>
           </header>
-          <form className="space-y-6">
+          <div className="space-y-4">
             <div>
               <label className="block text-lg mb-2 text-gray-900">
                 Name
@@ -284,7 +312,7 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={handlePlaceOrder}
-                className="px-8 py-4 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-lg font-medium text-white transition-all duration-300"
+                className="px-8 py-4 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-lg font-medium text-white transition-all duration-300 shadow-xl"
               >
                 Place Order
               </button>
@@ -296,7 +324,7 @@ export default function CartPage() {
                 <Info size={24} className="text-[#FB6F90]" />
               </button>
             </footer>
-          </form>
+          </div>
         </aside>
       </section>
       <AnimatePresence>

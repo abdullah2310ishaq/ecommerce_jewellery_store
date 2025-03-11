@@ -17,7 +17,7 @@ interface ProductListProps {
   products: Product[]
 }
 
-const ITEMS_PER_PAGE = 3
+const ITEMS_PER_PAGE = 9
 
 export default function ProductList({ products }: ProductListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
