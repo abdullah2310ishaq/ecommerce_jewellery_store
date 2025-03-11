@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getAllProducts } from "../firebase/firebase_services/firestore";
 import ProductList, { Product } from "./product_components/ProductList";
 
@@ -8,24 +8,23 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        // 1) Fetch all products from Firestore
-        const all = await getAllProducts();
-        console.log("Fetched all products:", all);
-
-        // 2) Convert them to our local Product type
-        setProducts(all as Product[]);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
+  // Memoized fetch function to ensure stability
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const all = await getAllProducts();
+      console.log("Fetched all products:", all);
+      setProducts(all as Product[]);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   if (loading) {
     return (
@@ -37,3 +36,4 @@ export default function ProductsPage() {
 
   return <ProductList products={products} />;
 }
+u

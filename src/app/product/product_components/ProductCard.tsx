@@ -1,59 +1,75 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Sparkles, Eye } from "lucide-react"
+import { memo } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Sparkles, Eye } from "lucide-react";
 
 export interface Product {
-  id: string
-  name: string
-  price: number
-  images?: string[]
-  isOnSale?: boolean
-  description?: string
+  id: string;
+  name: string;
+  price: number;
+  images?: string[];
+  isOnSale?: boolean;
+  description?: string;
 }
 
 interface ProductCardProps {
-  product: Product
-  viewMode: "grid" | "list"
+  product: Product;
+  viewMode: "grid" | "list";
 }
 
-const ProductCard = ({ product, viewMode }: ProductCardProps) => {
-  const [, setIsHovered] = useState(false)
-  const imageToShow = product.images?.[0] || "/placeholder.svg"
+// Animation variants defined outside to avoid re-creation on every render.
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
-  // Grid mode card
+const badgeVariants = {
+  hidden: { scale: 0 },
+  visible: { scale: 1 }
+};
+
+// Extracted SaleBadge component.
+const SaleBadge = () => (
+  <motion.div
+    className="z-10"
+    variants={badgeVariants}
+    initial="hidden"
+    animate="visible"
+    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+  >
+    <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+      <Sparkles className="w-3 h-3" />
+      Sale
+    </span>
+  </motion.div>
+);
+
+const ProductCard = ({ product, viewMode }: ProductCardProps) => {
+  const imageToShow = product.images?.[0] || "/placeholder.svg";
+
   if (viewMode === "grid") {
     return (
       <motion.div
         className="relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-[#FB6F90] hover:shadow-lg transition-all duration-300 group h-full"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
         transition={{ duration: 0.5 }}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
       >
         {/* Sale Badge */}
         {product.isOnSale && (
-          <motion.div
-            className="absolute top-2 right-2 z-10"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Sale
-            </span>
-          </motion.div>
+          <div className="absolute top-2 right-2">
+            <SaleBadge />
+          </div>
         )}
 
         {/* Product Image */}
         <div className="relative overflow-hidden aspect-square">
           <Image
-            src={imageToShow || "/placeholder.svg"}
+            src={imageToShow}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -66,7 +82,9 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
           <h3 className="text-lg font-semibold text-gray-800 truncate group-hover:text-[#FB6F90] transition-colors">
             {product.name}
           </h3>
-          <p className="font-medium text-xl text-[#FB6F90]">Rs. {product.price.toFixed(2)}</p>
+          <p className="font-medium text-xl text-[#FB6F90]">
+            Rs. {product.price.toFixed(2)}
+          </p>
 
           {/* Action Button */}
           <Link href={`/product/${product.id}`}>
@@ -80,40 +98,31 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
           </Link>
         </div>
       </motion.div>
-    )
+    );
   }
 
   // List mode card
   return (
     <motion.div
       className="relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-[#FB6F90] hover:shadow-lg transition-all duration-300 group"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
       transition={{ duration: 0.5 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
     >
       <div className="flex flex-col sm:flex-row">
         {/* Sale Badge */}
         {product.isOnSale && (
-          <motion.div
-            className="absolute top-2 left-2 z-10"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Sale
-            </span>
-          </motion.div>
+          <div className="absolute top-2 left-2">
+            <SaleBadge />
+          </div>
         )}
 
         {/* Product Image */}
         <div className="relative overflow-hidden sm:w-1/3">
           <div className="aspect-square sm:aspect-[4/3]">
             <Image
-              src={imageToShow || "/placeholder.svg"}
+              src={imageToShow}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -128,7 +137,9 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
             <h3 className="text-xl font-semibold text-gray-800 group-hover:text-[#FB6F90] transition-colors">
               {product.name}
             </h3>
-            <p className="font-medium text-2xl text-[#FB6F90] mt-2">Rs. {product.price.toFixed(2)}</p>
+            <p className="font-medium text-2xl text-[#FB6F90] mt-2">
+              Rs. {product.price.toFixed(2)}
+            </p>
             <p className="text-gray-600 mt-2 line-clamp-2">
               {product.description || "Beautiful jewelry piece crafted with precision and care."}
             </p>
@@ -149,8 +160,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ProductCard
-
+export default memo(ProductCard);
