@@ -11,7 +11,6 @@ export interface Product {
   name: string;
   price: number;
   images?: string[];
-  isOnSale?: boolean;
   description?: string;
 }
 
@@ -24,9 +23,9 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
   const [, setIsHovered] = useState(false);
   const imageToShow = product.images?.[0] || "/placeholder.svg";
 
-  // Calculate sale price
+  // Apply Rs. 200 discount on all products
   const basePrice = product.price;
-  const salePrice = product.isOnSale ? basePrice - 200 : basePrice;
+  const salePrice = basePrice - 200;
 
   // Grid mode card
   if (viewMode === "grid") {
@@ -39,20 +38,18 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
       >
-        {/* Sale Badge */}
-        {product.isOnSale && (
-          <motion.div
-            className="absolute top-2 right-2 z-10"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Sale
-            </span>
-          </motion.div>
-        )}
+        {/* Sale Badge (Always Visible) */}
+        <motion.div
+          className="absolute top-2 right-2 z-10"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        >
+          <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Sale
+          </span>
+        </motion.div>
 
         {/* Product Image */}
         <div className="relative overflow-hidden aspect-square">
@@ -71,14 +68,8 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
             {product.name}
           </h3>
           <div className="flex flex-col">
-            {product.isOnSale ? (
-              <>
-                <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
-                <p className="font-medium text-xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
-              </>
-            ) : (
-              <p className="font-medium text-xl text-[#FB6F90]">Rs. {basePrice.toFixed(2)}</p>
-            )}
+            <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
+            <p className="font-medium text-xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
           </div>
 
           {/* Action Button */}
@@ -107,20 +98,18 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
       onHoverEnd={() => setIsHovered(false)}
     >
       <div className="flex flex-col sm:flex-row">
-        {/* Sale Badge */}
-        {product.isOnSale && (
-          <motion.div
-            className="absolute top-2 left-2 z-10"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Sale
-            </span>
-          </motion.div>
-        )}
+        {/* Sale Badge (Always Visible) */}
+        <motion.div
+          className="absolute top-2 left-2 z-10"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        >
+          <span className="bg-[#FB6F90] text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Sale
+          </span>
+        </motion.div>
 
         {/* Product Image */}
         <div className="relative overflow-hidden sm:w-1/3">
@@ -143,14 +132,8 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
             </h3>
 
             <div className="flex flex-col mt-2">
-              {product.isOnSale ? (
-                <>
-                  <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
-                  <p className="font-medium text-2xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
-                </>
-              ) : (
-                <p className="font-medium text-2xl text-[#FB6F90]">Rs. {basePrice.toFixed(2)}</p>
-              )}
+              <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
+              <p className="font-medium text-2xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
             </div>
 
             <p className="text-gray-600 mt-2 line-clamp-2">
