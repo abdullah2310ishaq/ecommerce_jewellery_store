@@ -159,7 +159,7 @@ export default function Collections() {
                 variants={itemVariants}
                 className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
-                <Link href={`/products`}>
+                <Link href={`/product`}>
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <Image
                       src={collection.image || "/placeholder.jpg"}
