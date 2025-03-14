@@ -1,28 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Sparkles, Eye } from "lucide-react"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Sparkles, Eye } from "lucide-react";
 
 export interface Product {
-  id: string
-  name: string
-  price: number
-  images?: string[]
-  isOnSale?: boolean
-  description?: string
+  id: string;
+  name: string;
+  price: number;
+  images?: string[];
+  isOnSale?: boolean;
+  description?: string;
 }
 
 interface ProductCardProps {
-  product: Product
-  viewMode: "grid" | "list"
+  product: Product;
+  viewMode: "grid" | "list";
 }
 
 const ProductCard = ({ product, viewMode }: ProductCardProps) => {
-  const [, setIsHovered] = useState(false)
-  const imageToShow = product.images?.[0] || "/placeholder.svg"
+  const [, setIsHovered] = useState(false);
+  const imageToShow = product.images?.[0] || "/placeholder.svg";
+
+  // Calculate sale price
+  const basePrice = product.price;
+  const salePrice = product.isOnSale ? basePrice - 200 : basePrice;
 
   // Grid mode card
   if (viewMode === "grid") {
@@ -53,7 +57,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         {/* Product Image */}
         <div className="relative overflow-hidden aspect-square">
           <Image
-            src={imageToShow || "/placeholder.svg"}
+            src={imageToShow}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -66,7 +70,16 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
           <h3 className="text-lg font-semibold text-gray-800 truncate group-hover:text-[#FB6F90] transition-colors">
             {product.name}
           </h3>
-          <p className="font-medium text-xl text-[#FB6F90]">Rs. {product.price.toFixed(2)}</p>
+          <div className="flex flex-col">
+            {product.isOnSale ? (
+              <>
+                <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
+                <p className="font-medium text-xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
+              </>
+            ) : (
+              <p className="font-medium text-xl text-[#FB6F90]">Rs. {basePrice.toFixed(2)}</p>
+            )}
+          </div>
 
           {/* Action Button */}
           <Link href={`/product/${product.id}`}>
@@ -80,7 +93,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
           </Link>
         </div>
       </motion.div>
-    )
+    );
   }
 
   // List mode card
@@ -113,7 +126,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         <div className="relative overflow-hidden sm:w-1/3">
           <div className="aspect-square sm:aspect-[4/3]">
             <Image
-              src={imageToShow || "/placeholder.svg"}
+              src={imageToShow}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -128,7 +141,18 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
             <h3 className="text-xl font-semibold text-gray-800 group-hover:text-[#FB6F90] transition-colors">
               {product.name}
             </h3>
-            <p className="font-medium text-2xl text-[#FB6F90] mt-2">Rs. {product.price.toFixed(2)}</p>
+
+            <div className="flex flex-col mt-2">
+              {product.isOnSale ? (
+                <>
+                  <p className="text-gray-500 text-sm line-through">Rs. {basePrice.toFixed(2)}</p>
+                  <p className="font-medium text-2xl text-[#FB6F90]">Rs. {salePrice.toFixed(2)}</p>
+                </>
+              ) : (
+                <p className="font-medium text-2xl text-[#FB6F90]">Rs. {basePrice.toFixed(2)}</p>
+              )}
+            </div>
+
             <p className="text-gray-600 mt-2 line-clamp-2">
               {product.description || "Beautiful jewelry piece crafted with precision and care."}
             </p>
@@ -149,8 +173,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default ProductCard
-
+export default ProductCard;

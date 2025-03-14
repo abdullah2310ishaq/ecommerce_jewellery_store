@@ -118,7 +118,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-[#FB6F90] text-2xl font-bold tracking-wide group-hover:text-[#FB6F90]/80 transition-colors">
-                H&H Jewelers
+                H&H Jewellery
               </span>
               <span className="text-gray-500 text-xs tracking-widest">FINE JEWELRY COLLECTION</span>
             </div>
