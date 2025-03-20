@@ -3,12 +3,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, ShoppingBag, User, SearchIcon } from 'lucide-react';
+import {
+  Menu,
+  X,
+  LogOut,
+  ShoppingBag,
+  User,
+  SearchIcon,
+  Layers,
+} from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/app/context/AuthContext";
 import { logoutUser } from "@/app/firebase/firebase_services/firebaseAuth";
 import SearchWithModal from "./Search";
-
 
 // Desktop Navigation Link with underline animation
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
@@ -33,14 +40,14 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
 };
 
 // Mobile Navigation Link with beautiful styling
-const MobileNavLink = ({ 
-  href, 
-  icon, 
-  children, 
-  onClick 
-}: { 
-  href: string; 
-  icon: React.ReactNode; 
+const MobileNavLink = ({
+  href,
+  icon,
+  children,
+  onClick,
+}: {
+  href: string;
+  icon: React.ReactNode;
   children: React.ReactNode;
   onClick: () => void;
 }) => {
@@ -61,10 +68,20 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+
+  // Sample collections array – adjust as needed
+  const collections = [
+    { name: "Necklaces", slug: "necklaces" },
+    { name: "Rings", slug: "rings" },
+    { name: "Bracelets", slug: "bracelets" },
+    { name: "Earrings", slug: "earrings" },
+  ];
 
   // Close mobile menu when navigating
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setIsCollectionsOpen(false);
   };
 
   // Handle scroll effect for navbar
@@ -86,6 +103,11 @@ export default function Navbar() {
     setIsSearchOpen(!isSearchOpen);
   };
 
+  // Toggle collections submenu in mobile menu
+  const toggleCollections = () => {
+    setIsCollectionsOpen(!isCollectionsOpen);
+  };
+
   return (
     <>
       {/* Elegant announcement bar with subtle animation */}
@@ -94,11 +116,13 @@ export default function Navbar() {
       </div>
 
       {/* Navbar with refined scroll effect */}
-      <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "bg-white/90 backdrop-blur-md shadow-sm" 
-          : "bg-white border-b border-gray-50"
-      }`}>
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/90 backdrop-blur-md shadow-sm"
+            : "bg-white border-b border-gray-50"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 lg:px-8 flex justify-between items-center h-20">
           {/* Logo with refined animation */}
           <Link href="/home" className="flex items-center space-x-3 group">
@@ -120,7 +144,9 @@ export default function Navbar() {
               <span className="text-[#FB6F90] text-2xl font-bold tracking-wide group-hover:text-[#FB6F90]/80 transition-colors">
                 H&H Jewellery
               </span>
-              <span className="text-gray-500 text-xs tracking-widest">FINE JEWELRY COLLECTION</span>
+              <span className="text-gray-500 text-xs tracking-widest">
+                FINE JEWELRY COLLECTION
+              </span>
             </div>
           </Link>
 
@@ -136,14 +162,14 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center space-x-6">
             {/* Integrated Search Button */}
             <div className="relative">
-              <button 
+              <button
                 onClick={toggleSearch}
                 className="text-gray-600 hover:text-[#FB6F90] transition-colors p-2 rounded-full hover:bg-[#FB6F90]/10"
                 aria-label="Search"
               >
                 <SearchIcon className="w-5 h-5" />
               </button>
-              
+
               {/* Search modal */}
               <AnimatePresence>
                 {isSearchOpen && (
@@ -160,18 +186,16 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
-            
-            {/* Wishlist - Removed number indicator */}
-          
-            
-            {/* Cart - Removed number indicator */}
-            <Link 
+
+            <Link
               href="/cart"
               className="text-gray-600 hover:text-[#FB6F90] transition-colors p-2 rounded-full hover:bg-[#FB6F90]/10 group relative"
               aria-label="Shopping Cart"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Cart</span>
+              <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Cart
+              </span>
             </Link>
 
             {/* User Account with refined dropdown */}
@@ -182,15 +206,24 @@ export default function Navbar() {
                     {user.displayName?.charAt(0) || "U"}
                   </div>
                 </button>
-                
+
                 {/* User dropdown with refined styling */}
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-40">
                   <div className="p-3 border-b border-gray-50">
-                    <p className="text-sm font-medium text-gray-700">Hi, {user.displayName || "User"}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      Hi, {user.displayName || "User"}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {user.email}
+                    </p>
                   </div>
                   <div className="p-2">
-                 <Link href="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md">My Orders</Link>
+                    <Link
+                      href="/cart"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md"
+                    >
+                      My Orders
+                    </Link>
                     <button
                       onClick={logoutUser}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-md"
@@ -201,7 +234,7 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <Link 
+              <Link
                 href="/auth"
                 className="flex items-center space-x-2 text-gray-600 hover:text-white transition-all py-1.5 px-4 rounded-full border border-gray-200 hover:border-[#FB6F90] hover:bg-[#FB6F90]"
               >
@@ -213,22 +246,22 @@ export default function Navbar() {
 
           {/* Mobile Menu & Search Buttons - Refined */}
           <div className="flex items-center space-x-4 lg:hidden">
-            <button 
+            <button
               onClick={toggleSearch}
               className="text-gray-600 hover:text-[#FB6F90] transition p-2"
               aria-label="Search"
             >
               <SearchIcon className="w-5 h-5" />
             </button>
-            
-            <Link 
+
+            <Link
               href="/cart"
               className="text-gray-600 hover:text-[#FB6F90] transition p-2"
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
             </Link>
-            
+
             <button
               onClick={() => setIsMenuOpen(true)}
               className="text-gray-700 hover:text-[#FB6F90] transition p-2"
@@ -251,7 +284,9 @@ export default function Navbar() {
           >
             <div className="pt-20 px-4 pb-4 h-full flex flex-col">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-800">Search Products</h2>
+                <h2 className="text-lg font-medium text-gray-800">
+                  Search Products
+                </h2>
                 <button
                   onClick={toggleSearch}
                   className="text-gray-500 hover:text-[#FB6F90] p-2"
@@ -279,7 +314,7 @@ export default function Navbar() {
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
               onClick={closeMenu}
             />
-            
+
             {/* Side drawer with refined animation */}
             <motion.div
               initial={{ x: "100%" }}
@@ -308,7 +343,7 @@ export default function Navbar() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               {/* User section with refined styling */}
               <div className="p-6 border-b border-gray-50">
                 {user ? (
@@ -317,13 +352,17 @@ export default function Navbar() {
                       {user.displayName?.charAt(0) || "U"}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">{user.displayName || "User"}</p>
-                      <p className="text-sm text-gray-500 truncate max-w-[150px]">{user.email}</p>
+                      <p className="font-medium text-gray-800">
+                        {user.displayName || "User"}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <Link 
-                    href="/auth" 
+                  <Link
+                    href="/auth"
                     className="flex items-center justify-center space-x-2 bg-gradient-to-r from-[#FB6F90] to-[#FB6F90]/90 text-white py-3 px-4 rounded-lg w-full hover:opacity-95 transition-opacity"
                     onClick={closeMenu}
                   >
@@ -332,15 +371,67 @@ export default function Navbar() {
                   </Link>
                 )}
               </div>
-              
+
               {/* Navigation links with refined spacing */}
               <div className="p-4">
-                <MobileNavLink href="/product" icon={<ShoppingBag className="w-5 h-5" />} onClick={closeMenu}>Products</MobileNavLink>
-                <MobileNavLink href="/cart" icon={<ShoppingBag className="w-5 h-5" />} onClick={closeMenu}>Shopping Cart</MobileNavLink>
-                <MobileNavLink href="/about" icon={<User className="w-5 h-5" />} onClick={closeMenu}>About Us</MobileNavLink>
-                
+                <MobileNavLink
+                  href="/product"
+                  icon={<ShoppingBag className="w-5 h-5" />}
+                  onClick={closeMenu}
+                >
+                  Products
+                </MobileNavLink>
+                <MobileNavLink
+                  href="/cart"
+                  icon={<ShoppingBag className="w-5 h-5" />}
+                  onClick={closeMenu}
+                >
+                  Shopping Cart
+                </MobileNavLink>
+                {/* New Collections Button */}
+                <div className="flex flex-col">
+                  <button
+                    onClick={toggleCollections}
+                    className="flex items-center space-x-4 p-4 w-full text-gray-700 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-lg transition-all duration-300 ease-in-out"
+                  >
+                    <div className="text-[#FB6F90]/70">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <span className="text-lg font-medium">Collections</span>
+                  </button>
+                  {/* Collections submenu */}
+                  <AnimatePresence>
+                    {isCollectionsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="ml-8 overflow-hidden"
+                      >
+                        {collections.map((col) => (
+                          <Link
+                            key={col.slug}
+                            href="/product"
+                            className="block py-3 pl-4 pr-2 text-gray-600 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-lg transition-colors"
+                            onClick={closeMenu}
+                          >
+                            {col.name}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <MobileNavLink
+                  href="/about"
+                  icon={<User className="w-5 h-5" />}
+                  onClick={closeMenu}
+                >
+                  About Us
+                </MobileNavLink>
               </div>
-              
+
               {/* Footer with subtle styling */}
               {user && (
                 <div className="mt-auto p-6 border-t border-gray-50 bg-gray-50/50">
