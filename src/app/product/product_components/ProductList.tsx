@@ -1,81 +1,61 @@
-"use client";
-import { useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import ProductCard from "./ProductCard";
-import {
-  ChevronDown,
-  ChevronUp,
-  Grid,
-  List,
-  Search,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+"use client"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import ProductCard from "./ProductCard"
+import { ChevronDown, ChevronUp, Grid, List, Search, X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images?: string[];
-  rating?: number;
-  isOnSale?: boolean;
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  rating?: number
+  isOnSale?: boolean
 }
 
 interface ProductListProps {
-  products: Product[];
+  products: Product[]
 }
 
-const ITEMS_PER_PAGE = 3;
 const ITEMS_PER_PAGE = 9
 
 export default function ProductList({ products }: ProductListProps) {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [sortBy, setSortBy] = useState<"name" | "price" | "rating">("name")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
-  // Filter and sort products (memoized)
-  const filteredAndSortedProducts = useMemo(() => {
-    const filtered = products.filter((p) =>
-      searchQuery
-        ? p.name.toLowerCase().includes(searchQuery.toLowerCase())
-        : true,
-    );
+  // Filter and sort products
+  const filteredAndSortedProducts = products
+    .filter((p) => {
+      // Search filter
+      return !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name)
+      if (sortBy === "price") return a.price - b.price
+      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0)
+      return 0
+    })
 
-    const sorted = filtered.sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "price") return a.price - b.price;
-      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
-      return 0;
-    });
+  // Apply sort order
+  if (sortOrder === "desc") filteredAndSortedProducts.reverse()
 
-    return sortOrder === "desc" ? sorted.reverse() : sorted;
-  }, [products, searchQuery, sortBy, sortOrder]);
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE)
+  const paginatedProducts = filteredAndSortedProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  )
 
-  // Compute total pages (memoized)
-  const totalPages = useMemo(
-    () => Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE),
-    [filteredAndSortedProducts],
-  );
-
-  // Get paginated products (memoized)
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedProducts.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE,
-    );
-  }, [filteredAndSortedProducts, currentPage]);
-
-  // Clear filters callback (stable reference)
-  const clearFilters = useCallback(() => {
-    setSearchQuery("");
-    setSortBy("name");
-    setSortOrder("asc");
-    setCurrentPage(1);
-  }, []);
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("")
+    setSortBy("name")
+    setSortOrder("asc")
+    setCurrentPage(1)
+  }
 
   return (
     <section className="bg-gray-50 py-10 px-4 min-h-screen">
@@ -111,8 +91,8 @@ export default function ProductList({ products }: ProductListProps) {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1)
                 }}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#FB6F90] focus:border-transparent"
               />
@@ -120,8 +100,8 @@ export default function ProductList({ products }: ProductListProps) {
               {searchQuery && (
                 <button
                   onClick={() => {
-                    setSearchQuery("");
-                    setCurrentPage(1);
+                    setSearchQuery("")
+                    setCurrentPage(1)
                   }}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
@@ -145,9 +125,7 @@ export default function ProductList({ products }: ProductListProps) {
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 ${
-                  viewMode === "grid"
-                    ? "bg-[#FB6F90] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                  viewMode === "grid" ? "bg-[#FB6F90] text-white" : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
                 aria-label="Grid view"
               >
@@ -156,9 +134,7 @@ export default function ProductList({ products }: ProductListProps) {
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-2 ${
-                  viewMode === "list"
-                    ? "bg-[#FB6F90] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                  viewMode === "list" ? "bg-[#FB6F90] text-white" : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
                 aria-label="List view"
               >
@@ -167,11 +143,7 @@ export default function ProductList({ products }: ProductListProps) {
             </div>
 
             <p className="text-sm text-gray-600">
-              Showing{" "}
-              <span className="font-medium">
-                {filteredAndSortedProducts.length}
-              </span>{" "}
-              products
+              Showing <span className="font-medium">{filteredAndSortedProducts.length}</span> products
             </p>
           </div>
 
@@ -185,9 +157,7 @@ export default function ProductList({ products }: ProductListProps) {
                 <select
                   id="sortBy"
                   value={sortBy}
-                  onChange={(e) =>
-                    setSortBy(e.target.value as "name" | "price" | "rating")
-                  }
+                  onChange={(e) => setSortBy(e.target.value as "name" | "price" | "rating")}
                   className="bg-white rounded-l-md border border-gray-300 py-1.5 pl-3 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-[#FB6F90] focus:border-[#FB6F90]"
                 >
                   <option value="name">Name</option>
@@ -195,13 +165,9 @@ export default function ProductList({ products }: ProductListProps) {
                   <option value="rating">Rating</option>
                 </select>
                 <button
-                  onClick={() =>
-                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-                  }
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
                   className="p-1.5 bg-white rounded-r-md border border-l-0 border-gray-300 hover:bg-gray-50"
-                  aria-label={
-                    sortOrder === "asc" ? "Sort ascending" : "Sort descending"
-                  }
+                  aria-label={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
                 >
                   {sortOrder === "asc" ? (
                     <ChevronUp size={18} className="text-gray-700" />
@@ -232,12 +198,8 @@ export default function ProductList({ products }: ProductListProps) {
             animate={{ opacity: 1 }}
             className="bg-white rounded-lg shadow-sm p-8 text-center"
           >
-            <p className="text-lg text-gray-600 mb-2">
-              No products found
-            </p>
-            <p className="text-gray-500 mb-4">
-              Try adjusting your search criteria
-            </p>
+            <p className="text-lg text-gray-600 mb-2">No products found</p>
+            <p className="text-gray-500 mb-4">Try adjusting your search criteria</p>
             <button
               onClick={clearFilters}
               className="px-4 py-2 bg-[#FB6F90] text-white rounded-md hover:bg-[#d85476] transition-colors"
@@ -250,9 +212,7 @@ export default function ProductList({ products }: ProductListProps) {
             {/* Product Grid/List */}
             <div
               className={`grid gap-6 ${
-                viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-1"
+                viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
               }`}
             >
               <AnimatePresence mode="wait">
@@ -275,9 +235,7 @@ export default function ProductList({ products }: ProductListProps) {
             {totalPages > 1 && (
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                   className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
                 >
@@ -287,9 +245,7 @@ export default function ProductList({ products }: ProductListProps) {
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                   className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
                 >
@@ -301,5 +257,5 @@ export default function ProductList({ products }: ProductListProps) {
         )}
       </div>
     </section>
-  );
+  )
 }
