@@ -1,7 +1,8 @@
 "use client";
 
-import { getAllOrders, updateOrderStatus } from "@/app/firebase/firebase_services/firestore";
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { doc, getDoc } from "firebase/firestore";
 import {
   CalendarDays,
   Clock,
@@ -11,7 +12,12 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { format } from "date-fns";
+
+import {
+  getAllOrders,
+  updateOrderStatus,
+} from "@/app/firebase/firebase_services/firestore";
+import { firestore } from "@/app/firebase/firebase_services/firebaseConfig";
 
 // Define a more specific type for the Firebase timestamp
 type FirebaseTimestamp = {
@@ -23,6 +29,8 @@ interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+  // We'll attach productImages once fetched.
+  productImages?: string[];
 }
 
 interface OrderDoc {
@@ -40,11 +48,15 @@ interface OrderDoc {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderDoc[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [timeFilter, setTimeFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
+
+  // Track which order is expanded
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
+  // Fetch all orders initially
   async function fetchOrders() {
     try {
       setLoading(true);
@@ -72,23 +84,80 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
+  // Update order status in Firestore and local state
   async function handleStatusChange(orderId: string, newStatus: string) {
     try {
       await updateOrderStatus(orderId, newStatus);
-      setOrders(
-        orders.map((order) => {
-          if (order.id === orderId) {
-            return { ...order, status: newStatus };
-          }
-          return order;
-        })
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
       );
     } catch (error) {
       console.error("Error updating order status:", error);
     }
   }
 
-  // Filter orders based on status tab, time filter, and search query
+  // Fetch product images for each item in an order
+  async function fetchProductImagesForOrderItems(items: OrderItem[]) {
+    try {
+      const updatedItems = await Promise.all(
+        items.map(async (item) => {
+          // If we already have productImages, skip re-fetch
+          if (item.productImages && item.productImages.length > 0) {
+            return item;
+          }
+
+          // Otherwise, fetch from "products" collection:
+          const productDocRef = doc(firestore, "products", item.productId);
+          const productSnap = await getDoc(productDocRef);
+
+          if (productSnap.exists()) {
+            const productData = productSnap.data();
+            const productImages = productData.images || [];
+            return { ...item, productImages };
+          } else {
+            return { ...item, productImages: [] };
+          }
+        })
+      );
+
+      return updatedItems;
+    } catch (error) {
+      console.error("Error fetching product images:", error);
+      return items; // fallback
+    }
+  }
+
+  // Expand/collapse an order. On expand, fetch the product images if needed
+  async function handleExpandOrder(orderId: string) {
+    // If the same order is clicked again, collapse it
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null);
+      return;
+    }
+
+    // Find the order in state
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+
+    // Fetch product images only if not already fetched
+    if (!order.items.some((i) => i.productImages && i.productImages.length)) {
+      const updatedItems = await fetchProductImagesForOrderItems(order.items);
+
+      // Update local state with the new items
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, items: updatedItems } : o
+        )
+      );
+    }
+
+    // Expand the selected order
+    setExpandedOrder(orderId);
+  }
+
+  // Apply filters: status tab, time filter, search query
   const filteredOrders = orders.filter((order) => {
     // Status filter
     if (activeTab !== "all" && order.status !== activeTab) {
@@ -97,7 +166,10 @@ export default function AdminOrdersPage() {
 
     // Time filter
     if (timeFilter !== "all" && order.createdAt) {
-      const orderDate = order.createdAt instanceof Date ? order.createdAt : order.createdAt.toDate();
+      const orderDate =
+        order.createdAt instanceof Date
+          ? order.createdAt
+          : order.createdAt.toDate();
       const today = new Date();
 
       if (timeFilter === "today") {
@@ -146,7 +218,7 @@ export default function AdminOrdersPage() {
   // Get total revenue
   const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-  // Get status badge color
+  // Status badge color
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Pending":
@@ -162,7 +234,7 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // Get status icon
+  // Status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Pending":
@@ -191,7 +263,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 p-4 md:p-8">
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
-        {/* Header and Stats */}
+        {/* Header & Stats */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-[#FB6F90]">Order Management</h1>
           <p className="text-gray-600 mb-6">Easily manage and track all customer orders.</p>
@@ -229,7 +301,6 @@ export default function AdminOrdersPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-
             <div className="relative w-full md:w-[180px]">
               <select
                 value={timeFilter}
@@ -268,6 +339,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="mt-4">
+            {/* If no results */}
             {filteredOrders.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
@@ -334,6 +406,7 @@ export default function AdminOrdersPage() {
                         </p>
                       </div>
 
+                      {/* Expanded Section */}
                       <div
                         className={`overflow-hidden transition-all duration-300 ${
                           expandedOrder === order.id ? "max-h-[1000px]" : "max-h-0"
@@ -350,19 +423,51 @@ export default function AdminOrdersPage() {
                               </tr>
                             </thead>
                             <tbody>
-                              {order.items.map((item, idx) => (
-                                <tr key={idx} className="border-b border-gray-100">
-                                  <td className="py-2">{item.name}</td>
-                                  <td className="py-2">Rs. {item.price.toFixed(2)}</td>
-                                  <td className="py-2">{item.quantity}</td>
-                                  <td className="py-2 text-right">Rs. {(item.price * item.quantity).toFixed(2)}</td>
-                                </tr>
-                              ))}
+                              {order.items.map((item, idx) => {
+                                const subtotal = item.price * item.quantity;
+                                const hasImages = item.productImages && item.productImages.length > 0;
+
+                                return (
+                                  <tr key={idx} className="border-b border-gray-100">
+                                    <td className="py-2">
+                                      {/* Show first product image if available */}
+                                      <div className="flex items-start gap-2">
+                                        {hasImages ? (
+                                          <img
+                                            src={item.productImages?.[0]}
+                                            alt={item.name}
+                                            className="w-16 h-16 object-cover rounded"
+                                          />
+                                        ) : (
+                                          <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                                            <Package className="h-6 w-6 text-gray-400" />
+                                          </div>
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-gray-800">{item.name}</p>
+                                          {/* If more images exist, show a small gallery or count */}
+                                          {hasImages && item.productImages!.length > 1 && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              +{item.productImages!.length - 1} more image
+                                              {item.productImages!.length - 1 > 1 ? "s" : ""}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="py-2">Rs. {item.price.toFixed(2)}</td>
+                                    <td className="py-2">{item.quantity}</td>
+                                    <td className="py-2 text-right">Rs. {subtotal.toFixed(2)}</td>
+                                  </tr>
+                                );
+                              })}
                               <tr className="font-medium">
                                 <td colSpan={3} className="py-2 text-right">
                                   Total:
                                 </td>
-                                <td className="py-2 text-right text-[#FB6F90]">Rs. {order.totalAmount.toFixed(2)}</td>
+                                <td className="py-2 text-right text-[#FB6F90]">
+                                  Rs. {order.totalAmount.toFixed(2)}
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -377,7 +482,7 @@ export default function AdminOrdersPage() {
                       </div>
                       <button
                         className="text-sm text-[#FB6F90] hover:text-[#E85A7C] focus:outline-none"
-                        onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                        onClick={() => handleExpandOrder(order.id)}
                       >
                         {expandedOrder === order.id ? "Hide Details" : "View Details"}
                       </button>

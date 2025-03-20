@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
-
+import { addToCart } from "@/app/cart/cart";
 import { useAuth } from "@/app/context/AuthContext";
 import {
   getProductById,
@@ -14,8 +14,6 @@ import {
 } from "@/app/firebase/firebase_services/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
-
-import { addToCart } from "@/app/cart/cart";
 
 interface FirestoreProduct {
   id: string;
@@ -45,7 +43,6 @@ export default function ProductDetailPage() {
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [prodLoading, setProdLoading] = useState(true);
-
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -57,7 +54,8 @@ export default function ProductDetailPage() {
     async function fetchData() {
       try {
         setProdLoading(true);
-        const resolvedId = Array.isArray(id) ? id[0] : id!;
+        const resolvedId = Array.isArray(id) ? id[0] : id;
+        if (!resolvedId) return;
         const prod = await getProductById(resolvedId);
         if (prod) {
           setProduct(prod as FirestoreProduct);
@@ -89,7 +87,6 @@ export default function ProductDetailPage() {
       const updated = await getReviewsForProduct(product.id);
       setReviews(updated as ReviewData[]);
       setReviewForm({ rating: 5, comment: "" });
-
       Swal.fire({
         title: "Success!",
         text: "Review submitted successfully!",
@@ -139,6 +136,10 @@ export default function ProductDetailPage() {
   const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
 
+  // Calculate sale price as base price minus Rs.200
+  const basePrice = product.price;
+  const salePrice = basePrice - 200;
+
   const handleIncrement = () => {
     if (quantity < stock) setQuantity(quantity + 1);
   };
@@ -150,7 +151,6 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-white text-gray-800 p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Product Images & Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -170,7 +170,9 @@ export default function ProductDetailPage() {
                 src={mainImage}
                 alt={product.name}
                 fill
-                className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
+                className={`object-cover transition-transform duration-200 ${
+                  isZoomed ? "scale-150" : ""
+                }`}
                 style={
                   isZoomed
                     ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` }
@@ -201,7 +203,7 @@ export default function ProductDetailPage() {
               </div>
             )}
           </div>
-  
+
           {/* Product Info */}
           <div className="lg:w-1/2 space-y-6">
             <motion.h1
@@ -212,15 +214,20 @@ export default function ProductDetailPage() {
             >
               {product.name}
             </motion.h1>
-            <motion.p
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-3xl text-gray-600 font-light"
+              className="flex items-center gap-4"
             >
-              Rs. {product.price.toFixed(2)}
-            </motion.p>
-  
+              <p className="text-3xl text-gray-600 font-light line-through">
+                Rs. {basePrice.toFixed(2)}
+              </p>
+              <p className="text-3xl text-red-500 font-bold">
+                Rs. {salePrice.toFixed(2)}
+              </p>
+            </motion.div>
+
             {/* Stock Display */}
             {isOutOfStock ? (
               <motion.p
@@ -241,7 +248,7 @@ export default function ProductDetailPage() {
                 In Stock: {stock}
               </motion.p>
             )}
-  
+
             {/* Quantity Selector */}
             {!isOutOfStock && (
               <motion.div
@@ -259,7 +266,7 @@ export default function ProductDetailPage() {
                   >
                     <Minus size={20} />
                   </button>
-                  <div className="px-4 py-2 text-lg">{quantity}</div>
+                  <div className="px-4 py-2 text-lg font-semibold">{quantity}</div>
                   <button
                     onClick={handleIncrement}
                     disabled={quantity >= stock}
@@ -270,7 +277,7 @@ export default function ProductDetailPage() {
                 </div>
               </motion.div>
             )}
-  
+
             {/* Category, Description, Features */}
             {product.category && (
               <motion.p
@@ -308,21 +315,21 @@ export default function ProductDetailPage() {
                 ))}
               </motion.ul>
             )}
-  
+
             {/* Add to Cart Button */}
             <div className="flex space-x-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
+                onClick={() =>
                   addToCart({
                     id: product.id,
                     name: product.name,
-                    price: product.price,
+                    price: salePrice, // Use sale price
                     image: mainImage,
                     quantity,
-                  });
-                }}
+                  })
+                }
                 disabled={isOutOfStock}
                 className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-md hover:shadow-lg transition-all duration-300 ${
                   isOutOfStock
@@ -336,7 +343,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </motion.div>
-  
+
         {/* Reviews Section */}
         <div className="mt-20 bg-gray-50 p-8 rounded-lg shadow-md">
           <h2 className="text-3xl font-semibold text-gray-800 mb-8 border-b border-gray-200 pb-3">
@@ -349,8 +356,11 @@ export default function ProductDetailPage() {
           ) : (
             <div className="space-y-6">
               {reviews.map((r) => (
-                <div
+                <motion.div
                   key={r.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
                   className="bg-white p-6 border border-gray-100 rounded-md"
                 >
                   <div className="flex items-start gap-4">
@@ -369,18 +379,20 @@ export default function ProductDetailPage() {
                           <Star
                             key={i}
                             size={16}
-                            className={i < r.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
+                            className={
+                              i < r.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"
+                            }
                           />
                         ))}
                       </div>
                       <p className="text-gray-700">{r.comment}</p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
-  
+
           {/* Add Review Form */}
           {user ? (
             <form
@@ -402,7 +414,9 @@ export default function ProductDetailPage() {
                     >
                       <Star
                         size={24}
-                        className={num <= reviewForm.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
+                        className={
+                          num <= reviewForm.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"
+                        }
                       />
                     </button>
                   ))}
@@ -439,6 +453,4 @@ export default function ProductDetailPage() {
       </div>
     </div>
   );
-  
-  
 }

@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import { memo } from "react";
 import Image from "next/image";
@@ -16,6 +17,8 @@ export interface Product {
 }
 
 interface ProductCardProps {
+  product: Product;
+  viewMode: "grid" | "list";
   product: Product;
   viewMode: "grid" | "list";
 }
@@ -70,6 +73,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         <div className="relative overflow-hidden aspect-square">
           <Image
             src={imageToShow}
+            src={imageToShow}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
@@ -99,6 +103,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         </div>
       </motion.div>
     );
+    );
   }
 
   // List mode card
@@ -122,6 +127,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         <div className="relative overflow-hidden sm:w-1/3">
           <div className="aspect-square sm:aspect-[4/3]">
             <Image
+              src={imageToShow}
               src={imageToShow}
               alt={product.name}
               fill
@@ -160,6 +166,8 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         </div>
       </div>
     </motion.div>
+  );
+};
   );
 };
 

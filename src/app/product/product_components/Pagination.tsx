@@ -21,7 +21,7 @@ const Pagination = ({ totalPages, onPageChange }: PaginationProps) => {
     [totalPages, onPageChange]
   );
 
-  // Reset to page 1 if totalPages changes
+
   useEffect(() => {
     setCurrentPage(1);
     onPageChange(1);
@@ -68,7 +68,7 @@ const Pagination = ({ totalPages, onPageChange }: PaginationProps) => {
 
   return (
     <div className="flex items-center justify-center space-x-2">
-      {/* Previous Button */}
+ 
       <button
         onClick={() => changePage(currentPage - 1)}
         disabled={currentPage === 1}
@@ -78,7 +78,6 @@ const Pagination = ({ totalPages, onPageChange }: PaginationProps) => {
         <ChevronLeft size={18} className="text-gray-700" />
       </button>
 
-      {/* Page Numbers */}
       <div className="flex items-center space-x-1">
         {pageNumbers.map((page, index) =>
           typeof page === "number" ? (
@@ -101,7 +100,6 @@ const Pagination = ({ totalPages, onPageChange }: PaginationProps) => {
         )}
       </div>
 
-      {/* Next Button */}
       <button
         onClick={() => changePage(currentPage + 1)}
         disabled={currentPage === totalPages}
