@@ -1,100 +1,86 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { doc, getDoc } from "firebase/firestore";
-import {
-  CalendarDays,
-  Clock,
-  Package,
-  Search,
-  TruckIcon,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import { doc, getDoc } from "firebase/firestore"
+import { CalendarDays, Clock, Package, Search, TruckIcon, CheckCircle, XCircle, X } from "lucide-react"
 
-import {
-  getAllOrders,
-  updateOrderStatus,
-} from "@/app/firebase/firebase_services/firestore";
-import { firestore } from "@/app/firebase/firebase_services/firebaseConfig";
+import { getAllOrders, updateOrderStatus } from "@/app/firebase/firebase_services/firestore"
+import { firestore } from "@/app/firebase/firebase_services/firebaseConfig"
 
 // Define a more specific type for the Firebase timestamp
 type FirebaseTimestamp = {
-  toDate: () => Date;
-};
+  toDate: () => Date
+}
 
 interface OrderItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
+  productId: string
+  name: string
+  price: number
+  quantity: number
   // We'll attach productImages once fetched.
-  productImages?: string[];
+  productImages?: string[]
 }
 
 interface OrderDoc {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: string;
-  createdAt: Date | FirebaseTimestamp;
+  id: string
+  name: string
+  email: string
+  phone: string
+  address: string
+  items: OrderItem[]
+  totalAmount: number
+  status: string
+  createdAt: Date | FirebaseTimestamp
 }
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<OrderDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<OrderDoc[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [timeFilter, setTimeFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("")
+  const [timeFilter, setTimeFilter] = useState("all")
+  const [activeTab, setActiveTab] = useState("all")
 
   // Track which order is expanded
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+
+  // State for modal image viewer
+  const [modalImage, setModalImage] = useState<string | null>(null)
 
   // Fetch all orders initially
   async function fetchOrders() {
     try {
-      setLoading(true);
-      const data = await getAllOrders();
-      console.log("Fetched orders:", data);
+      setLoading(true)
+      const data = await getAllOrders()
+      console.log("Fetched orders:", data)
 
       // Convert Firebase timestamps to JS Date objects if needed
       const processedOrders = (data as OrderDoc[]).map((order) => ({
         ...order,
         createdAt:
-          order.createdAt && "toDate" in order.createdAt
-            ? order.createdAt.toDate()
-            : new Date(order.createdAt),
-      }));
+          order.createdAt && "toDate" in order.createdAt ? order.createdAt.toDate() : new Date(order.createdAt),
+      }))
 
-      setOrders(processedOrders);
+      setOrders(processedOrders)
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Error fetching orders:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders()
+  }, [])
 
   // Update order status in Firestore and local state
   async function handleStatusChange(orderId: string, newStatus: string) {
     try {
-      await updateOrderStatus(orderId, newStatus);
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      await updateOrderStatus(orderId, newStatus)
+      setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)))
     } catch (error) {
-      console.error("Error updating order status:", error);
+      console.error("Error updating order status:", error)
     }
   }
 
@@ -105,27 +91,27 @@ export default function AdminOrdersPage() {
         items.map(async (item) => {
           // If we already have productImages, skip re-fetch
           if (item.productImages && item.productImages.length > 0) {
-            return item;
+            return item
           }
 
           // Otherwise, fetch from "products" collection:
-          const productDocRef = doc(firestore, "products", item.productId);
-          const productSnap = await getDoc(productDocRef);
+          const productDocRef = doc(firestore, "products", item.productId)
+          const productSnap = await getDoc(productDocRef)
 
           if (productSnap.exists()) {
-            const productData = productSnap.data();
-            const productImages = productData.images || [];
-            return { ...item, productImages };
+            const productData = productSnap.data()
+            const productImages = productData.images || []
+            return { ...item, productImages }
           } else {
-            return { ...item, productImages: [] };
+            return { ...item, productImages: [] }
           }
-        })
-      );
+        }),
+      )
 
-      return updatedItems;
+      return updatedItems
     } catch (error) {
-      console.error("Error fetching product images:", error);
-      return items; // fallback
+      console.error("Error fetching product images:", error)
+      return items // fallback
     }
   }
 
@@ -133,44 +119,47 @@ export default function AdminOrdersPage() {
   async function handleExpandOrder(orderId: string) {
     // If the same order is clicked again, collapse it
     if (expandedOrder === orderId) {
-      setExpandedOrder(null);
-      return;
+      setExpandedOrder(null)
+      return
     }
 
     // Find the order in state
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
+    const order = orders.find((o) => o.id === orderId)
+    if (!order) return
 
     // Fetch product images only if not already fetched
     if (!order.items.some((i) => i.productImages && i.productImages.length)) {
-      const updatedItems = await fetchProductImagesForOrderItems(order.items);
+      const updatedItems = await fetchProductImagesForOrderItems(order.items)
 
       // Update local state with the new items
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId ? { ...o, items: updatedItems } : o
-        )
-      );
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, items: updatedItems } : o)))
     }
 
     // Expand the selected order
-    setExpandedOrder(orderId);
+    setExpandedOrder(orderId)
+  }
+
+  // Open image in modal
+  const openImageModal = (imageUrl: string) => {
+    setModalImage(imageUrl)
+  }
+
+  // Close image modal
+  const closeImageModal = () => {
+    setModalImage(null)
   }
 
   // Apply filters: status tab, time filter, search query
   const filteredOrders = orders.filter((order) => {
     // Status filter
     if (activeTab !== "all" && order.status !== activeTab) {
-      return false;
+      return false
     }
 
     // Time filter
     if (timeFilter !== "all" && order.createdAt) {
-      const orderDate =
-        order.createdAt instanceof Date
-          ? order.createdAt
-          : order.createdAt.toDate();
-      const today = new Date();
+      const orderDate = order.createdAt instanceof Date ? order.createdAt : order.createdAt.toDate()
+      const today = new Date()
 
       if (timeFilter === "today") {
         if (
@@ -178,77 +167,77 @@ export default function AdminOrdersPage() {
           orderDate.getMonth() !== today.getMonth() ||
           orderDate.getFullYear() !== today.getFullYear()
         ) {
-          return false;
+          return false
         }
       } else if (timeFilter === "week") {
-        const weekAgo = new Date();
-        weekAgo.setDate(today.getDate() - 7);
+        const weekAgo = new Date()
+        weekAgo.setDate(today.getDate() - 7)
         if (orderDate < weekAgo) {
-          return false;
+          return false
         }
       } else if (timeFilter === "month") {
-        const monthAgo = new Date();
-        monthAgo.setMonth(today.getMonth() - 1);
+        const monthAgo = new Date()
+        monthAgo.setMonth(today.getMonth() - 1)
         if (orderDate < monthAgo) {
-          return false;
+          return false
         }
       }
     }
 
     // Search query
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase()
       return (
         order.id.toLowerCase().includes(query) ||
         order.name.toLowerCase().includes(query) ||
         order.email.toLowerCase().includes(query) ||
         order.address.toLowerCase().includes(query) ||
         order.items.some((item) => item.name.toLowerCase().includes(query))
-      );
+      )
     }
 
-    return true;
-  });
+    return true
+  })
 
   // Get counts for order status badges
   const getStatusCount = (status: string) => {
-    return orders.filter((order) => order.status === status).length;
-  };
+    return orders.filter((order) => order.status === status).length
+  }
 
   // Get total revenue
-  const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0)
 
   // Status badge color
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800"
       case "Shipped":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-800"
       case "Delivered":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800"
       case "Canceled":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800"
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800"
     }
-  };
+  }
 
   // Status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Pending":
-        return <Clock className="h-4 w-4 mr-1" />;
+        return <Clock className="h-4 w-4 mr-1" />
       case "Shipped":
-        return <TruckIcon className="h-4 w-4 mr-1" />;
+        return <TruckIcon className="h-4 w-4 mr-1" />
       case "Delivered":
-        return <CheckCircle className="h-4 w-4 mr-1" />;
+        return <CheckCircle className="h-4 w-4 mr-1" />
       case "Canceled":
-        return <XCircle className="h-4 w-4 mr-1" />;
+        return <XCircle className="h-4 w-4 mr-1" />
       default:
-        return <Package className="h-4 w-4 mr-1" />;
+        return <Package className="h-4 w-4 mr-1" />
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -257,7 +246,7 @@ export default function AdminOrdersPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FB6F90]"></div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -363,7 +352,7 @@ export default function AdminOrdersPage() {
                               <span className="ml-2 text-sm font-normal text-gray-500">
                                 {format(
                                   order.createdAt instanceof Date ? order.createdAt : order.createdAt.toDate(),
-                                  "MMM d, yyyy"
+                                  "MMM d, yyyy",
                                 )}
                               </span>
                             )}
@@ -375,7 +364,7 @@ export default function AdminOrdersPage() {
                         <div className="flex items-center gap-2">
                           <div
                             className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${getStatusColor(
-                              order.status || "Pending"
+                              order.status || "Pending",
                             )}`}
                           >
                             {getStatusIcon(order.status || "Pending")}
@@ -424,8 +413,8 @@ export default function AdminOrdersPage() {
                             </thead>
                             <tbody>
                               {order.items.map((item, idx) => {
-                                const subtotal = item.price * item.quantity;
-                                const hasImages = item.productImages && item.productImages.length > 0;
+                                const subtotal = item.price * item.quantity
+                                const hasImages = item.productImages && item.productImages.length > 0
 
                                 return (
                                   <tr key={idx} className="border-b border-gray-100">
@@ -433,11 +422,16 @@ export default function AdminOrdersPage() {
                                       {/* Show first product image if available */}
                                       <div className="flex items-start gap-2">
                                         {hasImages ? (
-                                          <img
-                                            src={item.productImages?.[0]}
-                                            alt={item.name}
-                                            className="w-16 h-16 object-cover rounded"
-                                          />
+                                          <div
+                                            className="w-16 h-16 cursor-pointer hover:opacity-90 transition-opacity"
+                                            onClick={() => openImageModal(item.productImages![0])}
+                                          >
+                                            <img
+                                              src={item.productImages?.[0] || "/placeholder.svg"}
+                                              alt={item.name}
+                                              className="w-16 h-16 object-cover rounded"
+                                            />
+                                          </div>
                                         ) : (
                                           <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
                                             <Package className="h-6 w-6 text-gray-400" />
@@ -445,12 +439,28 @@ export default function AdminOrdersPage() {
                                         )}
                                         <div>
                                           <p className="font-medium text-gray-800">{item.name}</p>
-                                          {/* If more images exist, show a small gallery or count */}
+                                          {/* If more images exist, show a small gallery */}
                                           {hasImages && item.productImages!.length > 1 && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                              +{item.productImages!.length - 1} more image
-                                              {item.productImages!.length - 1 > 1 ? "s" : ""}
-                                            </p>
+                                            <div className="flex gap-1 mt-1">
+                                              {item.productImages!.slice(1, 4).map((img, imgIdx) => (
+                                                <div
+                                                  key={imgIdx}
+                                                  className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity"
+                                                  onClick={() => openImageModal(img)}
+                                                >
+                                                  <img
+                                                    src={img || "/placeholder.svg"}
+                                                    alt={`${item.name} ${imgIdx + 2}`}
+                                                    className="w-8 h-8 object-cover rounded"
+                                                  />
+                                                </div>
+                                              ))}
+                                              {item.productImages!.length > 4 && (
+                                                <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-600">
+                                                  +{item.productImages!.length - 4}
+                                                </div>
+                                              )}
+                                            </div>
                                           )}
                                         </div>
                                       </div>
@@ -459,15 +469,13 @@ export default function AdminOrdersPage() {
                                     <td className="py-2">{item.quantity}</td>
                                     <td className="py-2 text-right">Rs. {subtotal.toFixed(2)}</td>
                                   </tr>
-                                );
+                                )
                               })}
                               <tr className="font-medium">
                                 <td colSpan={3} className="py-2 text-right">
                                   Total:
                                 </td>
-                                <td className="py-2 text-right text-[#FB6F90]">
-                                  Rs. {order.totalAmount.toFixed(2)}
-                                </td>
+                                <td className="py-2 text-right text-[#FB6F90]">Rs. {order.totalAmount.toFixed(2)}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -494,6 +502,26 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {modalImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-4xl w-full">
+            <button
+              onClick={closeImageModal}
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <img
+              src={modalImage || "/placeholder.svg"}
+              alt="Product detail"
+              className="max-w-full max-h-[80vh] object-contain mx-auto rounded-lg"
+            />
+          </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
+
