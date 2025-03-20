@@ -2,9 +2,11 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import ProductCard from "./ProductCard"
-import { ChevronDown, ChevronUp, Grid, List, Search, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronUp, Grid, List, Search, X } from "lucide-react"
+import Pagination from "./Pagination"
 
 export interface Product {
+  collectionId: string
   id: string
   name: string
   price: number
@@ -49,6 +51,13 @@ export default function ProductList({ products }: ProductListProps) {
     currentPage * ITEMS_PER_PAGE,
   )
 
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+    // Scroll to top of product list
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("")
@@ -58,26 +67,10 @@ export default function ProductList({ products }: ProductListProps) {
   }
 
   return (
-    <section className="bg-gray-50 py-10 px-4 min-h-screen">
+    <section className="bg-gray-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header with title and search */}
-        <div className="mb-8">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-2"
-          >
-            Our Exclusive Collection
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-center text-gray-600 mb-6"
-          >
-            Discover our handpicked selection of beautiful jewelry pieces
-          </motion.p>
-
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           {/* Search bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -110,7 +103,7 @@ export default function ProductList({ products }: ProductListProps) {
               )}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Controls bar */}
         <motion.div
@@ -199,7 +192,7 @@ export default function ProductList({ products }: ProductListProps) {
             className="bg-white rounded-lg shadow-sm p-8 text-center"
           >
             <p className="text-lg text-gray-600 mb-2">No products found</p>
-            <p className="text-gray-500 mb-4">Try adjusting your search criteria</p>
+            <p className="text-gray-500 mb-4">Try adjusting your search criteria or collection filters</p>
             <button
               onClick={clearFilters}
               className="px-4 py-2 bg-[#FB6F90] text-white rounded-md hover:bg-[#d85476] transition-colors"
@@ -233,24 +226,8 @@ export default function ProductList({ products }: ProductListProps) {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <span className="text-gray-600">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 disabled:opacity-50"
-                >
-                  <ChevronRight size={20} />
-                </button>
+              <div className="mt-8">
+                <Pagination totalPages={totalPages} onPageChange={handlePageChange} />
               </div>
             )}
           </>

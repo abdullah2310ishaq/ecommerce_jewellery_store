@@ -208,7 +208,7 @@ export default function Collections() {
         {!loading && !error && collections.length > 0 && (
           <div className="text-center mt-10">
             <Link
-              href="/collections"
+              href="/product"
               className="inline-flex items-center px-6 py-3 bg-transparent border border-[#FB6F90] text-[#FB6F90] rounded-full hover:bg-[#FB6F90] hover:text-white transition-colors duration-300 font-medium"
             >
               View All Collections
