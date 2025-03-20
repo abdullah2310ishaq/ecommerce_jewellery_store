@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
+import { Suspense } from "react"; // Import Suspense
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Navbar />
-          {children}
+          {/* Wrap the children in Suspense */}
+          <Suspense fallback={<div>Loading...</div>}>
+            {children}
+          </Suspense>
           <Footer />
         </AuthProvider>
       </body>
