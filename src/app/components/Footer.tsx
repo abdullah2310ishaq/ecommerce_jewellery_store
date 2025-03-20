@@ -53,7 +53,8 @@ const Footer = () => {
               <a
                 href="https://www.facebook.com/share/1FAxWUrtwR/?mibextid=wwXIfr"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                title="Facebook"
                 className="p-2 bg-gray-200 rounded-lg hover:bg-[#FB6F90] transition-colors duration-300"
               >
                 <Facebook className="w-5 h-5" />
