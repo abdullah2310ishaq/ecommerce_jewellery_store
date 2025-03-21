@@ -2,9 +2,21 @@
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const Pagination = ({ totalPages, onPageChange }: { totalPages: number; onPageChange: (newPage: number) => void }) => {
-  const [currentPage, setCurrentPage] = useState(1)
+const Pagination = ({
+  totalPages,
+  onPageChange,
+  currentPageProp = 1, // Add prop to control current page from parent
+}: {
+  totalPages: number
+  onPageChange: (newPage: number) => void
+  currentPageProp?: number
+}) => {
+  const [currentPage, setCurrentPage] = useState(currentPageProp)
 
+  // Update internal state when prop changes
+  useEffect(() => {
+    setCurrentPage(currentPageProp)
+  }, [currentPageProp])
 
   const changePage = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -13,27 +25,26 @@ const Pagination = ({ totalPages, onPageChange }: { totalPages: number; onPageCh
     }
   }
 
-
+  // Reset to page 1 when total pages changes
   useEffect(() => {
-    setCurrentPage(1)
-    onPageChange(1)
-  }, [totalPages, onPageChange])
-
+    // Only reset if current page is out of bounds
+    if (currentPage > totalPages) {
+      setCurrentPage(1)
+      onPageChange(1)
+    }
+  }, [totalPages, onPageChange, currentPage])
 
   const getPageNumbers = () => {
     const pageNumbers = []
     const maxPagesToShow = 5
 
     if (totalPages <= maxPagesToShow) {
-   
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i)
       }
     } else {
-
       pageNumbers.push(1)
 
-  
       let startPage = Math.max(2, currentPage - 1)
       let endPage = Math.min(totalPages - 1, currentPage + 1)
 
@@ -63,15 +74,19 @@ const Pagination = ({ totalPages, onPageChange }: { totalPages: number; onPageCh
       }
 
       // Always include last page
-      pageNumbers.push(totalPages)
+      if (totalPages > 1) {
+        pageNumbers.push(totalPages)
+      }
     }
 
     return pageNumbers
   }
 
+  // Don't render pagination if there's only one page
+  if (totalPages <= 1) return null
+
   return (
     <div className="flex items-center justify-center space-x-2">
- 
       <button
         onClick={() => changePage(currentPage - 1)}
         disabled={currentPage === 1}

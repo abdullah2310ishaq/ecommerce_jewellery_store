@@ -13,7 +13,7 @@ interface Product {
   id: string
   name: string
   price: number
-  collectionId: string // This was missing and causing the type error
+  collectionId: string
   images?: string[]
   rating?: number
   isOnSale?: boolean
