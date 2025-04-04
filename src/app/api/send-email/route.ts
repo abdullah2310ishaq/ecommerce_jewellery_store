@@ -1,67 +1,74 @@
-import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { type NextRequest, NextResponse } from "next/server"
+import { v2 as cloudinary } from "cloudinary"
 
-// Configure Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-  service: "Gmail", // Use "Gmail", "Yahoo", "Outlook", or your SMTP provider
-  auth: {
-    user: process.env.EMAIL_USER, // Your email
-    pass: process.env.EMAIL_PASS, // Your app password
-  },
-});
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+})
 
-// Define types for order items and payload
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-interface OrderPayload {
-  name: string;
-  email: string;
-  orderId: string | number;
-  items: OrderItem[];
-  totalAmount: number;
-  address: string;
-}
-
-// Email sending function
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { name, email, orderId, items, totalAmount, address } =
-      (await req.json()) as OrderPayload;
+    // Get the form data from the request
+    const formData = await request.formData()
+    const file = formData.get("file") as File
+    const folder = (formData.get("folder") as string) || "products" // Default folder
 
-    // Create order summary HTML
-    const orderSummary = items
-      .map((item: OrderItem) => `<li>${item.name} (x${item.quantity}) - Rs. ${item.price}</li>`)
-      .join("");
+    if (!file) {
+      console.error("No file provided in upload request")
+      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    }
 
-    // Email HTML content
-    const mailOptions = {
-      from: `"H&H Jewelers" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: `Order Confirmation - #${orderId}`,
-      html: `
-        <h2>Thank you for your order, ${name}!</h2>
-        <p>Your order ID: <strong>#${orderId}</strong></p>
-        <p><strong>Order Summary:</strong></p>
-        <ul>${orderSummary}</ul>
-        <p><strong>Total Amount:</strong> Rs. ${totalAmount}</p>
-        <p><strong>Shipping Address:</strong> ${address}</p>
-        <p>We will notify you once your order is shipped.</p>
-        <p>For any queries, contact us at handhjewelry925@gmail.com .</p>
-        <p>Best regards,</p>
-        <p><strong>H&H Jewelers</strong></p>
-      `,
-    };
+    console.log(
+      `Processing upload request for file: ${file.name}, size: ${file.size}, type: ${file.type}, folder: ${folder}`,
+    )
+    console.log(
+      `Cloudinary config: cloud_name: ${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}, API key exists: ${!!process.env.CLOUDINARY_API_KEY}, API secret exists: ${!!process.env.CLOUDINARY_API_SECRET}`,
+    )
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    })
 
-    return NextResponse.json({ message: "Email sent successfully" }, { status: 200 });
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    // Convert buffer to base64
+    const base64String = buffer.toString("base64")
+    const dataURI = `data:${file.type};base64,${base64String}`
+
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        dataURI,
+        {
+          folder: folder,
+          resource_type: "auto", // Automatically detect if it's an image or video
+        },
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error)
+            reject(error)
+          } else {
+            console.log("Cloudinary upload success:", { publicId: result?.public_id, url: result?.secure_url })
+            resolve(result)
+          }
+        },
+      )
+    })
+
+    // Return the Cloudinary URL and other details
+    return NextResponse.json(result)
   } catch (error) {
-    console.error("Error sending email:", error);
-    return NextResponse.json({ error: "Email could not be sent" }, { status: 500 });
+    console.error("Error uploading to Cloudinary:", error)
+    return NextResponse.json({ error: "Failed to upload file", details:onmessage }, { status: 500 })
   }
 }
+

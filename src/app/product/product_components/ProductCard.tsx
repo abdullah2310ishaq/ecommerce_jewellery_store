@@ -1,31 +1,32 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Sparkles, Eye } from "lucide-react";
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { Sparkles, Eye } from "lucide-react"
 
 export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images?: string[];
-  description?: string;
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  description?: string
 }
 
 interface ProductCardProps {
-  product: Product;
-  viewMode: "grid" | "list";
+  product: Product
+  viewMode: "grid" | "list"
 }
 
 const ProductCard = ({ product, viewMode }: ProductCardProps) => {
-  const [, setIsHovered] = useState(false);
-  const imageToShow = product.images?.[0] || "/c1.jpg";
+  const [, setIsHovered] = useState(false)
+  const [imageError, setImageError] = useState(false)
+  const imageToShow = product.images?.[0] || "/placeholder.svg"
 
   // Apply Rs. 200 discount on all products
-  const basePrice = product.price;
-  const salePrice = basePrice - 200;
+  const basePrice = product.price
+  const salePrice = basePrice - 200
 
   // Grid mode card
   if (viewMode === "grid") {
@@ -54,10 +55,15 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         {/* Product Image */}
         <div className="relative overflow-hidden aspect-square">
           <Image
-            src={imageToShow}
+            src={imageError ? "/placeholder.svg" : imageToShow}
             alt={product.name}
             fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+            onError={() => {
+              console.error("Image failed to load:", imageToShow)
+              setImageError(true)
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
@@ -84,7 +90,7 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
           </Link>
         </div>
       </motion.div>
-    );
+    )
   }
 
   // List mode card
@@ -115,10 +121,14 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         <div className="relative overflow-hidden sm:w-1/3">
           <div className="aspect-square sm:aspect-[4/3]">
             <Image
-              src={imageToShow}
+              src={imageError ? "/placeholder.svg" : imageToShow}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+              onError={() => {
+                console.error("Image failed to load:", imageToShow)
+                setImageError(true)
+              }}
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -156,7 +166,8 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
         </div>
       </div>
     </motion.div>
-  );
-};
+  )
+}
 
-export default ProductCard;
+export default ProductCard
+

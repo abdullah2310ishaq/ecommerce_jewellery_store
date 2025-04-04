@@ -1,127 +1,124 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import Swal from "sweetalert2";
-import { addToCart } from "@/app/cart/cart";
-import { useAuth } from "@/app/context/AuthContext";
-import {
-  getProductById,
-  getReviewsForProduct,
-  addReviewToProduct,
-} from "@/app/firebase/firebase_services/firestore";
-import type { Timestamp } from "firebase/firestore";
-import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react";
+import type React from "react"
+import { useEffect, useState, useRef } from "react"
+import { useParams } from "next/navigation"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import Swal from "sweetalert2"
+import { addToCart } from "@/app/cart/cart"
+import { useAuth } from "@/app/context/AuthContext"
+import { getProductById, getReviewsForProduct, addReviewToProduct } from "@/app/firebase/firebase_services/firestore"
+import type { Timestamp } from "firebase/firestore"
+import { Star, ShoppingCart, User, Plus, Minus } from "lucide-react"
 
 interface FirestoreProduct {
-  id: string;
-  name: string;
-  price: number;
-  images?: string[];
-  description?: string[];
-  features?: string[];
-  category?: string;
-  stock?: number;
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  description?: string[]
+  features?: string[]
+  category?: string
+  stock?: number
 }
 
 interface ReviewData {
-  id?: string;
-  userId: string;
-  username: string;
-  rating: number;
-  comment: string;
-  createdAt?: Timestamp;
+  id?: string
+  userId: string
+  username: string
+  rating: number
+  comment: string
+  createdAt?: Timestamp
 }
 
 export default function ProductDetailPage() {
-  const { id } = useParams();
-  const { user, loading: authLoading } = useAuth();
+  const { id } = useParams()
+  const { user, loading: authLoading } = useAuth()
 
-  const [product, setProduct] = useState<FirestoreProduct | null>(null);
-  const [reviews, setReviews] = useState<ReviewData[]>([]);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
-  const [prodLoading, setProdLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
-  const imageRef = useRef<HTMLDivElement>(null);
+  const [product, setProduct] = useState<FirestoreProduct | null>(null)
+  const [reviews, setReviews] = useState<ReviewData[]>([])
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" })
+  const [prodLoading, setProdLoading] = useState(true)
+  const [quantity, setQuantity] = useState(1)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+  const imageRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return
     async function fetchData() {
       try {
-        setProdLoading(true);
-        const resolvedId = Array.isArray(id) ? id[0] : id;
-        if (!resolvedId) return;
-        const prod = await getProductById(resolvedId);
+        setProdLoading(true)
+        const resolvedId = Array.isArray(id) ? id[0] : id
+        if (!resolvedId) return
+        const prod = await getProductById(resolvedId)
         if (prod) {
-          setProduct(prod as FirestoreProduct);
-          const revs = await getReviewsForProduct(prod.id);
-          setReviews(revs as ReviewData[]);
+          setProduct(prod as FirestoreProduct)
+          const revs = await getReviewsForProduct(prod.id)
+          setReviews(revs as ReviewData[])
         }
       } catch (error) {
-        console.error("Error loading product/reviews:", error);
+        console.error("Error loading product/reviews:", error)
       } finally {
-        setProdLoading(false);
+        setProdLoading(false)
       }
     }
-    fetchData();
-  }, [id]);
+    fetchData()
+  }, [id])
 
   async function handleReviewSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user || !product) return;
+    e.preventDefault()
+    if (!user || !product) return
 
     const newReview: ReviewData = {
       userId: user.uid,
       username: user.displayName ?? "Anonymous",
       rating: reviewForm.rating,
       comment: reviewForm.comment,
-    };
+    }
 
     try {
-      await addReviewToProduct(product.id, newReview);
-      const updated = await getReviewsForProduct(product.id);
-      setReviews(updated as ReviewData[]);
-      setReviewForm({ rating: 5, comment: "" });
+      await addReviewToProduct(product.id, newReview)
+      const updated = await getReviewsForProduct(product.id)
+      setReviews(updated as ReviewData[])
+      setReviewForm({ rating: 5, comment: "" })
       Swal.fire({
         title: "Success!",
         text: "Review submitted successfully!",
         icon: "success",
         confirmButtonText: "OK",
-      });
+      })
     } catch (err) {
-      console.error("Error adding review:", err);
+      console.error("Error adding review:", err)
       Swal.fire({
         title: "Error!",
         text: "Failed to submit review. Try again!",
         icon: "error",
         confirmButtonText: "OK",
-      });
+      })
     }
   }
 
   const handleImageZoom = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageRef.current) return;
-    const { left, top, width, height } = imageRef.current.getBoundingClientRect();
-    const x = (e.clientX - left) / width;
-    const y = (e.clientY - top) / height;
-    setZoomPosition({ x, y });
-  };
+    if (!imageRef.current) return
+    const { left, top, width, height } = imageRef.current.getBoundingClientRect()
+    const x = (e.clientX - left) / width
+    const y = (e.clientY - top) / height
+    setZoomPosition({ x, y })
+  }
 
   if (authLoading || prodLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
           className="w-20 h-20 border-t-4 border-b-4 border-[#FB6F90] rounded-full"
         />
       </div>
-    );
+    )
   }
 
   if (!product) {
@@ -129,24 +126,24 @@ export default function ProductDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-white text-gray-900">
         <p className="text-3xl font-semibold">Product not found</p>
       </div>
-    );
+    )
   }
 
-  const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg";
-  const stock = product.stock ?? 0;
-  const isOutOfStock = stock <= 0;
+  const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg"
+  const stock = product.stock ?? 0
+  const isOutOfStock = stock <= 0
 
   // Calculate sale price as base price minus Rs.200
-  const basePrice = product.price;
-  const salePrice = basePrice - 200;
+  const basePrice = product.price
+  const salePrice = basePrice - 200
 
   const handleIncrement = () => {
-    if (quantity < stock) setQuantity(quantity + 1);
-  };
+    if (quantity < stock) setQuantity(quantity + 1)
+  }
 
   const handleDecrement = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
+    if (quantity > 1) setQuantity(quantity - 1)
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-800 p-8">
@@ -167,17 +164,16 @@ export default function ProductDetailPage() {
               onMouseLeave={() => setIsZoomed(false)}
             >
               <Image
-                src={mainImage}
+                src={mainImage || "/placeholder.svg"}
                 alt={product.name}
                 fill
-                className={`object-cover transition-transform duration-200 ${
-                  isZoomed ? "scale-150" : ""
-                }`}
-                style={
-                  isZoomed
-                    ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` }
-                    : undefined
-                }
+                className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
+                style={isZoomed ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` } : undefined}
+                onError={(e) => {
+                  console.error("Image failed to load:", mainImage)
+                  // Fall back to placeholder
+                  e.currentTarget.src = "/placeholder.svg"
+                }}
               />
             </div>
             {product.images && product.images.length > 1 && (
@@ -197,6 +193,10 @@ export default function ProductDetailPage() {
                       alt=""
                       fill
                       className="object-cover rounded-xl"
+                      onError={(e) => {
+                        console.error("Thumbnail image failed to load:", img)
+                        e.currentTarget.src = "/placeholder.svg"
+                      }}
                     />
                   </motion.div>
                 ))}
@@ -220,12 +220,8 @@ export default function ProductDetailPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex items-center gap-4"
             >
-              <p className="text-3xl text-gray-600 font-light line-through">
-                Rs. {basePrice.toFixed(2)}
-              </p>
-              <p className="text-3xl text-red-500 font-bold">
-                Rs. {salePrice.toFixed(2)}
-              </p>
+              <p className="text-3xl text-gray-600 font-light line-through">Rs. {basePrice.toFixed(2)}</p>
+              <p className="text-3xl text-red-500 font-bold">Rs. {salePrice.toFixed(2)}</p>
             </motion.div>
 
             {/* Stock Display */}
@@ -332,9 +328,7 @@ export default function ProductDetailPage() {
                 }
                 disabled={isOutOfStock}
                 className={`px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-md hover:shadow-lg transition-all duration-300 ${
-                  isOutOfStock
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 text-white"
+                  isOutOfStock ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-blue-500 text-white"
                 }`}
               >
                 <ShoppingCart size={24} />
@@ -346,9 +340,7 @@ export default function ProductDetailPage() {
 
         {/* Reviews Section */}
         <div className="mt-20 bg-gray-50 p-8 rounded-lg shadow-md">
-          <h2 className="text-3xl font-semibold text-gray-800 mb-8 border-b border-gray-200 pb-3">
-            Customer Reviews
-          </h2>
+          <h2 className="text-3xl font-semibold text-gray-800 mb-8 border-b border-gray-200 pb-3">Customer Reviews</h2>
           {reviews.length === 0 ? (
             <p className="text-gray-600 text-lg italic my-8 text-center">
               No reviews yet. Be the first to review this product!
@@ -370,18 +362,14 @@ export default function ProductDetailPage() {
                     <div className="flex-grow">
                       <div className="flex justify-between items-center mb-2">
                         <p className="text-blue-500 font-medium">{r.username}</p>
-                        <p className="text-sm text-gray-500">
-                          {r.createdAt?.toDate?.().toLocaleDateString()}
-                        </p>
+                        <p className="text-sm text-gray-500">{r.createdAt?.toDate?.().toLocaleDateString()}</p>
                       </div>
                       <div className="flex items-center mb-2">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             size={16}
-                            className={
-                              i < r.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"
-                            }
+                            className={i < r.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
                           />
                         ))}
                       </div>
@@ -414,9 +402,7 @@ export default function ProductDetailPage() {
                     >
                       <Star
                         size={24}
-                        className={
-                          num <= reviewForm.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"
-                        }
+                        className={num <= reviewForm.rating ? "text-blue-500 fill-blue-500" : "text-gray-300"}
                       />
                     </button>
                   ))}
@@ -444,13 +430,12 @@ export default function ProductDetailPage() {
             </form>
           ) : (
             <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-              <p className="text-gray-600">
-                Please log in to write a review and share your experience.
-              </p>
+              <p className="text-gray-600">Please log in to write a review and share your experience.</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
+
