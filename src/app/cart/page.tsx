@@ -1,58 +1,65 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { placeOrder } from "../firebase/firebase_services/firestore";
-import { type CartItem, getCart, updateCartItem, clearCart } from "./cart";
-import Swal from "sweetalert2";
-import { Info } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
-import PaymentInfo from "./PaymentInfo";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { placeOrder } from "../firebase/firebase_services/firestore"
+import { type CartItem, getCart, updateCartItem, clearCart } from "./cart"
+import Swal from "sweetalert2"
+import { Info, Trash2 } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import PaymentInfo from "./PaymentInfo"
 
 export default function CartPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [address, setAddress] = useState("")
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   // Load cart items on mount
   useEffect(() => {
-    setCartItems(getCart());
-  }, []);
+    setCartItems(getCart())
+  }, [])
+
+  const handleImageError = (itemId: string) => {
+    console.error(`Image failed to load for cart item ${itemId}`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [itemId]: true,
+    }))
+  }
 
   // Calculate the subtotal amount
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   // Calculate additional fee if subtotal is between Rs.1200 and Rs.3000
-  let additionalFee = 0;
+  let additionalFee = 0
   if (subtotal < 1200) {
-    additionalFee = 0; // We'll block orders under 1200, so fee is irrelevant
+    additionalFee = 0 // We'll block orders under 1200, so fee is irrelevant
   } else if (subtotal < 3000) {
-    additionalFee = 200;
+    additionalFee = 200
   } // else additionalFee remains 0 for free delivery (subtotal >=3000)
 
   // Final total
-  const finalTotal = subtotal < 1200 ? 0 : subtotal + additionalFee;
+  const finalTotal = subtotal < 1200 ? 0 : subtotal + additionalFee
 
   // Update quantity
   function handleQuantityChange(itemId: string, newQty: number) {
     if (newQty >= 1) {
-      updateCartItem(itemId, newQty);
-      setCartItems(getCart());
+      updateCartItem(itemId, newQty)
+      setCartItems(getCart())
     }
   }
 
   // Remove item from cart
   function handleRemoveItem(itemId: string) {
-    updateCartItem(itemId, 0);
-    setCartItems(getCart());
+    updateCartItem(itemId, 0)
+    setCartItems(getCart())
   }
 
   async function handlePlaceOrder() {
@@ -63,10 +70,10 @@ export default function CartPage() {
         text: "The minimum order amount is Rs.1200. Please add more items.",
         icon: "warning",
         confirmButtonText: "OK",
-      });
-      return;
+      })
+      return
     }
-    
+
     if (!name || !email || !phone || !address) {
       Swal.fire({
         title: "Warning!",
@@ -76,11 +83,10 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
-      });
-      return;
+      })
+      return
     }
 
     try {
@@ -98,17 +104,17 @@ export default function CartPage() {
         // Place order with final total (including additional fee)
         totalAmount: finalTotal,
         // You could include additional info about delivery fee if needed
-      };
+      }
 
       // Place the order in Firestore
-      const orderId = await placeOrder(orderData);
+      const orderId = await placeOrder(orderData)
 
       // Send order confirmation email
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...orderData, orderId }),
-      });
+      })
 
       Swal.fire({
         title: "Order Placed!",
@@ -118,22 +124,21 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
-      });
+      })
 
       // Save order info in sessionStorage for confirmation page (optional)
-      sessionStorage.setItem("orderId", orderId);
-      sessionStorage.setItem("orderData", JSON.stringify(orderData));
+      sessionStorage.setItem("orderId", orderId)
+      sessionStorage.setItem("orderData", JSON.stringify(orderData))
 
-      clearCart();
-      setCartItems([]);
+      clearCart()
+      setCartItems([])
 
       // Redirect to confirmation page
-      router.push("/cart/confirmation");
+      router.push("/cart/confirmation")
     } catch (error) {
-      console.error("Error placing order:", error);
+      console.error("Error placing order:", error)
       Swal.fire({
         title: "Error!",
         text: "Failed to place order. Please try again.",
@@ -142,10 +147,9 @@ export default function CartPage() {
         customClass: {
           popup: "bg-white text-gray-900",
           title: "text-[#FB6F90] font-bold",
-          confirmButton:
-            "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
+          confirmButton: "bg-[#FB6F90] hover:bg-[#FB6F90]/90 text-white rounded px-4 py-2",
         },
-      });
+      })
     }
   }
 
@@ -153,118 +157,102 @@ export default function CartPage() {
   if (cartItems.length === 0) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-100">
-        <h1 className="text-3xl font-bold mb-4 text-[#FB6F90]">
-          Your Cart is Empty
-        </h1>
-        <p className="text-lg text-gray-700 mb-8">
-          Looks like you havenot added any items to your cart yet.
-        </p>
-        <button 
-          onClick={() => router.push('/')} 
+        <h1 className="text-3xl font-bold mb-4 text-[#FB6F90]">Your Cart is Empty</h1>
+        <p className="text-lg text-gray-700 mb-8">Looks like you havenot added any items to your cart yet.</p>
+        <button
+          onClick={() => router.push("/")}
           className="px-6 py-3 bg-[#FB6F90] hover:bg-[#FB6F90]/90 rounded-full font-medium transition-all duration-300 text-white"
         >
           Continue Shopping
         </button>
       </main>
-    );
+    )
   }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-gray-100 text-gray-900 py-8 px-4 md:px-8">
       <header className="max-w-6xl mx-auto text-center mb-10">
-        <h1 className="text-4xl font-bold text-[#FB6F90]">
-          Your Shopping Cart
-        </h1>
+        <h1 className="text-4xl font-bold text-[#FB6F90]">Your Shopping Cart</h1>
       </header>
 
       <section className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* CART ITEMS SECTION */}
         <article className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-lg">
           <header className="mb-6 border-b pb-2">
-            <h2 className="text-2xl font-semibold text-[#FB6F90]">
-              Cart Items
-            </h2>
+            <h2 className="text-2xl font-semibold text-[#FB6F90]">Cart Items</h2>
           </header>
           <ul className="divide-y divide-gray-200">
-            {cartItems.map((item) => (
-              <li
-                key={item.id}
-                className="flex flex-col md:flex-row items-center py-6"
-              >
-                <div className="flex-1">
-                  <h3 className="text-xl font-medium text-[#FB6F90]">{item.name}</h3>
-                  <p className="text-gray-700 mt-1">Rs. {item.price.toFixed(2)} each</p>
-                </div>
-                <div className="flex items-center space-x-4 my-4 md:my-0">
-                  <button 
-                    onClick={() =>
-                      handleQuantityChange(item.id, item.quantity - 1)
-                    }
-                    className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
-                  >
-                    <span className="text-2xl">−</span>
-                  </button>
-                  <span className="w-12 text-center text-xl font-semibold">
-                    {item.quantity}
-                  </span>
-                  <button 
-                    onClick={() =>
-                      handleQuantityChange(item.id, item.quantity + 1)
-                    }
-                    className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
-                  >
-                    <span className="text-2xl">+</span>
-                  </button>
-                </div>
-                <aside className="flex flex-col items-end">
-                  <p className="font-semibold text-xl">
-                    Rs. {(item.price * item.quantity).toFixed(2)}
-                  </p>
-                  <button 
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="mt-2 text-red-400 text-sm hover:text-red-300"
-                  >
-                    Remove
-                  </button>
-                </aside>
-              </li>
-            ))}
+            {cartItems.map((item) => {
+              const hasImageError = imageErrors[item.id]
+              const imageUrl = hasImageError ? "/placeholder.svg" : item.image || "/placeholder.svg"
+
+              return (
+                <li key={item.id} className="flex flex-col md:flex-row items-center py-6">
+                  {/* Product Image */}
+                  <div className="w-24 h-24 relative rounded-lg overflow-hidden mr-4 mb-4 md:mb-0">
+                    <Image
+                      src={imageUrl || "/placeholder.svg"}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      onError={() => handleImageError(item.id)}
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <h3 className="text-xl font-medium text-[#FB6F90]">{item.name}</h3>
+                    <p className="text-gray-700 mt-1">Rs. {item.price.toFixed(2)} each</p>
+                  </div>
+                  <div className="flex items-center space-x-4 my-4 md:my-0">
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                      className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
+                    >
+                      <span className="text-2xl">−</span>
+                    </button>
+                    <span className="w-12 text-center text-xl font-semibold">{item.quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                      className="w-10 h-10 flex items-center justify-center bg-gray-300 hover:bg-gray-400 rounded-full transition-colors"
+                    >
+                      <span className="text-2xl">+</span>
+                    </button>
+                  </div>
+                  <aside className="flex flex-col items-end">
+                    <p className="font-semibold text-xl">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="mt-2 text-red-400 text-sm hover:text-red-300 flex items-center"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Remove
+                    </button>
+                  </aside>
+                </li>
+              )
+            })}
           </ul>
           <footer className="mt-8 text-right">
-            <div className="text-2xl font-bold text-[#FB6F90]">
-              Subtotal: Rs. {subtotal.toFixed(2)}
-            </div>
+            <div className="text-2xl font-bold text-[#FB6F90]">Subtotal: Rs. {subtotal.toFixed(2)}</div>
             {subtotal < 1200 ? (
-              <p className="mt-2 text-lg text-red-500 font-bold">
-                Minimum order is Rs.1200
-              </p>
+              <p className="mt-2 text-lg text-red-500 font-bold">Minimum order is Rs.1200</p>
             ) : subtotal < 3000 ? (
-              <p className="mt-2 text-lg text-gray-700">
-                Additional delivery fee: Rs.200
-              </p>
+              <p className="mt-2 text-lg text-gray-700">Additional delivery fee: Rs.200</p>
             ) : (
-              <p className="mt-2 text-lg text-green-600 font-bold">
-                Free Delivery!
-              </p>
+              <p className="mt-2 text-lg text-green-600 font-bold">Free Delivery!</p>
             )}
-            <div className="text-2xl font-bold text-[#FB6F90] mt-4">
-              Final Total: Rs. {finalTotal.toFixed(2)}
-            </div>
+            <div className="text-2xl font-bold text-[#FB6F90] mt-4">Final Total: Rs. {finalTotal.toFixed(2)}</div>
           </footer>
         </article>
 
         {/* CHECKOUT FORM */}
         <aside className="bg-white rounded-2xl p-8 shadow-lg h-fit">
           <header className="mb-6 border-b pb-2">
-            <h2 className="text-2xl font-semibold text-[#FB6F90]">
-              Checkout Details
-            </h2>
+            <h2 className="text-2xl font-semibold text-[#FB6F90]">Checkout Details</h2>
           </header>
           <div className="space-y-4">
             <div>
-              <label className="block text-lg mb-2 text-gray-900">
-                Name
-              </label>
+              <label className="block text-lg mb-2 text-gray-900">Name</label>
               <input
                 type="text"
                 placeholder="Enter your full name"
@@ -274,9 +262,7 @@ export default function CartPage() {
               />
             </div>
             <div>
-              <label className="block text-lg mb-2 text-gray-900">
-                Email
-              </label>
+              <label className="block text-lg mb-2 text-gray-900">Email</label>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -286,9 +272,7 @@ export default function CartPage() {
               />
             </div>
             <div>
-              <label className="block text-lg mb-2 text-gray-900">
-                Phone
-              </label>
+              <label className="block text-lg mb-2 text-gray-900">Phone</label>
               <input
                 type="text"
                 placeholder="Your contact number"
@@ -298,9 +282,7 @@ export default function CartPage() {
               />
             </div>
             <div>
-              <label className="block text-lg mb-2 text-gray-900">
-                Shipping Address
-              </label>
+              <label className="block text-lg mb-2 text-gray-900">Shipping Address</label>
               <textarea
                 placeholder="Enter your complete address"
                 className="w-full p-4 bg-gray-100 border border-gray-300 rounded-lg h-28 focus:ring-2 focus:ring-[#FB6F90] focus:outline-none transition-all"
@@ -327,11 +309,8 @@ export default function CartPage() {
           </div>
         </aside>
       </section>
-      <AnimatePresence>
-        {showPaymentInfo && (
-          <PaymentInfo onClose={() => setShowPaymentInfo(false)} />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{showPaymentInfo && <PaymentInfo onClose={() => setShowPaymentInfo(false)} />}</AnimatePresence>
     </main>
-  );
+  )
 }
+

@@ -45,6 +45,7 @@ export default function ProductDetailPage() {
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
   const imageRef = useRef<HTMLDivElement>(null)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (!id) return
@@ -55,6 +56,7 @@ export default function ProductDetailPage() {
         if (!resolvedId) return
         const prod = await getProductById(resolvedId)
         if (prod) {
+          console.log("Product detail data:", prod)
           setProduct(prod as FirestoreProduct)
           const revs = await getReviewsForProduct(prod.id)
           setReviews(revs as ReviewData[])
@@ -67,6 +69,14 @@ export default function ProductDetailPage() {
     }
     fetchData()
   }, [id])
+
+  const handleImageError = (index: number) => {
+    console.error(`Image at index ${index} failed to load for product ${product?.id}`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [index]: true,
+    }))
+  }
 
   async function handleReviewSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -129,7 +139,10 @@ export default function ProductDetailPage() {
     )
   }
 
-  const mainImage = product.images?.[currentImageIndex] || "/placeholder.svg"
+  const mainImageIndex = currentImageIndex
+  const hasMainImageError = imageErrors[mainImageIndex]
+  const mainImage = hasMainImageError ? "/placeholder.svg" : product.images?.[mainImageIndex] || "/placeholder.svg"
+
   const stock = product.stock ?? 0
   const isOutOfStock = stock <= 0
 
@@ -169,37 +182,35 @@ export default function ProductDetailPage() {
                 fill
                 className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
                 style={isZoomed ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` } : undefined}
-                onError={(e) => {
-                  console.error("Image failed to load:", mainImage)
-                  // Fall back to placeholder
-                  e.currentTarget.src = "/placeholder.svg"
-                }}
+                onError={() => handleImageError(mainImageIndex)}
               />
             </div>
             {product.images && product.images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto">
-                {product.images.map((img, idx) => (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`relative w-24 h-24 border rounded-xl cursor-pointer transition-all duration-300 ${
-                      idx === currentImageIndex ? "border-blue-500" : "border-gray-300"
-                    }`}
-                    onClick={() => setCurrentImageIndex(idx)}
-                  >
-                    <Image
-                      src={img || "/placeholder.svg"}
-                      alt=""
-                      fill
-                      className="object-cover rounded-xl"
-                      onError={(e) => {
-                        console.error("Thumbnail image failed to load:", img)
-                        e.currentTarget.src = "/placeholder.svg"
-                      }}
-                    />
-                  </motion.div>
-                ))}
+                {product.images.map((img, idx) => {
+                  const hasThumbError = imageErrors[idx]
+                  const thumbSrc = hasThumbError ? "/placeholder.svg" : img || "/placeholder.svg"
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`relative w-24 h-24 border rounded-xl cursor-pointer transition-all duration-300 ${
+                        idx === currentImageIndex ? "border-blue-500" : "border-gray-300"
+                      }`}
+                      onClick={() => setCurrentImageIndex(idx)}
+                    >
+                      <Image
+                        src={thumbSrc || "/placeholder.svg"}
+                        alt=""
+                        fill
+                        className="object-cover rounded-xl"
+                        onError={() => handleImageError(idx)}
+                      />
+                    </motion.div>
+                  )
+                })}
               </div>
             )}
           </div>
