@@ -11,49 +11,59 @@ interface ImageDebuggerProps {
   className?: string
 }
 
-export default function ImageDebugger({ src, alt, width = 300, height = 300, className = "" }: ImageDebuggerProps) {
-  const [imageSrc, setImageSrc] = useState(src)
+interface UrlInfo {
+  protocol?: string
+  hostname?: string
+  pathname?: string
+  isCloudinary?: boolean
+  isFirebase?: boolean
+  error?: string
+}
+
+export default function ImageDebugger({
+  src,
+  alt,
+  width = 300,
+  height = 300,
+  className = "",
+}: ImageDebuggerProps) {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [urlDetails, setUrlDetails] = useState<UrlInfo | null>(null)
+  const [imageSrc, setImageSrc] = useState(src)
 
   useEffect(() => {
-    // Reset states when src changes
-    setImageSrc(src)
     setError(null)
     setIsLoading(true)
+    setImageSrc(src)
+
+    try {
+      const url = new URL(src)
+      setUrlDetails({
+        protocol: url.protocol,
+        hostname: url.hostname,
+        pathname: url.pathname,
+        isCloudinary: url.hostname.includes("cloudinary.com"),
+        isFirebase: url.hostname.includes("firebasestorage.googleapis.com"),
+      })
+    } catch {
+      setUrlDetails({ error: "Invalid URL format" })
+    }
   }, [src])
 
-  // Function to check if the URL is a Cloudinary URL
-  const isCloudinaryUrl = (url: string): boolean => {
-    return url.includes("cloudinary.com")
-  }
-
-  // Function to check if the URL is a valid URL
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url)
-      return true
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
-      return false
-    }
-  }
-
-  // Function to get a diagnostic message
   const getDiagnosticMessage = (): string => {
-    if (!imageSrc) return "No image source provided"
-    if (!isValidUrl(imageSrc)) return "Invalid URL format"
-    if (isCloudinaryUrl(imageSrc)) {
-      return "Cloudinary URL detected. Format appears correct."
-    }
-    return "Not a Cloudinary URL. This might be a Firebase URL or another source."
+    if (!src) return "No image source provided"
+    if (urlDetails?.error) return "Invalid URL format"
+    if (urlDetails?.isCloudinary) return "Cloudinary URL detected. Format appears correct."
+    if (urlDetails?.isFirebase) return "Firebase Storage URL detected."
+    return "Unrecognized image URL source."
   }
 
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#FB6F90]"></div>
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#FB6F90]" />
         </div>
       )}
 
@@ -62,31 +72,23 @@ export default function ImageDebugger({ src, alt, width = 300, height = 300, cla
         alt={alt}
         width={width}
         height={height}
-        className={className}
+        className={`${className} ${isLoading ? "opacity-0" : "opacity-100"}`}
         onLoad={() => setIsLoading(false)}
         onError={(e) => {
           console.error("Image failed to load:", imageSrc, e)
           setError("Failed to load image")
-          setIsLoading(false)
-          // Fall back to placeholder
           setImageSrc("/placeholder.svg")
+          setIsLoading(false)
         }}
       />
 
       {error && (
         <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-          <p>
-            <strong>Error:</strong> {error}
-          </p>
-          <p>
-            <strong>URL:</strong> {src}
-          </p>
-          <p>
-            <strong>Diagnostic:</strong> {getDiagnosticMessage()}
-          </p>
+          <p><strong>Error:</strong> {error}</p>
+          <p><strong>URL:</strong> {src}</p>
+          <p><strong>Diagnostic:</strong> {getDiagnosticMessage()}</p>
         </div>
       )}
     </div>
   )
 }
-

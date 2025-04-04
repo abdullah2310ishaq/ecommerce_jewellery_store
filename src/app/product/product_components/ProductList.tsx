@@ -31,6 +31,9 @@ export default function ProductList({ products }: ProductListProps) {
   // Filter and sort products
   const filteredAndSortedProducts = products
     .filter((p) => {
+      // Log product data to debug
+      console.log(`Product in list: ${p.id}, name: ${p.name}, images:`, p.images)
+
       // Search filter
       return !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
     })

@@ -17,8 +17,38 @@ export async function POST(request: NextRequest) {
     const folder = (formData.get("folder") as string) || "products" // Default folder
 
     if (!file) {
+      console.error("No file provided in upload request")
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
+
+    console.log(
+      `Processing upload request for file: ${file.name}, size: ${file.size}, type: ${file.type}, folder: ${folder}`,
+    )
+
+    // Check if Cloudinary environment variables are set
+    if (
+      !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      console.error("Missing Cloudinary environment variables")
+      return NextResponse.json(
+        { error: "Server configuration error - missing Cloudinary credentials" },
+        { status: 500 },
+      )
+    }
+
+    console.log(
+      `Cloudinary config: cloud_name: ${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}, API key exists: ${!!process.env.CLOUDINARY_API_KEY}, API secret exists: ${!!process.env.CLOUDINARY_API_SECRET}`,
+    )
+
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    })
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
@@ -38,8 +68,10 @@ export async function POST(request: NextRequest) {
         },
         (error, result) => {
           if (error) {
+            console.error("Cloudinary upload error:", error)
             reject(error)
           } else {
+            console.log("Cloudinary upload success:", { publicId: result?.public_id, url: result?.secure_url })
             resolve(result)
           }
         },
@@ -50,7 +82,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error("Error uploading to Cloudinary:", error)
-    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to upload file", }, { status: 500 })
   }
 }
 

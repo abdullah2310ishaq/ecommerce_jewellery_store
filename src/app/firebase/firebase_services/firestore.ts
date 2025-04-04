@@ -17,7 +17,7 @@ import {
   increment,
 } from "firebase/firestore"
 import { firestore } from "./firebaseConfig"
-import { uploadToCloudinary, getPublicIdFromUrl, deleteFromCloudinary } from "@/app/cloudinary_service"
+import { deleteFromCloudinary, getPublicIdFromUrl, uploadToCloudinary } from "@/app/cloudinary_service"
 // Import the Cloudinary service
 
 export interface CollectionData {
@@ -76,29 +76,52 @@ export const getCollectionById = async (collectionId: string) => {
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null
 }
 
+// Improve logging in getAllProducts
 export const getAllProducts = async () => {
-  const prodRef = collection(firestore, "products")
-  const snapshot = await getDocs(prodRef)
+  try {
+    const prodRef = collection(firestore, "products")
+    const snapshot = await getDocs(prodRef)
 
-  return snapshot.docs.map((doc) => {
-    const data = doc.data()
-    return {
-      id: doc.id,
-      name: data.name,
-      description: data.description ?? "",
-      price: data.price ?? 0,
-      images: Array.isArray(data.images) ? data.images : [],
-      collectionId: data.collectionId ?? "",
-      isBestSeller: data.isBestSeller ?? false,
-      stock: data.stock ?? 0, // <-- retrieve or fallback
-    }
-  })
+    const products = snapshot.docs.map((doc) => {
+      const data = doc.data()
+      console.log(`Product ${doc.id} data:`, data)
+      return {
+        id: doc.id,
+        name: data.name,
+        description: data.description ?? "",
+        price: data.price ?? 0,
+        images: Array.isArray(data.images) ? data.images : [],
+        collectionId: data.collectionId ?? "",
+        isBestSeller: data.isBestSeller ?? false,
+        stock: data.stock ?? 0,
+      }
+    })
+
+    console.log("All products data:", products)
+    return products
+  } catch (error) {
+    console.error("Error in getAllProducts:", error)
+    throw error
+  }
 }
 
+// Improve logging in the getProductById function
 export const getProductById = async (productId: string) => {
-  const prodRef = doc(firestore, "products", productId)
-  const snapshot = await getDoc(prodRef)
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null
+  try {
+    const prodRef = doc(firestore, "products", productId)
+    const snapshot = await getDoc(prodRef)
+
+    if (snapshot.exists()) {
+      const data = snapshot.data()
+      console.log(`Product ${productId} data:`, data)
+      console.log(`Product ${productId} images:`, data.images)
+      return { id: snapshot.id, ...data }
+    }
+    return null
+  } catch (error) {
+    console.error(`Error fetching product ${productId}:`, error)
+    return null
+  }
 }
 
 export const getProductsByCollection = async (collectionId: string) => {

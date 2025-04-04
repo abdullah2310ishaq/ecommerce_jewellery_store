@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -25,6 +25,11 @@ const ProductCard = ({ product, viewMode }: ProductCardProps) => {
 
   // Get the first image or use placeholder
   const imageUrl = product.images?.[0] || "/placeholder.svg"
+
+  // Log image URL for debugging
+  useEffect(() => {
+    console.log(`ProductCard for ${product.id} - Image URL:`, imageUrl)
+  }, [product.id, imageUrl])
 
   // Apply Rs. 200 discount on all products
   const basePrice = product.price

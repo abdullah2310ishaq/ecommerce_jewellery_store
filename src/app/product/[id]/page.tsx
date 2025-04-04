@@ -56,7 +56,6 @@ export default function ProductDetailPage() {
         if (!resolvedId) return
         const prod = await getProductById(resolvedId)
         if (prod) {
-          console.log("Product detail data:", prod)
           setProduct(prod as FirestoreProduct)
           const revs = await getReviewsForProduct(prod.id)
           setReviews(revs as ReviewData[])
@@ -182,7 +181,10 @@ export default function ProductDetailPage() {
                 fill
                 className={`object-cover transition-transform duration-200 ${isZoomed ? "scale-150" : ""}`}
                 style={isZoomed ? { transformOrigin: `${zoomPosition.x * 100}% ${zoomPosition.y * 100}%` } : undefined}
-                onError={() => handleImageError(mainImageIndex)}
+                onError={() => {
+                  console.error("Main image failed to load:", mainImage)
+                  handleImageError(mainImageIndex)
+                }}
               />
             </div>
             {product.images && product.images.length > 1 && (

@@ -10,22 +10,35 @@ type Product = {
   images: string[]
 }
 
+type CloudinaryConfig = {
+  cloudName: string
+  apiKey: string
+  apiSecret: string
+}
+
 export default function CloudinaryTestPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [cloudName, setCloudName] = useState<string | null>(null)
+  const [cloudinaryConfig, setCloudinaryConfig] = useState<CloudinaryConfig | null>(null)
 
   useEffect(() => {
     async function fetchProducts() {
       try {
         setLoading(true)
-        const productsData = await getAllProducts()
+        const productsData: Product[] = await getAllProducts()
+        console.log("Products data for testing:", productsData)
         setProducts(productsData)
 
-        // Get the Cloudinary cloud name from env
         const cloudNameEnv = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
         setCloudName(cloudNameEnv || "Not configured")
+
+        setCloudinaryConfig({
+          cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "Missing",
+          apiKey: process.env.CLOUDINARY_API_KEY ? "Configured" : "Missing",
+          apiSecret: process.env.CLOUDINARY_API_SECRET ? "Configured" : "Missing",
+        })
       } catch (err) {
         console.error("Error fetching products:", err)
         setError("Failed to fetch products")
@@ -65,8 +78,14 @@ export default function CloudinaryTestPage() {
         <p>
           <strong>NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:</strong> {cloudName}
         </p>
+        <p>
+          <strong>CLOUDINARY_API_KEY:</strong> {cloudinaryConfig?.apiKey}
+        </p>
+        <p>
+          <strong>CLOUDINARY_API_SECRET:</strong> {cloudinaryConfig?.apiSecret}
+        </p>
         <p className="mt-4 text-sm text-gray-600">
-          Note: If this is not configured correctly, images will not display properly.
+          Note: If these are not configured correctly, images will not display properly.
         </p>
       </div>
 
@@ -107,4 +126,3 @@ export default function CloudinaryTestPage() {
     </div>
   )
 }
-
