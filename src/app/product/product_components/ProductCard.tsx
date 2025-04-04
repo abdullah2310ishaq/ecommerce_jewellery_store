@@ -21,7 +21,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, viewMode }: ProductCardProps) => {
   const [, setIsHovered] = useState(false);
-  const imageToShow = product.images?.[0] || "/placeholder.svg";
+  const imageToShow = product.images?.[0] || "/c1.jpg";
 
   // Apply Rs. 200 discount on all products
   const basePrice = product.price;
