@@ -1,6 +1,7 @@
 "use client"
 import { useRouter } from "next/navigation"
-import React, { useState, useEffect } from "react"
+import type React from "react"
+import { useState, useEffect } from "react"
 
 // Firestore services
 import {
@@ -16,6 +17,7 @@ import {
   toggleFeaturedCollection,
   uploadImage,
   uploadVideo,
+  deleteImage,
 } from "../firebase/firebase_services/firestore"
 
 /* --------------------- INTERFACES --------------------- */
@@ -163,9 +165,7 @@ export default function AdminPage() {
   ===================================================== */
 
   // -------------- CREATE --------------
-  const handleNewProductChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleNewProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setNewProduct((prev) => ({ ...prev, [name]: value }))
   }
@@ -255,7 +255,7 @@ export default function AdminPage() {
   }
 
   const handleEditProductChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target
     setEditingProductData((prev) => ({ ...prev, [name]: value }))
@@ -272,7 +272,16 @@ export default function AdminPage() {
   }
 
   // Remove an EXISTING image from Firestore array
-  const handleRemoveExistingImage = (index: number) => {
+  const handleRemoveExistingImage = async (index: number) => {
+    // Get the image URL to delete
+    const imageToDelete = editingProductData.images[index]
+
+    // Delete from Cloudinary
+    if (imageToDelete) {
+      await deleteImage(imageToDelete)
+    }
+
+    // Update state
     setEditingProductData((prev) => ({
       ...prev,
       images: prev.images.filter((_, idx) => idx !== index),
@@ -299,6 +308,10 @@ export default function AdminPage() {
       // 2) Upload new video if provided
       let updatedVideo = editingProductData.video || ""
       if (editingVideoFile) {
+        // If there's an existing video, delete it first
+        if (updatedVideo) {
+          await deleteImage(updatedVideo)
+        }
         const vidUrl = await uploadVideo(editingVideoFile, "productVideos")
         if (vidUrl) updatedVideo = vidUrl
       }
@@ -331,6 +344,22 @@ export default function AdminPage() {
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return
     try {
+      // Find the product to get its images and video
+      const product = products.find((p) => p.id === productId)
+
+      if (product) {
+        // Delete all images from Cloudinary
+        for (const imageUrl of product.images) {
+          await deleteImage(imageUrl)
+        }
+
+        // Delete video if exists
+        if (product.video) {
+          await deleteImage(product.video)
+        }
+      }
+
+      // Delete from Firestore
       await deleteProduct(productId)
       alert(`Product deleted: ${productId}`)
       const prodData = await getAllProducts()
@@ -345,9 +374,7 @@ export default function AdminPage() {
     try {
       await toggleBestSeller(productId, !isBestSeller)
       alert(`Product ${productId} updated: isBestSeller -> ${!isBestSeller}`)
-      setProducts((prev) =>
-        prev.map((p) => (p.id === productId ? { ...p, isBestSeller: !isBestSeller } : p))
-      )
+      setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, isBestSeller: !isBestSeller } : p)))
     } catch (error) {
       console.error("Error toggling best seller:", error)
     }
@@ -358,9 +385,7 @@ export default function AdminPage() {
   ===================================================== */
 
   // -------------- CREATE --------------
-  const handleNewCollectionChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleNewCollectionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setNewCollection((prev) => ({ ...prev, [name]: value }))
   }
@@ -414,9 +439,7 @@ export default function AdminPage() {
     setEditingCollectionImageFile(null)
   }
 
-  const handleEditCollectionChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleEditCollectionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setEditingCollectionData((prev) => ({ ...prev, [name]: value }))
   }
@@ -432,6 +455,10 @@ export default function AdminPage() {
     try {
       let newImageURL = editingCollectionData.image
       if (editingCollectionImageFile) {
+        // If there's an existing image, delete it first
+        if (newImageURL) {
+          await deleteImage(newImageURL)
+        }
         const url = await uploadImage(editingCollectionImageFile, "collections")
         if (url) newImageURL = url
       }
@@ -458,6 +485,14 @@ export default function AdminPage() {
   const handleDeleteCollection = async (collectionId: string) => {
     if (!confirm("Are you sure you want to delete this collection?")) return
     try {
+      // Find the collection to get its image
+      const collection = collections.find((c) => c.id === collectionId)
+
+      // Delete image from Cloudinary if exists
+      if (collection && collection.image) {
+        await deleteImage(collection.image)
+      }
+
       await deleteCollectionById(collectionId)
       alert(`Collection deleted: ${collectionId}`)
       const collData = await getAllCollections()
@@ -472,9 +507,7 @@ export default function AdminPage() {
     try {
       await toggleFeaturedCollection(collectionId, !isFeatured)
       alert(`Collection ${collectionId} updated isFeatured -> ${!isFeatured}`)
-      setCollections((prev) =>
-        prev.map((c) => (c.id === collectionId ? { ...c, isFeatured: !isFeatured } : c))
-      )
+      setCollections((prev) => prev.map((c) => (c.id === collectionId ? { ...c, isFeatured: !isFeatured } : c)))
     } catch (error) {
       console.error("Error toggling featured collection:", error)
     }
@@ -496,16 +529,10 @@ export default function AdminPage() {
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => router.push("/admin/analytics")}
-            className="bg-green-500 text-white px-3 py-1 rounded"
-          >
+          <button onClick={() => router.push("/admin/analytics")} className="bg-green-500 text-white px-3 py-1 rounded">
             Profit
           </button>
-          <button
-            onClick={() => router.push("/admin/orders")}
-            className="bg-purple-500 text-white px-3 py-1 rounded"
-          >
+          <button onClick={() => router.push("/admin/orders")} className="bg-purple-500 text-white px-3 py-1 rounded">
             Orders
           </button>
           <button
@@ -594,12 +621,7 @@ export default function AdminPage() {
 
               {/* Optional video file */}
               <label className="text-sm font-medium mt-2">Optional Video</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleNewProductVideoFileChange}
-                className="border p-2"
-              />
+              <input type="file" accept="video/*" onChange={handleNewProductVideoFileChange} className="border p-2" />
 
               {/* Collection Select */}
               <select
@@ -675,7 +697,7 @@ export default function AdminPage() {
                           {editingProductData.images.map((imgUrl, idx) => (
                             <div key={idx} className="relative inline-block">
                               <img
-                                src={imgUrl}
+                                src={imgUrl || "/placeholder.svg"}
                                 alt={`Product Image ${idx}`}
                                 className="w-16 h-16 object-cover border rounded"
                               />
@@ -693,11 +715,7 @@ export default function AdminPage() {
 
                       {/* Existing video */}
                       {editingProductData.video && (
-                        <video
-                          src={editingProductData.video}
-                          controls
-                          className="w-32 h-auto border rounded mt-2"
-                        />
+                        <video src={editingProductData.video} controls className="w-32 h-auto border rounded mt-2" />
                       )}
 
                       {/* Add more images */}
@@ -787,24 +805,16 @@ export default function AdminPage() {
 
                       {/* Show video if exists */}
                       {product.video && (
-                        <video
-                          src={product.video}
-                          controls
-                          className="w-32 h-auto border rounded my-2"
-                        />
+                        <video src={product.video} controls className="w-32 h-auto border rounded my-2" />
                       )}
 
                       {product.description && <p>{product.description}</p>}
                       <p className="text-sm text-gray-500">ID: {product.id}</p>
-                      <p className="text-sm text-gray-500">
-                        Collection ID: {product.collectionId || "None"}
-                      </p>
+                      <p className="text-sm text-gray-500">Collection ID: {product.collectionId || "None"}</p>
 
                       <div className="mt-2 flex gap-2">
                         <button
-                          onClick={() =>
-                            handleToggleBestSeller(product.id, product.isBestSeller || false)
-                          }
+                          onClick={() => handleToggleBestSeller(product.id, product.isBestSeller || false)}
                           className="bg-yellow-500 text-white p-1 rounded"
                         >
                           {product.isBestSeller ? "Remove Best Seller" : "Mark Best Seller"}
@@ -861,12 +871,7 @@ export default function AdminPage() {
 
             {/* Single collection image */}
             <label className="text-sm font-medium">Optional Collection Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleNewCollectionImageFileChange}
-              className="border p-2"
-            />
+            <input type="file" accept="image/*" onChange={handleNewCollectionImageFileChange} className="border p-2" />
 
             <button type="submit" className="bg-blue-600 text-white p-2 rounded mt-2">
               Add Collection
@@ -903,7 +908,7 @@ export default function AdminPage() {
                       {/* Existing image preview (if any) */}
                       {editingCollectionData.image && (
                         <img
-                          src={editingCollectionData.image}
+                          src={editingCollectionData.image || "/placeholder.svg"}
                           alt={editingCollectionData.name}
                           className="w-24 h-24 object-cover my-1 border rounded"
                         />
@@ -939,7 +944,7 @@ export default function AdminPage() {
                       </div>
                       {collection.image && (
                         <img
-                          src={collection.image}
+                          src={collection.image || "/placeholder.svg"}
                           alt={collection.name}
                           className="w-24 h-24 object-cover my-1 border rounded"
                         />
@@ -953,9 +958,7 @@ export default function AdminPage() {
                       )}
                       <div className="mt-2 flex gap-2">
                         <button
-                          onClick={() =>
-                            handleToggleFeaturedCollection(collection.id, collection.isFeatured || false)
-                          }
+                          onClick={() => handleToggleFeaturedCollection(collection.id, collection.isFeatured || false)}
                           className="bg-yellow-500 text-white p-1 rounded"
                         >
                           {collection.isFeatured ? "Remove Featured" : "Make Featured"}
@@ -984,3 +987,4 @@ export default function AdminPage() {
     </div>
   )
 }
+
