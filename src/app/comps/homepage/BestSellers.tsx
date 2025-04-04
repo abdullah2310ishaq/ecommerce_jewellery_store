@@ -1,42 +1,53 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { Sparkles, Eye, ArrowRight } from "lucide-react";
-import { getBestSellers } from "../../firebase/firebase_services/firestore";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { Sparkles, Eye, ArrowRight } from "lucide-react"
+import { getBestSellers } from "../../firebase/firebase_services/firestore"
 
 interface FirestoreProduct {
-  id: string;
-  name: string;
-  price: number;
-  images?: string[];
-  rating?: number;
+  id: string
+  name: string
+  price: number
+  images?: string[]
+  rating?: number
 }
 
 export default function BestSellers() {
-  const [bestSellers, setBestSellers] = useState<FirestoreProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [bestSellers, setBestSellers] = useState<FirestoreProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getBestSellers();
+        setLoading(true)
+        const data = await getBestSellers()
         if (!data || !Array.isArray(data)) {
-          throw new Error("Invalid data format received");
+          throw new Error("Invalid data format received")
         }
-        setBestSellers(data as FirestoreProduct[]);
+        console.log("Best sellers data:", data)
+        setBestSellers(data as FirestoreProduct[])
       } catch (error) {
-        console.error("Error fetching best sellers:", error);
-        setError("Failed to load best sellers. Please try again later.");
+        console.error("Error fetching best sellers:", error)
+        setError("Failed to load best sellers. Please try again later.")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
+
+  const handleImageError = (productId: string) => {
+    console.error(`Image failed to load for product ${productId}`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [productId]: true,
+    }))
+  }
 
   return (
     <section className="py-20 bg-gray-50">
@@ -71,19 +82,17 @@ export default function BestSellers() {
 
         {/* Products Grid */}
         {!loading && !error && bestSellers.length > 0 && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
-          >
+          <motion.div initial="hidden" animate="visible" className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {bestSellers.map((product) => {
-              const basePrice = product.price;
-              const salePrice = basePrice - 200; // Apply Rs. 200 discount
+              const basePrice = product.price
+              const salePrice = basePrice - 200 // Apply Rs. 200 discount
+              const imageUrl = product.images?.[0] || "/placeholder.svg"
+              const hasImageError = imageErrors[product.id]
 
               return (
                 <motion.div
                   key={product.id}
-                  className="group relative bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                  className="relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-[#FB6F90] hover:shadow-lg transition-all duration-300 group h-full"
                 >
                   {/* Best Seller Badge */}
                   <div className="absolute top-2 left-2 z-10">
@@ -96,11 +105,12 @@ export default function BestSellers() {
                   {/* Product Image */}
                   <div className="relative overflow-hidden aspect-square">
                     <Image
-                      src={product.images?.[0] || "/placeholder.jpg"}
+                      src={hasImageError ? "/placeholder.svg" : imageUrl}
                       alt={product.name}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
                       className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                      onError={() => handleImageError(product.id)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -132,7 +142,7 @@ export default function BestSellers() {
                     </div>
                   </div>
                 </motion.div>
-              );
+              )
             })}
           </motion.div>
         )}
@@ -156,5 +166,6 @@ export default function BestSellers() {
         )}
       </div>
     </section>
-  );
+  )
 }
+

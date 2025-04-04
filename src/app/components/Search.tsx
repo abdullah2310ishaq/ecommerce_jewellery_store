@@ -31,6 +31,9 @@ export default function SearchWithModal() {
   // Ref for the entire search container (button + dropdown)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Track image errors
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+
   // Firestore query: fetch matching products when searchQuery changes
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -56,6 +59,7 @@ export default function SearchWithModal() {
           }
         })
 
+        console.log("Search results:", productList)
         setResults(productList)
       } catch (error) {
         console.error("Error fetching search results:", error)
@@ -67,6 +71,14 @@ export default function SearchWithModal() {
 
     fetchData()
   }, [searchQuery])
+
+  const handleImageError = (productId: string) => {
+    console.error(`Image failed to load for product ${productId} in search`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [productId]: true,
+    }))
+  }
 
   // Toggle the dropdown open/close and reset state on open
   const toggleDropdown = () => {
@@ -146,10 +158,15 @@ export default function SearchWithModal() {
                 </button>
                 <div className="relative w-full h-64 mb-4 rounded-lg overflow-hidden">
                   <Image
-                    src={selectedProduct.images?.[0] || "/placeholder.jpg"}
+                    src={
+                      imageErrors[selectedProduct.id]
+                        ? "/placeholder.svg"
+                        : selectedProduct.images?.[0] || "/placeholder.svg"
+                    }
                     alt={selectedProduct.name}
                     fill
                     className="object-cover"
+                    onError={() => handleImageError(selectedProduct.id)}
                   />
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">{selectedProduct.name}</h2>
@@ -190,10 +207,13 @@ export default function SearchWithModal() {
                         >
                           <div className="relative w-12 h-12 mr-3">
                             <Image
-                              src={product.images?.[0] || "/placeholder.jpg"}
+                              src={
+                                imageErrors[product.id] ? "/placeholder.svg" : product.images?.[0] || "/placeholder.svg"
+                              }
                               alt={product.name}
                               fill
                               className="object-cover rounded-md"
+                              onError={() => handleImageError(product.id)}
                             />
                           </div>
                           <div>

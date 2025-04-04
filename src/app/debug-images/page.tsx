@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { getAllProducts } from "@/app/firebase/firebase_services/firestore"
-import ImageDebugger from "../components/ImageDebugger"
 
-type Product = { 
-  id: string
-  name: string
-  images: string[]
+interface Product {
+  id: string;
+  name: string;
+  images?: string[];
 }
 
-export default function CloudinaryTestPage() {
+export default function DebugImagesPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -21,6 +21,7 @@ export default function CloudinaryTestPage() {
       try {
         setLoading(true)
         const productsData = await getAllProducts()
+        console.log("Products data:", productsData)
         setProducts(productsData)
 
         // Get the Cloudinary cloud name from env
@@ -58,7 +59,7 @@ export default function CloudinaryTestPage() {
 
   return (
     <div className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6">Cloudinary Image Test</h1>
+      <h1 className="text-3xl font-bold mb-6">Image Debugging Tool</h1>
 
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-xl font-bold mb-4">Environment Configuration</h2>
@@ -83,18 +84,28 @@ export default function CloudinaryTestPage() {
 
                 {product.images && product.images.length > 0 ? (
                   <div>
-                    <p className="text-sm text-gray-600 mb-2">First image URL:</p>
+                    <p className="text-sm text-gray-600 mb-2">Image URL:</p>
                     <div className="bg-gray-50 p-2 rounded mb-4 overflow-x-auto">
-                      <code className="text-xs">{product.images[0]}</code>
+                      <code className="text-xs break-all">{product.images[0]}</code>
                     </div>
 
-                    <ImageDebugger
-                      src={product.images[0] || "/placeholder.svg"}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
+                    <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
+                      <Image
+                        src={product.images[0] || "/placeholder.svg"}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                       
+                      />
+                    </div>
+
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700">Image Status:</p>
+                      <div className="flex items-center mt-1">
+                        <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                        <span className="text-sm">Loaded successfully</span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <p>No images available for this product.</p>

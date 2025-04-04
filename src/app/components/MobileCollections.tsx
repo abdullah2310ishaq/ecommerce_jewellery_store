@@ -21,12 +21,14 @@ export default function MobileCollectionMenu({ closeMenu }: MobileCollectionMenu
   const [collections, setCollections] = useState<Collection[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     async function fetchCollections() {
       try {
         setLoading(true)
         const collectionsData = await getAllCollections()
+        console.log("Mobile collections data:", collectionsData)
         setCollections(collectionsData as Collection[])
       } catch (error) {
         console.error("Error fetching collections:", error)
@@ -37,6 +39,14 @@ export default function MobileCollectionMenu({ closeMenu }: MobileCollectionMenu
 
     fetchCollections()
   }, [])
+
+  const handleImageError = (collectionId: string) => {
+    console.error(`Image failed to load for collection ${collectionId} in mobile menu`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [collectionId]: true,
+    }))
+  }
 
   return (
     <div className="flex flex-col">
@@ -76,29 +86,34 @@ export default function MobileCollectionMenu({ closeMenu }: MobileCollectionMenu
                   All Collections
                 </Link>
 
-                {collections.map((collection) => (
-                  <Link
-                    key={collection.id}
-                    href={`/product?collection=${collection.id}`}
-                    className="flex items-center gap-3 py-3 pl-4 pr-2 text-gray-600 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-lg transition-colors"
-                    onClick={closeMenu}
-                  >
-                    <div className="w-6 h-6 rounded-full bg-[#FB6F90]/10 flex items-center justify-center overflow-hidden">
-                      {collection.image ? (
-                        <Image
-                          src={collection.image || "/placeholder.svg"}
-                          alt={collection.name}
-                          width={24}
-                          height={24}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-[#FB6F90] text-xs">{collection.name.charAt(0)}</span>
-                      )}
-                    </div>
-                    {collection.name}
-                  </Link>
-                ))}
+                {collections.map((collection) => {
+                  const hasImageError = imageErrors[collection.id]
+
+                  return (
+                    <Link
+                      key={collection.id}
+                      href={`/product?collection=${collection.id}`}
+                      className="flex items-center gap-3 py-3 pl-4 pr-2 text-gray-600 hover:bg-[#FB6F90]/10 hover:text-[#FB6F90] rounded-lg transition-colors"
+                      onClick={closeMenu}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-[#FB6F90]/10 flex items-center justify-center overflow-hidden">
+                        {collection.image && !hasImageError ? (
+                          <Image
+                            src={collection.image || "/placeholder.svg"}
+                            alt={collection.name}
+                            width={24}
+                            height={24}
+                            className="object-cover"
+                            onError={() => handleImageError(collection.id)}
+                          />
+                        ) : (
+                          <span className="text-[#FB6F90] text-xs">{collection.name.charAt(0)}</span>
+                        )}
+                      </div>
+                      {collection.name}
+                    </Link>
+                  )
+                })}
               </>
             )}
           </motion.div>

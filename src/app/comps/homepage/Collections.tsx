@@ -20,16 +20,19 @@ export default function Collections() {
   const [collections, setCollections] = useState<FirestoreCollection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true)
         const featured = await getFeaturedCollections()
 
         if (!featured || !Array.isArray(featured)) {
           throw new Error("Invalid data format received")
         }
 
+        console.log("Featured collections data:", featured)
         setCollections(featured as FirestoreCollection[])
         setError(null)
       } catch (error) {
@@ -42,6 +45,14 @@ export default function Collections() {
 
     fetchData()
   }, [])
+
+  const handleImageError = (collectionId: string) => {
+    console.error(`Image failed to load for collection ${collectionId}`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [collectionId]: true,
+    }))
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -165,42 +176,44 @@ export default function Collections() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            {collections.map((collection) => (
-              <motion.div
-                key={collection.id}
-                variants={itemVariants}
-                className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
-              >
-                <Link href={`/product`}>
-                  <div className="relative aspect-[3/4] overflow-hidden">
-                    <Image
-                      src={collection.image || "/placeholder.jpg"}
-                      alt={collection.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = "/placeholder.jpg"
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-300" />
-                  </div>
-                  <div className="absolute inset-0 flex flex-col justify-end p-5">
-                    <h4 className="text-xl md:text-2xl font-serif mb-2 text-white transform group-hover:-translate-y-1 transition-transform duration-300">
-                      {collection.name}
-                    </h4>
-                    <p className="text-white/90 text-sm mb-3 line-clamp-2 transform group-hover:-translate-y-1 transition-transform duration-300 delay-75">
-                      {collection.description || `Discover our exquisite ${collection.name} collection`}
-                    </p>
-                    <div className="flex items-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
-                      <span className="text-sm font-medium mr-2 text-white">Explore Collection</span>
-                      <ArrowRight className="w-4 h-4 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
+            {collections.map((collection) => {
+              const hasImageError = imageErrors[collection.id]
+              const imageUrl = collection.image || "/placeholder.svg"
+
+              return (
+                <motion.div
+                  key={collection.id}
+                  variants={itemVariants}
+                  className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+                >
+                  <Link href={`/product?collection=${collection.id}`}>
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      <Image
+                        src={hasImageError ? "/placeholder.svg" : imageUrl}
+                        alt={collection.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={() => handleImageError(collection.id)}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-300" />
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                    <div className="absolute inset-0 flex flex-col justify-end p-5">
+                      <h4 className="text-xl md:text-2xl font-serif mb-2 text-white transform group-hover:-translate-y-1 transition-transform duration-300">
+                        {collection.name}
+                      </h4>
+                      <p className="text-white/90 text-sm mb-3 line-clamp-2 transform group-hover:-translate-y-1 transition-transform duration-300 delay-75">
+                        {collection.description || `Discover our exquisite ${collection.name} collection`}
+                      </p>
+                      <div className="flex items-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
+                        <span className="text-sm font-medium mr-2 text-white">Explore Collection</span>
+                        <ArrowRight className="w-4 h-4 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
           </motion.div>
         )}
 

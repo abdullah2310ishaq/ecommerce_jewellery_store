@@ -17,12 +17,14 @@ export default function CollectionDropdown() {
   const [collections, setCollections] = useState<Collection[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     async function fetchCollections() {
       try {
         setLoading(true)
         const collectionsData = await getAllCollections()
+        console.log("Nav collections data:", collectionsData)
         setCollections(collectionsData as Collection[])
       } catch (error) {
         console.error("Error fetching collections:", error)
@@ -33,6 +35,14 @@ export default function CollectionDropdown() {
 
     fetchCollections()
   }, [])
+
+  const handleImageError = (collectionId: string) => {
+    console.error(`Image failed to load for collection ${collectionId} in nav`)
+    setImageErrors((prev) => ({
+      ...prev,
+      [collectionId]: true,
+    }))
+  }
 
   return (
     <div className="relative" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
@@ -80,31 +90,37 @@ export default function CollectionDropdown() {
                   <div className="w-5 h-5 border-2 border-[#FB6F90] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : (
-                collections.map((collection) => (
-                  <Link
-                    key={collection.id}
-                    href={`/product?collection=${collection.id}`}
-                    className="flex items-center gap-3 p-3 hover:bg-[#FB6F90]/5 rounded-md transition-colors group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-[#FB6F90]/10 flex items-center justify-center overflow-hidden">
-                      {collection.image ? (
-                        <Image
-                          src={collection.image || "/placeholder.svg"}
-                          alt={collection.name}
-                          width={32}
-                          height={32}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-[#FB6F90] text-xs font-medium">{collection.name.charAt(0)}</span>
-                      )}
-                    </div>
-                    <span className="text-gray-700 group-hover:text-[#FB6F90] transition-colors">
-                      {collection.name}
-                    </span>
-                  </Link>
-                ))
+                collections.map((collection) => {
+                  const hasImageError = imageErrors[collection.id]
+                  const imageUrl = collection.image || "/placeholder.svg"
+
+                  return (
+                    <Link
+                      key={collection.id}
+                      href={`/product?collection=${collection.id}`}
+                      className="flex items-center gap-3 p-3 hover:bg-[#FB6F90]/5 rounded-md transition-colors group"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-[#FB6F90]/10 flex items-center justify-center overflow-hidden">
+                        {collection.image && !hasImageError ? (
+                          <Image
+                            src={imageUrl || "/placeholder.svg"}
+                            alt={collection.name}
+                            width={32}
+                            height={32}
+                            className="object-cover"
+                            onError={() => handleImageError(collection.id)}
+                          />
+                        ) : (
+                          <span className="text-[#FB6F90] text-xs font-medium">{collection.name.charAt(0)}</span>
+                        )}
+                      </div>
+                      <span className="text-gray-700 group-hover:text-[#FB6F90] transition-colors">
+                        {collection.name}
+                      </span>
+                    </Link>
+                  )
+                })
               )}
             </div>
           </motion.div>
