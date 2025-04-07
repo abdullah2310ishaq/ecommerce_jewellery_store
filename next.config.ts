@@ -5,16 +5,13 @@ const nextConfig: NextConfig = {
     domains: [
       "images.pexels.com",
       "firebasestorage.googleapis.com",
-      "lh3.googleusercontent.com", // Google Photos
-      "drive.google.com", // Google Drive (May not work directly)
+      "res.cloudinary.com", 
+
+      
     ],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "drive.google.com",
-        pathname: "/uc**", // Allow Google Drive images
-      },
-    ],
+    loader:'custom',
+    loaderFile: "./app/cloudinary_service.ts",
+   
   },
 };
 
