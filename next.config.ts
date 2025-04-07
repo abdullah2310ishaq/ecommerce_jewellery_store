@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
 
       
     ],
-    loader:'custom',
-    loaderFile: "./app/cloudinary_service.ts",
-   
+  
   },
 };
 
