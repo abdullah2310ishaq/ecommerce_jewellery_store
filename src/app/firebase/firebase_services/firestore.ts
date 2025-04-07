@@ -286,3 +286,5 @@ export const uploadVideo = async (file: File, folder = "productVideos") => {
   }
 }
 
+
+
