@@ -58,18 +58,6 @@ interface CollectionFormData {
   image: string
 }
 
-/* --------------------- UTILITY FUNCTIONS --------------------- */
-const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB in bytes
-
-// Validates if a file is under the size limit
-const validateFileSize = (file: File): boolean => {
-  if (file.size > MAX_FILE_SIZE) {
-    alert(`File "${file.name}" exceeds the 2MB size limit.`)
-    return false
-  }
-  return true
-}
-
 /* ----------------------------------------------------- */
 /*                      ADMIN PAGE                       */
 /* ----------------------------------------------------- */
@@ -186,12 +174,8 @@ export default function AdminPage() {
   const handleNewProductImagesFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const selectedFiles = Array.from(e.target.files)
-
-    // Filter out files that exceed the size limit
-    const validFiles = selectedFiles.filter((file) => validateFileSize(file))
-
-    // Append only valid files
-    setNewProductImageFiles((prev) => [...prev, ...validFiles])
+    // Append newly selected files
+    setNewProductImageFiles((prev) => [...prev, ...selectedFiles])
   }
   const handleRemoveSelectedNewImage = (index: number) => {
     setNewProductImageFiles((prev) => prev.filter((_, idx) => idx !== index))
@@ -200,13 +184,7 @@ export default function AdminPage() {
   // Video for new product
   const handleNewProductVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const file = e.target.files[0]
-
-    if (validateFileSize(file)) {
-      setNewProductVideoFile(file)
-    } else {
-      e.target.value = "" // Reset the input
-    }
+    setNewProductVideoFile(e.target.files[0])
   }
 
   // Submit new product
@@ -287,12 +265,7 @@ export default function AdminPage() {
   const handleEditingProductImagesFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const selectedFiles = Array.from(e.target.files)
-
-    // Filter out files that exceed the size limit
-    const validFiles = selectedFiles.filter((file) => validateFileSize(file))
-
-    // Append only valid files
-    setEditingImageFiles((prev) => [...prev, ...validFiles])
+    setEditingImageFiles((prev) => [...prev, ...selectedFiles])
   }
   const handleRemoveSelectedEditImage = (index: number) => {
     setEditingImageFiles((prev) => prev.filter((_, idx) => idx !== index))
@@ -318,13 +291,7 @@ export default function AdminPage() {
   // Editing video
   const handleEditingProductVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const file = e.target.files[0]
-
-    if (validateFileSize(file)) {
-      setEditingVideoFile(file)
-    } else {
-      e.target.value = "" // Reset the input
-    }
+    setEditingVideoFile(e.target.files[0])
   }
 
   const handleUpdateProductSubmit = async (e: React.FormEvent) => {
@@ -425,13 +392,7 @@ export default function AdminPage() {
 
   const handleNewCollectionImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const file = e.target.files[0]
-
-    if (validateFileSize(file)) {
-      setNewCollectionImageFile(file)
-    } else {
-      e.target.value = "" // Reset the input
-    }
+    setNewCollectionImageFile(e.target.files[0])
   }
 
   const handleCreateCollection = async (e: React.FormEvent) => {
@@ -485,13 +446,7 @@ export default function AdminPage() {
 
   const handleEditingCollectionImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const file = e.target.files[0]
-
-    if (validateFileSize(file)) {
-      setEditingCollectionImageFile(file)
-    } else {
-      e.target.value = "" // Reset the input
-    }
+    setEditingCollectionImageFile(e.target.files[0])
   }
 
   const handleUpdateCollectionSubmit = async (e: React.FormEvent) => {
@@ -638,7 +593,7 @@ export default function AdminPage() {
               />
 
               {/* Multiple image files */}
-              <label className="text-sm font-medium mt-2">Select Images (multiple allowed, max 2MB each)</label>
+              <label className="text-sm font-medium mt-2">Select Images (multiple allowed)</label>
               <input
                 type="file"
                 multiple
@@ -665,7 +620,7 @@ export default function AdminPage() {
               )}
 
               {/* Optional video file */}
-              <label className="text-sm font-medium mt-2">Optional Video (max 2MB)</label>
+              <label className="text-sm font-medium mt-2">Optional Video</label>
               <input type="file" accept="video/*" onChange={handleNewProductVideoFileChange} className="border p-2" />
 
               {/* Collection Select */}
@@ -764,7 +719,7 @@ export default function AdminPage() {
                       )}
 
                       {/* Add more images */}
-                      <label className="text-sm font-medium mt-2">Add More Images (max 2MB each)</label>
+                      <label className="text-sm font-medium mt-2">Add More Images</label>
                       <input
                         type="file"
                         multiple
@@ -791,7 +746,7 @@ export default function AdminPage() {
                       )}
 
                       {/* Replace/Add video */}
-                      <label className="text-sm font-medium mt-2">Replace/Add Video (max 2MB)</label>
+                      <label className="text-sm font-medium mt-2">Replace/Add Video</label>
                       <input
                         type="file"
                         accept="video/*"
@@ -915,7 +870,7 @@ export default function AdminPage() {
             />
 
             {/* Single collection image */}
-            <label className="text-sm font-medium">Optional Collection Image (max 2MB)</label>
+            <label className="text-sm font-medium">Optional Collection Image</label>
             <input type="file" accept="image/*" onChange={handleNewCollectionImageFileChange} className="border p-2" />
 
             <button type="submit" className="bg-blue-600 text-white p-2 rounded mt-2">
@@ -960,7 +915,7 @@ export default function AdminPage() {
                       )}
 
                       {/* Replace the collection's image */}
-                      <label className="text-sm font-medium">Replace Image (max 2MB)</label>
+                      <label className="text-sm font-medium">Replace Image</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -1032,3 +987,4 @@ export default function AdminPage() {
     </div>
   )
 }
+
